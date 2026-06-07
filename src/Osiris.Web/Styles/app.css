@@ -4,6 +4,13 @@
 @source "../Controllers/**/*.cs";
 @source "../Models/**/*.cs";
 
+/*
+ * Osiris brand palette
+ * Inspired by the black-and-gold Eye of Horus mark (ancient Egypt).
+ * - Brand / accent: Tailwind `amber` (gold) -- eyebrows, links, focus, active nav, avatar.
+ * - Surface / primary actions: Tailwind `slate` (charcoal/black) -- buttons, text, chrome.
+ * - Semantic states stay distinct: `red` for errors, `green` for real success.
+ */
 @theme {
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
 }
