@@ -1,0 +1,25 @@
+@model DashboardVm
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="space-y-6">
+    <div>
+        <p class="text-sm font-medium text-emerald-700">Protected area</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Initial dashboard</h2>
+        <p class="mt-2 text-sm text-slate-600">The first SaaS shell is ready for future finance modules.</p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        @foreach (var metric in Model.Metrics)
+        {
+            <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-sm font-medium text-slate-500">@metric.Label</p>
+                <p class="mt-3 text-3xl font-semibold text-slate-950">@metric.Value</p>
+                <p class="mt-2 text-sm text-slate-600">@metric.Description</p>
+            </article>
+        }
+    </div>
+</section>

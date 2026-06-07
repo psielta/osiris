@@ -1,0 +1,25 @@
+<header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
+    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden" x-on:click="sidebarOpen = true" aria-label="Open sidebar">
+        <span class="h-0.5 w-5 bg-current before:block before:h-0.5 before:w-5 before:-translate-y-1.5 before:bg-current after:block after:h-0.5 after:w-5 after:translate-y-1 after:bg-current"></span>
+    </button>
+
+    <div class="min-w-0">
+        <p class="text-sm font-medium text-slate-500">Workspace</p>
+        <h1 class="truncate text-lg font-semibold text-slate-950">@ViewData["Title"]</h1>
+    </div>
+
+    <div class="relative">
+        <button type="button" class="flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 hover:bg-slate-50" x-on:click="userMenuOpen = !userMenuOpen">
+            <span class="hidden max-w-40 truncate sm:block">@(User.Identity?.Name ?? "User")</span>
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800">U</span>
+        </button>
+
+        <div x-show="userMenuOpen" x-cloak x-transition.origin.top.right x-on:click.outside="userMenuOpen = false" class="absolute right-0 mt-2 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                    Sign out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>

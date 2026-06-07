@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: osiris-postgres
+    environment:
+      POSTGRES_USER: osiris
+      POSTGRES_PASSWORD: osiris
+      POSTGRES_DB: osiris_dev
+    ports:
+      - "13450:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osiris -d osiris_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seq:
+    image: datalust/seq:latest
+    container_name: osiris-seq
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "13451:80"
+      - "13452:5341"
+    volumes:
+      - seq_data:/data
+
+volumes:
+  postgres_data:
+  seq_data:

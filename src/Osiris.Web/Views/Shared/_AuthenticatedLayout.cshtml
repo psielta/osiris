@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Osiris</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+    <div x-data="{ sidebarOpen: false, userMenuOpen: false }" class="min-h-screen">
+        <partial name="_Sidebar" />
+
+        <div class="lg:pl-72">
+            <partial name="_Topbar" />
+
+            <main class="px-4 py-6 sm:px-6 lg:px-8">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/alpinejs/cdn.min.js" defer asp-append-version="true"></script>
+    <script src="~/lib/htmx/htmx.min.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
