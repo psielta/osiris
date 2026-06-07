@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "New category";
     Layout = "_AuthenticatedLayout";
+    var selectedColor = Model.Color ?? "#F59E0B";
 }
 
 <section class="mx-auto max-w-2xl space-y-6">
@@ -30,7 +31,13 @@
 
         <div>
             <label asp-for="Color" class="block text-sm font-medium text-slate-700"></label>
-            <input asp-for="Color" type="text" placeholder="#A1B2C3" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+            <div class="mt-1 flex items-center gap-3" x-data="{ color: '@selectedColor' }">
+                <input id="Color" name="Color" type="color" value="@selectedColor" x-model="color" class="h-11 w-16 cursor-pointer rounded-md border border-slate-300 bg-white p-1 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                <div class="flex h-11 flex-1 items-center gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+                    <span class="h-5 w-5 rounded-full border border-slate-300" x-bind:style="{ backgroundColor: color }"></span>
+                    <span>Selected color</span>
+                </div>
+            </div>
             <span asp-validation-for="Color" class="mt-1 block text-sm text-red-600"></span>
         </div>
 

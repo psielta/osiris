@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +56,46 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var response = await client.GetAsync("/categories");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Index_ShouldMarkCategoriesNavigationAsActive()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var html = await client.GetStringAsync("/categories");
+
+        Assert.Matches(
+            new Regex("<a(?=[^>]*href=\"/categories\")(?=[^>]*aria-current=\"page\")[^>]*>", RegexOptions.IgnoreCase),
+            html);
+        Assert.DoesNotMatch(
+            new Regex("<a(?=[^>]*href=\"/dashboard\")(?=[^>]*aria-current=\"page\")[^>]*>", RegexOptions.IgnoreCase),
+            html);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Index_WhenEmpty_ShouldShowIconEmptyState()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var html = await client.GetStringAsync("/categories");
+
+        Assert.Contains("ph ph-tag-simple", html);
+        Assert.Contains("No active categories yet", html);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Create_ShouldUseColorPicker()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var html = await client.GetStringAsync("/categories/create");
+
+        Assert.Contains("type=\"color\"", html);
+        Assert.DoesNotContain("placeholder=\"#A1B2C3\"", html);
     }
 
     [Fact]

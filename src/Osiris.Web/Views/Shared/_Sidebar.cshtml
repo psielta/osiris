@@ -1,3 +1,11 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var activeLinkClass = "flex items-center rounded-md border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900";
+    var inactiveLinkClass = "flex items-center rounded-md border-l-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950";
+    var isDashboardActive = string.Equals(currentController, "Dashboard", StringComparison.OrdinalIgnoreCase);
+    var isCategoriesActive = string.Equals(currentController, "Categories", StringComparison.OrdinalIgnoreCase);
+}
+
 <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" x-cloak x-on:click="sidebarOpen = false"></div>
 
 <aside class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-white transition lg:translate-x-0"
@@ -10,10 +18,10 @@
     </div>
 
     <nav class="flex-1 space-y-1 px-3 py-4">
-        <a asp-controller="Dashboard" asp-action="Index" class="flex items-center rounded-md border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
+        <a asp-controller="Dashboard" asp-action="Index" class="@(isDashboardActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isDashboardActive ? "page" : null)">
             Dashboard
         </a>
-        <a asp-controller="Categories" asp-action="Index" class="flex items-center rounded-md border-l-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950">
+        <a asp-controller="Categories" asp-action="Index" class="@(isCategoriesActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isCategoriesActive ? "page" : null)">
             Categories
         </a>
     </nav>
