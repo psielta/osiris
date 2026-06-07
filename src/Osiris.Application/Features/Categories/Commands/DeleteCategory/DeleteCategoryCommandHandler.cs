@@ -20,7 +20,7 @@ public sealed class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategor
         var category = await _categories.GetByIdAsync(_currentUser.TenantId, request.Id, cancellationToken);
         if (category is null)
         {
-            return Result.Failure(new ResultError("Category was not found."));
+            return Result.Failure(new ResultError("Categoria não encontrada."));
         }
 
         await _categories.DeleteAsync(category, cancellationToken);

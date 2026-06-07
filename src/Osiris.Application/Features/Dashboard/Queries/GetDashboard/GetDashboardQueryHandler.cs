@@ -9,10 +9,10 @@ public sealed class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery
     {
         var metrics = new[]
         {
-            new DashboardMetricDto("Users", "1", "Initial workspace owner"),
-            new DashboardMetricDto("Customers", "0", "No customers yet"),
-            new DashboardMetricDto("Revenue", "$0.00", "No revenue tracked"),
-            new DashboardMetricDto("Activities", "0", "No recent activities")
+            new DashboardMetricDto("Usuários", "1", "Dono inicial da área de trabalho"),
+            new DashboardMetricDto("Clientes", "0", "Nenhum cliente cadastrado"),
+            new DashboardMetricDto("Receita", "R$ 0,00", "Nenhuma receita acompanhada"),
+            new DashboardMetricDto("Atividades", "0", "Nenhuma atividade recente")
         };
 
         return Task.FromResult(new DashboardVm(metrics));

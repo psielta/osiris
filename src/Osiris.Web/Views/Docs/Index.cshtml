@@ -1,7 +1,7 @@
 @model DocumentationIndexViewModel
 
 @{
-    ViewData["Title"] = "Documentacao";
+    ViewData["Title"] = "Documentação";
     Layout = "_AuthenticatedLayout";
     var groups = Model.Items
         .GroupBy(item => item.Group)
@@ -12,8 +12,8 @@
 <section class="space-y-6">
     <div>
         <p class="text-sm font-medium text-amber-700">Ajuda</p>
-        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Documentacao do Osiris</h2>
-        <p class="mt-2 max-w-2xl text-sm text-slate-600">Guias simples para usar cada area do sistema no dia a dia.</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Documentação do Osiris</h2>
+        <p class="mt-2 max-w-2xl text-sm text-slate-600">Guias simples para usar cada área do sistema no dia a dia.</p>
     </div>
 
     @if (Model.Items.Count == 0)
@@ -23,7 +23,7 @@
                 <i class="ph ph-file-text text-3xl" aria-hidden="true"></i>
             </div>
             <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhum guia cadastrado</h3>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Quando novas telas forem documentadas, elas aparecerao aqui.</p>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Quando novas telas forem documentadas, elas aparecerão aqui.</p>
         </div>
     }
     else

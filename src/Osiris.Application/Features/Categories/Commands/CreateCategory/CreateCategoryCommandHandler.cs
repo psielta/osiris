@@ -20,7 +20,7 @@ public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategor
     {
         if (request.Type is null)
         {
-            return Result<Guid>.Failure(new ResultError("Category type is required.", nameof(request.Type)));
+            return Result<Guid>.Failure(new ResultError("Selecione o tipo da categoria.", nameof(request.Type)));
         }
 
         var tenantId = _currentUser.TenantId;
@@ -35,7 +35,7 @@ public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategor
         if (exists)
         {
             return Result<Guid>.Failure(new ResultError(
-                "A category with this name and type already exists.",
+                "Já existe uma categoria com este nome e tipo.",
                 nameof(request.Name)));
         }
 

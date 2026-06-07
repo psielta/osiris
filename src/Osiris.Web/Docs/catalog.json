@@ -2,7 +2,7 @@
   {
     "slug": "categories",
     "title": "Guia simples de categorias",
-    "description": "Entenda como usar categorias para organizar receitas e despesas sem termos tecnicos.",
+    "description": "Entenda como usar categorias para organizar receitas e despesas sem termos técnicos.",
     "group": "Financeiro",
     "icon": "ph ph-tag-simple",
     "markdownFile": "categories.md",

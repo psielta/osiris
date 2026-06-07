@@ -8,24 +8,36 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
     {
         RuleFor(command => command.TenantName)
             .NotEmpty()
-            .MaximumLength(100);
+            .WithMessage("Informe o nome da área de trabalho.")
+            .MaximumLength(100)
+            .WithMessage("O nome da área de trabalho deve ter no máximo 100 caracteres.");
 
         RuleFor(command => command.FullName)
             .NotEmpty()
-            .MaximumLength(100);
+            .WithMessage("Informe seu nome completo.")
+            .MaximumLength(100)
+            .WithMessage("O nome completo deve ter no máximo 100 caracteres.");
 
         RuleFor(command => command.Email)
             .NotEmpty()
+            .WithMessage("Informe o e-mail.")
             .EmailAddress()
-            .MaximumLength(256);
+            .WithMessage("Informe um e-mail válido.")
+            .MaximumLength(256)
+            .WithMessage("O e-mail deve ter no máximo 256 caracteres.");
 
         RuleFor(command => command.Password)
             .NotEmpty()
+            .WithMessage("Informe a senha.")
             .MinimumLength(6)
-            .MaximumLength(100);
+            .WithMessage("A senha deve ter pelo menos 6 caracteres.")
+            .MaximumLength(100)
+            .WithMessage("A senha deve ter no máximo 100 caracteres.");
 
         RuleFor(command => command.ConfirmPassword)
+            .NotEmpty()
+            .WithMessage("Confirme a senha.")
             .Equal(command => command.Password)
-            .WithMessage("Password confirmation must match the password.");
+            .WithMessage("A confirmação da senha deve ser igual à senha.");
     }
 }

@@ -4,24 +4,24 @@ Categorias servem para responder uma pergunta simples:
 
 > Para onde foi o dinheiro? Ou de onde o dinheiro veio?
 
-Elas funcionam como etiquetas. Cada receita ou gasto recebe uma categoria para que voce consiga enxergar seus habitos sem precisar entender contabilidade, economia ou termos tecnicos.
+Elas funcionam como etiquetas. Cada receita ou gasto recebe uma categoria para que você consiga enxergar seus hábitos sem precisar entender contabilidade, economia ou termos técnicos.
 
-## O que e uma categoria?
+## O que é uma categoria?
 
-Uma categoria e um nome que agrupa movimentacoes parecidas.
+Uma categoria é um nome que agrupa movimentações parecidas.
 
 Por exemplo:
 
-| Situacao | Categoria sugerida |
+| Situação | Categoria sugerida |
 | --- | --- |
 | Compra no supermercado | Mercado |
 | Aluguel da casa | Moradia |
-| Salario recebido | Salario |
+| Salário recebido | Salário |
 | Corrida por aplicativo | Transporte |
-| Consulta medica | Saude |
-| Mensalidade da escola | Educacao |
+| Consulta médica | Saúde |
+| Mensalidade da escola | Educação |
 
-A categoria nao e o banco, nao e o cartao e nao e a forma de pagamento. Ela representa o motivo da entrada ou saida de dinheiro.
+A categoria não é o banco, não é o cartão e não é a forma de pagamento. Ela representa o motivo da entrada ou saída de dinheiro.
 
 ## Receita e despesa
 
@@ -29,12 +29,12 @@ Existem dois tipos de categoria.
 
 | Tipo | Use quando |
 | --- | --- |
-| Receita | O dinheiro entra para voce |
-| Despesa | O dinheiro sai de voce |
+| Receita | O dinheiro entra para você |
+| Despesa | O dinheiro sai de você |
 
 Exemplos de receitas:
 
-- Salario
+- Salário
 - Freelance
 - Reembolso
 - Venda de algo usado
@@ -42,120 +42,120 @@ Exemplos de receitas:
 
 Exemplos de despesas:
 
-- Alimentacao
+- Alimentação
 - Mercado
 - Transporte
 - Moradia
-- Saude
+- Saúde
 - Lazer
 - Assinaturas
-- Educacao
+- Educação
 
 ## Como escolher boas categorias
 
-Comece simples. Um erro comum e criar categorias demais logo no inicio.
+Comece simples. Um erro comum é criar categorias demais logo no início.
 
 Uma boa primeira lista pode ser:
 
-- Salario
-- Alimentacao
+- Salário
+- Alimentação
 - Mercado
 - Moradia
 - Transporte
-- Saude
-- Educacao
+- Saúde
+- Educação
 - Lazer
 - Assinaturas
 - Outros
 
-Depois de algumas semanas, voce pode ajustar. Se "Alimentacao" ficou muito grande, talvez faca sentido separar "Restaurantes" e "Mercado". Se quase nunca usa uma categoria, talvez ela nao precise existir.
+Depois de algumas semanas, você pode ajustar. Se "Alimentação" ficou muito grande, talvez faça sentido separar "Restaurantes" e "Mercado". Se quase nunca usa uma categoria, talvez ela não precise existir.
 
-## Cartao de credito nao e categoria
+## Cartão de crédito não é categoria
 
-O cartao de credito e uma forma de pagar e uma divida a ser quitada depois. Ele nao explica o motivo do gasto.
+O cartão de crédito é uma forma de pagar e uma dívida a ser quitada depois. Ele não explica o motivo do gasto.
 
 Exemplo:
 
-| Lancamento | Categoria correta |
+| Lançamento | Categoria correta |
 | --- | --- |
-| Compra no mercado com cartao | Mercado |
-| Restaurante pago no cartao | Alimentacao |
-| Remedio comprado no cartao | Saude |
+| Compra no mercado com cartão | Mercado |
+| Restaurante pago no cartão | Alimentação |
+| Remédio comprado no cartão | Saúde |
 
-Quando voce paga a fatura do cartao, isso e pagamento de uma divida. Nao deve virar uma nova despesa por categoria, senao o mesmo gasto aparece duas vezes.
+Quando você paga a fatura do cartão, isso é pagamento de uma dívida. Não deve virar uma nova despesa por categoria, senão o mesmo gasto aparece duas vezes.
 
-## Conta, boleto e assinatura fora do cartao
+## Conta, boleto e assinatura fora do cartão
 
-Quando a obrigacao nao esta no cartao, use uma categoria normal de despesa.
+Quando a obrigação não está no cartão, use uma categoria normal de despesa.
 
 Exemplos:
 
 - Aluguel: Moradia
 - Internet: Casa ou Assinaturas
-- Academia: Saude ou Lazer
-- Escola: Educacao
-- Boleto de servico: categoria relacionada ao servico
+- Academia: Saúde ou Lazer
+- Escola: Educação
+- Boleto de serviço: categoria relacionada ao serviço
 
 ## Quando arquivar uma categoria
 
-Arquivar significa esconder a categoria das novas escolhas, sem apagar o historico.
+Arquivar significa esconder a categoria das novas escolhas, sem apagar o histórico.
 
 Use arquivar quando:
 
-- voce nao usa mais a categoria;
-- a categoria foi criada por engano, mas ja existe historico;
-- voce quer simplificar a lista sem perder informacoes antigas.
+- você não usa mais a categoria;
+- a categoria foi criada por engano, mas já existe histórico;
+- você quer simplificar a lista sem perder informações antigas.
 
-Apagar deve ser usado apenas quando a categoria ainda nao tem uso real. Se ela ja aparece em historicos, arquivar costuma ser a decisao mais segura.
+Apagar deve ser usado apenas quando a categoria ainda não tem uso real. Se ela já aparece em históricos, arquivar costuma ser a decisão mais segura.
 
 ## Para que serve a cor?
 
-A cor ajuda a reconhecer uma categoria rapidamente. Ela nao muda os calculos.
+A cor ajuda a reconhecer uma categoria rapidamente. Ela não muda os cálculos.
 
 Use cores de um jeito simples:
 
 - cores parecidas para assuntos parecidos;
-- uma cor forte para categorias que voce quer acompanhar de perto;
+- uma cor forte para categorias que você quer acompanhar de perto;
 - cores neutras para categorias pouco importantes.
 
-## Exemplos praticos
+## Exemplos práticos
 
 ### Exemplo 1: supermercado
 
-Voce gastou R$ 250 no supermercado.
+Você gastou R$ 250 no supermercado.
 
 - Tipo: Despesa
 - Categoria: Mercado
 
-### Exemplo 2: salario
+### Exemplo 2: salário
 
-Voce recebeu R$ 4.000 de salario.
+Você recebeu R$ 4.000 de salário.
 
 - Tipo: Receita
-- Categoria: Salario
+- Categoria: Salário
 
-### Exemplo 3: compra parcelada no cartao
+### Exemplo 3: compra parcelada no cartão
 
-Voce comprou um celular em 10 parcelas no cartao.
+Você comprou um celular em 10 parcelas no cartão.
 
 - Tipo: Despesa
-- Categoria: Eletronicos ou Compras
-- Observacao: as parcelas entram nas faturas do cartao, mas a categoria continua sendo a do motivo da compra.
+- Categoria: Eletrônicos ou Compras
+- Observação: as parcelas entram nas faturas do cartão, mas a categoria continua sendo a do motivo da compra.
 
 ### Exemplo 4: pagamento da fatura
 
-Voce pagou R$ 900 da fatura do cartao.
+Você pagou R$ 900 da fatura do cartão.
 
-- Isso e quitacao de divida.
-- Nao escolha uma categoria de despesa para duplicar os gastos.
-- Os gastos ja foram categorizados nas compras do cartao.
+- Isso é quitação de dívida.
+- Não escolha uma categoria de despesa para duplicar os gastos.
+- Os gastos já foram categorizados nas compras do cartão.
 
 ## Regra simples para decidir
 
-Se estiver em duvida, pergunte:
+Se estiver em dúvida, pergunte:
 
 1. O dinheiro entrou ou saiu?
 2. Qual foi o motivo?
-3. Eu vou querer ver isso separado em um relatorio?
+3. Eu vou querer ver isso separado em um relatório?
 
-Se a resposta da terceira pergunta for "nao", use uma categoria mais geral.
+Se a resposta da terceira pergunta for "não", use uma categoria mais geral.

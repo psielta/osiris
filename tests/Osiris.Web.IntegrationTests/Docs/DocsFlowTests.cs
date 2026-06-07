@@ -50,7 +50,7 @@ public sealed class DocsFlowTests : IAsyncLifetime
 
         var html = await client.GetStringAsync("/docs");
 
-        Assert.Contains("Documentacao do Osiris", html);
+        Assert.Contains("Documentação do Osiris", html);
         Assert.Contains("Guia simples de categorias", html);
         Assert.Contains("href=\"/docs/categories\"", html);
     }
@@ -94,7 +94,7 @@ public sealed class DocsFlowTests : IAsyncLifetime
         Assert.Contains("aria-label=\"Abrir ajuda\"", html);
         Assert.Contains("ph ph-question", html);
         Assert.Contains("href=\"/docs\"", html);
-        Assert.DoesNotContain(">Documentacao</a>", html);
+        Assert.DoesNotContain(">Documentação</a>", html);
         Assert.DoesNotMatch(
             new Regex("<a(?=[^>]*href=\"/docs\")(?=[^>]*aria-current=\"page\")[^>]*>", RegexOptions.IgnoreCase),
             html);

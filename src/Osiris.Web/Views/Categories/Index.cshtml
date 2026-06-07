@@ -1,7 +1,7 @@
 @model IReadOnlyCollection<CategoryListItemDto>
 
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = "Categorias";
     Layout = "_AuthenticatedLayout";
     var activeCategories = Model.Where(category => category.IsActive).ToArray();
     var archivedCategories = Model.Where(category => !category.IsActive).ToArray();
@@ -10,8 +10,8 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Finance</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Categories</h2>
+            <p class="text-sm font-medium text-amber-700">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Categorias</h2>
         </div>
 
         <div class="flex flex-wrap gap-3">
@@ -19,7 +19,7 @@
                 Guia de categorias
             </a>
             <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
-                New category
+                Nova categoria
             </a>
         </div>
     </div>
@@ -30,14 +30,14 @@
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
                 <i class="ph ph-tag-simple text-3xl" aria-hidden="true"></i>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-950">No active categories yet</h3>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Create your first income or expense category to organize future transactions.</p>
+            <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhuma categoria ativa ainda</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Crie sua primeira categoria de receita ou despesa para organizar seus próximos lançamentos.</p>
             <div class="mt-6 flex flex-wrap justify-center gap-3">
                 <a asp-controller="Docs" asp-action="Show" asp-route-slug="categories" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                     Guia de categorias
                 </a>
                 <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
-                    New category
+                    Nova categoria
                 </a>
             </div>
         </div>
@@ -48,10 +48,10 @@
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Color</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nome</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Cor</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ações</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -59,11 +59,11 @@
                     {
                         <tr>
                             <td class="px-4 py-3 text-sm font-medium text-slate-950">@category.Name</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">@category.Type</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">@(category.Type.ToDisplayName())</td>
                             <td class="px-4 py-3 text-sm text-slate-600">
                                 @if (string.IsNullOrWhiteSpace(category.Color))
                                 {
-                                    <span class="text-slate-400">None</span>
+                                    <span class="text-slate-400">Sem cor</span>
                                 }
                                 else
                                 {
@@ -75,11 +75,11 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex flex-wrap justify-end gap-2">
-                                    <a asp-action="Edit" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Edit</a>
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar</a>
                                     <form asp-action="Archive" asp-route-id="@category.Id" method="post">
-                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 px-3 text-sm font-medium text-amber-800 transition hover:bg-amber-50">Archive</button>
+                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 px-3 text-sm font-medium text-amber-800 transition hover:bg-amber-50">Arquivar</button>
                                     </form>
-                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Delete</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Excluir</a>
                                 </div>
                             </td>
                         </tr>
@@ -92,7 +92,7 @@
     @if (archivedCategories.Length > 0)
     {
         <div class="space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Archived</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Arquivadas</h3>
 
             <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <table class="min-w-full divide-y divide-slate-200">
@@ -101,11 +101,11 @@
                         {
                             <tr class="bg-slate-50">
                                 <td class="px-4 py-3 text-sm font-medium text-slate-500">@category.Name</td>
-                                <td class="px-4 py-3 text-sm text-slate-500">@category.Type</td>
+                                <td class="px-4 py-3 text-sm text-slate-500">@(category.Type.ToDisplayName())</td>
                                 <td class="px-4 py-3 text-sm text-slate-500">
                                     @if (string.IsNullOrWhiteSpace(category.Color))
                                     {
-                                        <span>None</span>
+                                        <span>Sem cor</span>
                                     }
                                     else
                                     {
@@ -113,7 +113,7 @@
                                     }
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Delete</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Excluir</a>
                                 </td>
                             </tr>
                         }

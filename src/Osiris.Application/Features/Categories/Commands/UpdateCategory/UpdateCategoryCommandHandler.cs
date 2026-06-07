@@ -25,14 +25,14 @@ public sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategor
     {
         if (request.Type is null)
         {
-            return Result.Failure(new ResultError("Category type is required.", nameof(request.Type)));
+            return Result.Failure(new ResultError("Selecione o tipo da categoria.", nameof(request.Type)));
         }
 
         var tenantId = _currentUser.TenantId;
         var category = await _categories.GetByIdAsync(tenantId, request.Id, cancellationToken);
         if (category is null)
         {
-            return Result.Failure(new ResultError("Category was not found."));
+            return Result.Failure(new ResultError("Categoria não encontrada."));
         }
 
         var normalizedName = FinancialCategory.NormalizeName(request.Name);
@@ -46,7 +46,7 @@ public sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategor
         if (exists)
         {
             return Result.Failure(new ResultError(
-                "A category with this name and type already exists.",
+                "Já existe uma categoria com este nome e tipo.",
                 nameof(request.Name)));
         }
 

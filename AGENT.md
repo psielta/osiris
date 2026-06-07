@@ -77,6 +77,14 @@ Use `npm run css:watch` during UI work.
 
 `dotnet build` should remain able to generate the CSS output.
 
+## User-Facing Language
+
+The app is for Brazilian users. All user-facing UI text must be written in Brazilian Portuguese.
+
+This includes Razor views, layout text, buttons, links, form labels, placeholders, empty states, table headers, select options, validation messages, business-rule errors, success messages, and in-app documentation.
+
+Code identifiers, routes, commands, queries, DTOs, tests, folders, database objects, and internal architecture terms may remain in English.
+
 ## Testing
 
 Tests are part of the architecture, not an optional follow-up.

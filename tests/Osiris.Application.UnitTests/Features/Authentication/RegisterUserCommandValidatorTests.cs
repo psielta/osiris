@@ -36,7 +36,7 @@ public sealed class RegisterUserCommandValidatorTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, error =>
             error.PropertyName == nameof(RegisterUserCommand.ConfirmPassword) &&
-            error.ErrorMessage == "Password confirmation must match the password.");
+            error.ErrorMessage == "A confirmação da senha deve ser igual à senha.");
     }
 
     [Fact]

@@ -13,9 +13,9 @@ public sealed class GetDashboardQueryHandlerTests
 
         Assert.Collection(
             result.Metrics,
-            metric => Assert.Equal("Users", metric.Label),
-            metric => Assert.Equal("Customers", metric.Label),
-            metric => Assert.Equal("Revenue", metric.Label),
-            metric => Assert.Equal("Activities", metric.Label));
+            metric => Assert.Equal("Usuários", metric.Label),
+            metric => Assert.Equal("Clientes", metric.Label),
+            metric => Assert.Equal("Receita", metric.Label),
+            metric => Assert.Equal("Atividades", metric.Label));
     }
 }

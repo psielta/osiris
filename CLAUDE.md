@@ -19,6 +19,12 @@ Testing rules:
 - Use integration tests for MVC routes, antiforgery, authentication, authorization, EF Core, Identity, PostgreSQL, and tenant behavior.
 - Do not use EF Core in-memory provider for integration tests; use PostgreSQL through Testcontainers.
 
+User-facing language:
+
+- The app is for Brazilian users, so all visible UI text must be in Brazilian Portuguese.
+- This includes Razor views, layout text, buttons, links, labels, placeholders, empty states, table headers, select options, validation messages, business-rule errors, success messages, and in-app documentation.
+- Code identifiers, routes, commands, queries, DTOs, tests, folders, database objects, and internal architecture terms may stay in English.
+
 Use the `13450-13500` range for this app's local development ports. Future Docker services or local service bindings must expose host ports in that range and be documented in `README.md`.
 
 Versioning:

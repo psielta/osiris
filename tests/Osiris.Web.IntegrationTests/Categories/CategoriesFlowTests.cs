@@ -57,7 +57,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Osiris v0.1.1", html);
+        Assert.Contains("Osiris v0.1.2", html);
         Assert.DoesNotContain("SaaS skeleton", html);
     }
 
@@ -86,7 +86,8 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var html = await client.GetStringAsync("/categories");
 
         Assert.Contains("ph ph-tag-simple", html);
-        Assert.Contains("No active categories yet", html);
+        Assert.Contains("Nenhuma categoria ativa ainda", html);
+        Assert.Contains("receita ou despesa", html);
     }
 
     [Fact]
@@ -98,6 +99,9 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var html = await client.GetStringAsync("/categories/create");
 
         Assert.Contains("type=\"color\"", html);
+        Assert.Contains("Selecione o tipo", html);
+        Assert.Contains(">Receita</option>", html);
+        Assert.Contains(">Despesa</option>", html);
         Assert.DoesNotContain("placeholder=\"#A1B2C3\"", html);
     }
 

@@ -8,7 +8,10 @@ public sealed class ForgotPasswordCommandValidator : AbstractValidator<ForgotPas
     {
         RuleFor(command => command.Email)
             .NotEmpty()
+            .WithMessage("Informe o e-mail.")
             .EmailAddress()
-            .MaximumLength(256);
+            .WithMessage("Informe um e-mail válido.")
+            .MaximumLength(256)
+            .WithMessage("O e-mail deve ter no máximo 256 caracteres.");
     }
 }

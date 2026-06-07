@@ -25,7 +25,7 @@ public sealed class ArchiveCategoryCommandHandler : IRequestHandler<ArchiveCateg
         var category = await _categories.GetByIdAsync(_currentUser.TenantId, request.Id, cancellationToken);
         if (category is null)
         {
-            return Result.Failure(new ResultError("Category was not found."));
+            return Result.Failure(new ResultError("Categoria não encontrada."));
         }
 
         category.Archive(_dateTimeProvider.UtcNow);

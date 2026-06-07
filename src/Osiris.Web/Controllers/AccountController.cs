@@ -126,7 +126,7 @@ public sealed class AccountController : AppController
         try
         {
             await _mediator.Send(new ForgotPasswordCommand(model.Email), cancellationToken);
-            ViewData["SuccessMessage"] = "If the account exists, password recovery instructions will be sent.";
+            ViewData["SuccessMessage"] = "Se a conta existir, as instruções de recuperação serão enviadas.";
             return View(new ForgotPasswordViewModel());
         }
         catch (ValidationException exception)

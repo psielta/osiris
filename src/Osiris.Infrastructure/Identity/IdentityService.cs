@@ -33,7 +33,7 @@ public sealed class IdentityService : IIdentityService
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser is not null)
         {
-            return Result<string>.Failure(new ResultError("This email is already registered.", nameof(email)));
+            return Result<string>.Failure(new ResultError("Este e-mail já está cadastrado.", nameof(email)));
         }
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -80,10 +80,10 @@ public sealed class IdentityService : IIdentityService
 
         if (result.IsLockedOut)
         {
-            return Result.Failure(new ResultError("This account is temporarily locked."));
+            return Result.Failure(new ResultError("Esta conta está temporariamente bloqueada."));
         }
 
-        return Result.Failure(new ResultError("Invalid email or password."));
+        return Result.Failure(new ResultError("E-mail ou senha inválidos."));
     }
 
     public async Task<Result> SignInAsync(string userId, CancellationToken cancellationToken)
@@ -91,7 +91,7 @@ public sealed class IdentityService : IIdentityService
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
         {
-            return Result.Failure(new ResultError("User could not be found."));
+            return Result.Failure(new ResultError("Usuário não encontrado."));
         }
 
         await _signInManager.SignInAsync(user, isPersistent: false);
@@ -126,7 +126,25 @@ public sealed class IdentityService : IIdentityService
                 ? "Email"
                 : null;
 
-            return new ResultError(error.Description, field, error.Code);
+            return new ResultError(MapIdentityErrorDescription(error), field, error.Code);
         });
+    }
+
+    private static string MapIdentityErrorDescription(IdentityError error)
+    {
+        return error.Code switch
+        {
+            "DuplicateEmail" => "Este e-mail já está cadastrado.",
+            "DuplicateUserName" => "Este e-mail já está cadastrado.",
+            "InvalidEmail" => "Informe um e-mail válido.",
+            "InvalidUserName" => "Informe um e-mail válido.",
+            "PasswordTooShort" => "A senha deve ter pelo menos 6 caracteres.",
+            "PasswordRequiresDigit" => "A senha deve ter pelo menos um número.",
+            "PasswordRequiresLower" => "A senha deve ter pelo menos uma letra minúscula.",
+            "PasswordRequiresUpper" => "A senha deve ter pelo menos uma letra maiúscula.",
+            "PasswordRequiresNonAlphanumeric" => "A senha deve ter pelo menos um caractere especial.",
+            "PasswordRequiresUniqueChars" => "A senha deve ter mais caracteres diferentes.",
+            _ => "Não foi possível concluir a operação. Revise os dados informados."
+        };
     }
 }

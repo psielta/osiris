@@ -7,20 +7,26 @@ public sealed class UpdateCategoryCommandValidator : AbstractValidator<UpdateCat
     public UpdateCategoryCommandValidator()
     {
         RuleFor(command => command.Id)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage("Categoria inválida.");
 
         RuleFor(command => command.Name)
             .NotEmpty()
-            .MaximumLength(100);
+            .WithMessage("Informe o nome da categoria.")
+            .MaximumLength(100)
+            .WithMessage("O nome da categoria deve ter no máximo 100 caracteres.");
 
         RuleFor(command => command.Type)
             .NotNull()
-            .IsInEnum();
+            .WithMessage("Selecione o tipo da categoria.")
+            .IsInEnum()
+            .WithMessage("Selecione um tipo de categoria válido.");
 
         RuleFor(command => command.Color)
             .MaximumLength(7)
+            .WithMessage("A cor deve ter no máximo 7 caracteres.")
             .Matches("^#[0-9A-Fa-f]{6}$")
             .When(command => !string.IsNullOrWhiteSpace(command.Color))
-            .WithMessage("Color must be a hex color such as #A1B2C3.");
+            .WithMessage("Escolha uma cor válida.");
     }
 }
