@@ -14,9 +14,14 @@
             <h2 class="mt-2 text-2xl font-semibold text-slate-950">Categories</h2>
         </div>
 
-        <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
-            New category
-        </a>
+        <div class="flex flex-wrap gap-3">
+            <a asp-controller="Docs" asp-action="Show" asp-route-slug="categories" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                Guia de categorias
+            </a>
+            <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+                New category
+            </a>
+        </div>
     </div>
 
     @if (activeCategories.Length == 0)
@@ -27,9 +32,14 @@
             </div>
             <h3 class="mt-4 text-base font-semibold text-slate-950">No active categories yet</h3>
             <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Create your first income or expense category to organize future transactions.</p>
-            <a asp-action="Create" class="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
-                New category
-            </a>
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+                <a asp-controller="Docs" asp-action="Show" asp-route-slug="categories" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                    Guia de categorias
+                </a>
+                <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+                    New category
+                </a>
+            </div>
         </div>
     }
     else

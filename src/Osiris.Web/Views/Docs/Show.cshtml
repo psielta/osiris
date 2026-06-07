@@ -1,0 +1,237 @@
+@model DocumentationPageViewModel
+
+@{
+    ViewData["Title"] = Model.Current.Title;
+    Layout = "_AuthenticatedLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" />
+    <style>
+        .docs-markdown h1,
+        .docs-markdown h2,
+        .docs-markdown h3 {
+            color: #020617;
+            font-weight: 700;
+            line-height: 1.25;
+            scroll-margin-top: 24px;
+        }
+
+        .docs-markdown h1 {
+            font-size: 1.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .docs-markdown h2 {
+            border-top: 1px solid #e2e8f0;
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+        }
+
+        .docs-markdown h3 {
+            font-size: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .docs-markdown p,
+        .docs-markdown li {
+            color: #475569;
+            font-size: .9375rem;
+            line-height: 1.7;
+        }
+
+        .docs-markdown p {
+            margin-top: .75rem;
+        }
+
+        .docs-markdown ul,
+        .docs-markdown ol {
+            margin-top: .75rem;
+            padding-left: 1.25rem;
+        }
+
+        .docs-markdown ul {
+            list-style: disc;
+        }
+
+        .docs-markdown ol {
+            list-style: decimal;
+        }
+
+        .docs-markdown blockquote {
+            border-left: 4px solid #f59e0b;
+            margin-top: 1rem;
+            padding: .75rem 1rem;
+            background: #fffbeb;
+            border-radius: .375rem;
+        }
+
+        .docs-markdown blockquote p {
+            color: #78350f;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .docs-markdown table {
+            border-collapse: collapse;
+            display: block;
+            margin-top: 1rem;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .docs-markdown th,
+        .docs-markdown td {
+            border: 1px solid #e2e8f0;
+            padding: .75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .docs-markdown th {
+            background: #f8fafc;
+            color: #334155;
+            font-size: .8125rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .docs-markdown td {
+            color: #475569;
+            font-size: .875rem;
+        }
+
+        .docs-markdown code {
+            background: #f1f5f9;
+            border-radius: .25rem;
+            color: #0f172a;
+            font-size: .85em;
+            padding: .15rem .35rem;
+        }
+
+        .docs-markdown pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: .5rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+            padding: 1rem;
+        }
+
+        .docs-markdown pre code {
+            background: transparent;
+            padding: 0;
+        }
+    </style>
+}
+
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Ajuda</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@Model.Current.Title</h2>
+            <p class="mt-2 max-w-2xl text-sm text-slate-600">@Model.Current.Description</p>
+        </div>
+
+        <a asp-controller="Docs" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+            Todos os guias
+        </a>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[280px_1fr]">
+        <aside class="hidden xl:block">
+            <div class="sticky top-6 space-y-4">
+                <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Guias</p>
+                    <nav class="mt-3 space-y-1">
+                        @foreach (var item in Model.Items.OrderBy(item => item.Order).ThenBy(item => item.Title))
+                        {
+                            var itemClass = item.Slug == Model.Current.Slug
+                                ? "block rounded-md bg-amber-50 px-2 py-1.5 text-sm font-medium text-amber-900"
+                                : "block rounded-md px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950";
+                            <a asp-controller="Docs" asp-action="Show" asp-route-slug="@item.Slug" class="@itemClass">@item.Title</a>
+                        }
+                    </nav>
+                </div>
+
+                <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Nesta pagina</p>
+                    <nav id="docs-toc" class="mt-3 space-y-1"></nav>
+                </div>
+            </div>
+        </aside>
+
+        <article class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div id="docs-loading" class="flex items-center gap-3 text-sm text-slate-500">
+                <i class="ph ph-circle-notch animate-spin text-xl" aria-hidden="true"></i>
+                Carregando guia...
+            </div>
+            <div id="docs-content" class="docs-markdown hidden" data-markdown-url="@Url.Action("Markdown", "Docs", new { slug = Model.Current.Slug })"></div>
+        </article>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+    <script>
+        (async function () {
+            const content = document.getElementById('docs-content');
+            const loading = document.getElementById('docs-loading');
+            const toc = document.getElementById('docs-toc');
+
+            function slugify(value) {
+                return value
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+
+            try {
+                const response = await fetch(content.dataset.markdownUrl, {
+                    headers: { 'Accept': 'text/markdown' }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                marked.setOptions({ gfm: true, breaks: false });
+
+                const markdown = await response.text();
+                content.innerHTML = DOMPurify.sanitize(marked.parse(markdown));
+
+                content.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
+
+                content.querySelectorAll('h2, h3').forEach((heading) => {
+                    const id = slugify(heading.textContent || 'secao');
+                    heading.id = id;
+
+                    if (!toc) {
+                        return;
+                    }
+
+                    const link = document.createElement('a');
+                    link.href = `#${id}`;
+                    link.textContent = heading.textContent;
+                    link.className = heading.tagName === 'H2'
+                        ? 'block rounded-md px-2 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950'
+                        : 'block rounded-md px-4 py-1 text-xs text-slate-500 transition hover:bg-slate-50 hover:text-slate-900';
+                    toc.appendChild(link);
+                });
+
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+            } catch (error) {
+                loading.classList.remove('text-slate-500');
+                loading.classList.add('text-red-700');
+                loading.innerHTML = 'Nao foi possivel carregar o guia.';
+                console.error(error);
+            }
+        })();
+    </script>
+}

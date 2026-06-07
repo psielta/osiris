@@ -12,6 +12,46 @@ This first stage contains authentication, tenant creation during registration, a
 
 The financial MVP follows the model documented in [docs/financial-model.md](docs/financial-model.md): credit card purchases are categorized expenses, statements group card debt, statement payments settle debt and account cash outflow without duplicating expenses, and bills are for off-card obligations.
 
+## In-App User Documentation
+
+Authenticated users can read end-user guides in the documentation area:
+
+```text
+/docs
+```
+
+Each guide has its own slug route, for example:
+
+```text
+/docs/categories
+```
+
+The pages render Markdown in the browser with CDN libraries, following the same documentation style used in the Contabil API reference page:
+
+- `marked` parses Markdown.
+- `DOMPurify` sanitizes the rendered HTML.
+- `highlight.js` styles fenced code blocks if the guide later needs examples.
+
+Documentation entries are registered in:
+
+```text
+src/Osiris.Web/Docs/catalog.json
+```
+
+Markdown sources are stored in the same folder, for example:
+
+```text
+src/Osiris.Web/Docs/categories.md
+```
+
+Protected Markdown endpoints follow the same slug:
+
+```text
+/docs/{slug}.md
+```
+
+To add documentation for another screen, add a Markdown file under `src/Osiris.Web/Docs`, register it in `catalog.json`, and link to `/docs/{slug}`. Keep end-user guides written for non-technical users. They should explain financial concepts in plain language and avoid accounting jargon.
+
 ## Prerequisites
 
 - .NET SDK 10

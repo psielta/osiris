@@ -7,6 +7,7 @@
     <partial name="_Favicons" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <script src="https://unpkg.com/@@phosphor-icons/web@2.1.1"></script>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
     <div x-data="{ sidebarOpen: false, userMenuOpen: false }" class="min-h-screen">
