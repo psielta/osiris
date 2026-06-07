@@ -77,6 +77,26 @@ Use `npm run css:watch` during UI work.
 
 `dotnet build` should remain able to generate the CSS output.
 
+## Testing
+
+Tests are part of the architecture, not an optional follow-up.
+
+Keep test projects under `tests/`:
+
+- `Osiris.Application.UnitTests`: unit tests for commands, queries, handlers, validators, DTO mapping, and Application behavior.
+- `Osiris.Web.IntegrationTests`: integration tests for MVC routes, authentication flows, EF Core, Identity, PostgreSQL, and tenant creation.
+
+Testing rules:
+
+- Add or update tests whenever behavior changes.
+- Prefer unit tests for Application handlers and FluentValidation validators.
+- Prefer integration tests for controller routes, antiforgery flows, authentication, authorization, database persistence, and multitenancy behavior.
+- Controllers must not be unit-tested by mocking business logic when a full MVC integration test is more valuable.
+- Do not use EF Core in-memory provider for integration tests.
+- Integration tests that touch persistence must use PostgreSQL through Testcontainers.
+- Keep tests readable and focused on observable behavior.
+- `dotnet test Osiris.sln` should pass before handing work back.
+
 ## Local Ports
 
 Use the `13450-13500` range for this app's local development ports.

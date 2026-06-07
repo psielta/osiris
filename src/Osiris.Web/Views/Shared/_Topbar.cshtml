@@ -1,7 +1,10 @@
 <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
-    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden" x-on:click="sidebarOpen = true" aria-label="Open sidebar">
-        <span class="h-0.5 w-5 bg-current before:block before:h-0.5 before:w-5 before:-translate-y-1.5 before:bg-current after:block after:h-0.5 after:w-5 after:translate-y-1 after:bg-current"></span>
-    </button>
+    <div class="flex items-center gap-3">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden" x-on:click="sidebarOpen = true" aria-label="Open sidebar">
+            <span class="h-0.5 w-5 bg-current before:block before:h-0.5 before:w-5 before:-translate-y-1.5 before:bg-current after:block after:h-0.5 after:w-5 after:translate-y-1 after:bg-current"></span>
+        </button>
+        <img src="~/images/osiris-logo.svg" alt="Osiris" class="hidden h-9 w-9 shrink-0 sm:block lg:hidden" asp-append-version="true" />
+    </div>
 
     <div class="min-w-0">
         <p class="text-sm font-medium text-slate-500">Workspace</p>

@@ -45,7 +45,7 @@ try
 
     app.Run();
 }
-catch (Exception exception)
+catch (Exception exception) when (exception.GetType().Name != "HostAbortedException")
 {
     Log.Fatal(exception, "Application terminated unexpectedly");
 }
@@ -53,3 +53,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program;

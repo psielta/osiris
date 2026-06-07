@@ -1,4 +1,8 @@
-# Osiris
+<p align="center">
+  <img src="src/Osiris.Web/wwwroot/images/osiris-logo.svg" alt="Osiris logo" width="180" />
+</p>
+
+<h1 align="center">Osiris</h1>
 
 Osiris is the initial skeleton for a personal finance SaaS built with ASP.NET Core MVC, Identity, EF Core, PostgreSQL, MediatR, FluentValidation, Tailwind CSS, Alpine.js, HTMX, and Serilog.
 
@@ -61,6 +65,16 @@ dotnet ef database update `
 
 ## Run The App
 
+Quick Windows launcher:
+
+```powershell
+.\rodar-osiris.bat
+```
+
+The launcher frees port `13453`, starts Docker services, waits for PostgreSQL, applies migrations, and runs the Web project.
+
+Manual run:
+
 ```powershell
 dotnet run --project src/Osiris.Web
 ```
@@ -97,6 +111,44 @@ npm run css:watch
 
 `dotnet build` also runs `npm install` if `node_modules` is missing, copies Alpine.js and HTMX to `wwwroot/lib`, and builds `wwwroot/css/app.css`.
 
+## Tests
+
+The solution includes unit and integration test projects from the start:
+
+```text
+tests/
+  Osiris.Application.UnitTests/
+  Osiris.Web.IntegrationTests/
+```
+
+Run all tests:
+
+```powershell
+dotnet test Osiris.sln
+```
+
+Run only unit tests:
+
+```powershell
+dotnet test tests/Osiris.Application.UnitTests
+```
+
+Run only integration tests:
+
+```powershell
+dotnet test tests/Osiris.Web.IntegrationTests
+```
+
+Integration tests use `WebApplicationFactory` and PostgreSQL through Testcontainers. Docker must be running for those tests.
+
+Current coverage includes:
+
+- FluentValidation rules for registration and login commands.
+- Register user command handler behavior.
+- Initial dashboard query data.
+- Anonymous dashboard authorization redirect.
+- Registration flow creating a tenant, creating an Identity user, signing in, and accessing `/dashboard`.
+
 ## Folder Structure
 
 ```text
@@ -105,12 +157,17 @@ src/
   Osiris.Application/
   Osiris.Infrastructure/
   Osiris.Web/
+tests/
+  Osiris.Application.UnitTests/
+  Osiris.Web.IntegrationTests/
 ```
 
 - `Osiris.Domain`: domain entities with no framework dependencies.
 - `Osiris.Application`: CQRS commands/queries, handlers, validation, pipeline behaviors, and service interfaces.
 - `Osiris.Infrastructure`: EF Core, PostgreSQL, Identity, email placeholder, and service implementations.
 - `Osiris.Web`: MVC controllers, Razor views, Tailwind assets, and startup configuration.
+- `Osiris.Application.UnitTests`: isolated tests for Application validators, handlers, commands, and queries.
+- `Osiris.Web.IntegrationTests`: MVC and persistence tests using a real PostgreSQL container.
 
 ## Next Steps
 
