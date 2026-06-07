@@ -2,7 +2,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Osiris.Application.Common.Models;
 using Osiris.Application.Features.Authentication.Commands.ForgotPassword;
 using Osiris.Application.Features.Authentication.Commands.LoginUser;
 using Osiris.Application.Features.Authentication.Commands.LogoutUser;
@@ -11,7 +10,7 @@ using Osiris.Web.Models;
 
 namespace Osiris.Web.Controllers;
 
-public sealed class AccountController : Controller
+public sealed class AccountController : AppController
 {
     private readonly IMediator _mediator;
 
@@ -154,29 +153,4 @@ public sealed class AccountController : Controller
         return RedirectToAction("Index", "Dashboard");
     }
 
-    private void AddResultErrors(Result result)
-    {
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError(NormalizeField(error.Field), error.Message);
-        }
-    }
-
-    private void AddValidationErrors(ValidationException exception)
-    {
-        foreach (var error in exception.Errors)
-        {
-            ModelState.AddModelError(NormalizeField(error.PropertyName), error.ErrorMessage);
-        }
-    }
-
-    private static string NormalizeField(string? field)
-    {
-        if (string.IsNullOrWhiteSpace(field))
-        {
-            return string.Empty;
-        }
-
-        return char.ToUpperInvariant(field[0]) + field[1..];
-    }
 }

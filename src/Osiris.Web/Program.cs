@@ -1,5 +1,7 @@
 using Osiris.Application;
+using Osiris.Application.Common.Interfaces;
 using Osiris.Infrastructure;
+using Osiris.Web.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -21,6 +23,8 @@ try
     builder.Services.AddControllersWithViews();
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
     var app = builder.Build();
 
