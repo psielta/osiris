@@ -1,0 +1,108 @@
+@model IReadOnlyCollection<CategoryListItemDto>
+
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "_AuthenticatedLayout";
+    var activeCategories = Model.Where(category => category.IsActive).ToArray();
+    var archivedCategories = Model.Where(category => !category.IsActive).ToArray();
+}
+
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Finance</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Categories</h2>
+        </div>
+
+        <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+            New category
+        </a>
+    </div>
+
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Color</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+                @if (activeCategories.Length == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500">No active categories yet.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var category in activeCategories)
+                    {
+                        <tr>
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950">@category.Name</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">@category.Type</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">
+                                @if (string.IsNullOrWhiteSpace(category.Color))
+                                {
+                                    <span class="text-slate-400">None</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-2">
+                                        <span class="h-4 w-4 rounded border border-slate-200" style="background-color: @category.Color"></span>
+                                        @category.Color
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap justify-end gap-2">
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Edit</a>
+                                    <form asp-action="Archive" asp-route-id="@category.Id" method="post">
+                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 px-3 text-sm font-medium text-amber-800 transition hover:bg-amber-50">Archive</button>
+                                    </form>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (archivedCategories.Length > 0)
+    {
+        <div class="space-y-3">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Archived</h3>
+
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <tbody class="divide-y divide-slate-200">
+                        @foreach (var category in archivedCategories)
+                        {
+                            <tr class="bg-slate-50">
+                                <td class="px-4 py-3 text-sm font-medium text-slate-500">@category.Name</td>
+                                <td class="px-4 py-3 text-sm text-slate-500">@category.Type</td>
+                                <td class="px-4 py-3 text-sm text-slate-500">
+                                    @if (string.IsNullOrWhiteSpace(category.Color))
+                                    {
+                                        <span>None</span>
+                                    }
+                                    else
+                                    {
+                                        @category.Color
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="inline-flex h-9 items-center rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 transition hover:bg-red-50">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
