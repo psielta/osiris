@@ -8,6 +8,10 @@ Osiris is the initial skeleton for a personal finance SaaS built with ASP.NET Co
 
 This first stage contains authentication, tenant creation during registration, and a protected dashboard. It intentionally does not include finance CRUDs, payments, or tenant subdomain resolution yet.
 
+## Financial Domain Model
+
+The financial MVP follows the model documented in [docs/financial-model.md](docs/financial-model.md): credit card purchases are categorized expenses, statements group card debt, statement payments settle debt and account cash outflow without duplicating expenses, and bills are for off-card obligations.
+
 ## Prerequisites
 
 - .NET SDK 10
