@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Osiris.Application.Common.Interfaces;
+using Osiris.Infrastructure.Common;
 using Osiris.Infrastructure.Email;
 using Osiris.Infrastructure.Identity;
 using Osiris.Infrastructure.Persistence;
@@ -36,6 +37,7 @@ public static class DependencyInjection
                 options.SignIn.RequireConfirmedAccount = false;
                 options.User.RequireUniqueEmail = true;
             })
+            .AddClaimsPrincipalFactory<TenantClaimsPrincipalFactory>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
@@ -48,6 +50,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
         return services;
