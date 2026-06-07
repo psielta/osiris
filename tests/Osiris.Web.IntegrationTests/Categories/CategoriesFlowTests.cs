@@ -54,8 +54,11 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
 
         var response = await client.GetAsync("/categories");
+        var html = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Osiris v0.1.1", html);
+        Assert.DoesNotContain("SaaS skeleton", html);
     }
 
     [Fact]

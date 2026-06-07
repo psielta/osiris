@@ -111,6 +111,24 @@ Current assignments:
 - Web HTTP: `13453`
 - Web HTTPS: `13454`
 
+## Versioning
+
+The Web app version is user-visible in the authenticated sidebar footer.
+
+Keep these version values aligned:
+
+- `src/Osiris.Web/Osiris.Web.csproj` (`<Version>`)
+- `src/Osiris.Web/package.json` (`version`)
+- `src/Osiris.Web/package-lock.json` root package version
+
+Use SemVer-style increments:
+
+- Patch: bug fixes, UI polish, copy changes, documentation-only app updates, and other backward-compatible maintenance.
+- Minor: new user-facing features, new screens, new financial flows, or backward-compatible data model additions.
+- Major: incompatible behavior, API, migration, or data-contract changes.
+
+For pre-1.0 releases, still use patch/minor intentionally: patch for fixes and polish, minor for new usable capability. If a change is not intended to ship to users, do not bump the version just to commit internal work.
+
 ## Git Commits
 
 Use Conventional Commits for every app commit.

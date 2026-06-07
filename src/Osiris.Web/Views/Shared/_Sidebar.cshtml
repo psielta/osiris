@@ -4,6 +4,13 @@
     var inactiveLinkClass = "flex items-center rounded-md border-l-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950";
     var isDashboardActive = string.Equals(currentController, "Dashboard", StringComparison.OrdinalIgnoreCase);
     var isCategoriesActive = string.Equals(currentController, "Categories", StringComparison.OrdinalIgnoreCase);
+    var appAssembly = typeof(Osiris.Web.Controllers.DashboardController).Assembly;
+    var appVersion = System.Reflection.CustomAttributeExtensions
+        .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(appAssembly)?
+        .InformationalVersion
+        .Split('+')[0]
+        ?? appAssembly.GetName().Version?.ToString(3)
+        ?? "0.1.0";
 }
 
 <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" x-cloak x-on:click="sidebarOpen = false"></div>
@@ -26,7 +33,7 @@
         </a>
     </nav>
 
-    <div class="border-t border-slate-200 px-6 py-4 text-xs text-slate-500">
-        SaaS skeleton
+    <div class="border-t border-slate-200 px-6 py-4 text-xs font-medium text-slate-500">
+        Osiris v@(appVersion)
     </div>
 </aside>
