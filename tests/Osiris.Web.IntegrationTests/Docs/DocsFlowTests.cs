@@ -85,13 +85,17 @@ public sealed class DocsFlowTests : IAsyncLifetime
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task Show_ShouldMarkDocumentationNavigationAsActive()
+    public async Task Show_ShouldExposeDocumentationHelpButtonInHeader()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
 
         var html = await client.GetStringAsync("/docs/categories");
 
-        Assert.Matches(
+        Assert.Contains("aria-label=\"Abrir ajuda\"", html);
+        Assert.Contains("ph ph-question", html);
+        Assert.Contains("href=\"/docs\"", html);
+        Assert.DoesNotContain(">Documentacao</a>", html);
+        Assert.DoesNotMatch(
             new Regex("<a(?=[^>]*href=\"/docs\")(?=[^>]*aria-current=\"page\")[^>]*>", RegexOptions.IgnoreCase),
             html);
         Assert.DoesNotMatch(

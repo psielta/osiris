@@ -4,7 +4,6 @@
     var inactiveLinkClass = "flex items-center rounded-md border-l-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950";
     var isDashboardActive = string.Equals(currentController, "Dashboard", StringComparison.OrdinalIgnoreCase);
     var isCategoriesActive = string.Equals(currentController, "Categories", StringComparison.OrdinalIgnoreCase);
-    var isDocsActive = string.Equals(currentController, "Docs", StringComparison.OrdinalIgnoreCase);
 }
 
 <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" x-cloak x-on:click="sidebarOpen = false"></div>
@@ -24,9 +23,6 @@
         </a>
         <a asp-controller="Categories" asp-action="Index" class="@(isCategoriesActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isCategoriesActive ? "page" : null)">
             Categories
-        </a>
-        <a asp-controller="Docs" asp-action="Index" class="@(isDocsActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isDocsActive ? "page" : null)">
-            Documentacao
         </a>
     </nav>
 
