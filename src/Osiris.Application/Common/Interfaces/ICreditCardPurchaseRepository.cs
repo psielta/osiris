@@ -32,6 +32,8 @@ public interface ICreditCardPurchaseRepository
         int month,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyCollection<CreditCardPurchase>> ListAsync(Guid tenantId, CancellationToken cancellationToken);
+
     /// <summary>
     /// Removes the purchase and its installments in a single transaction. Status changes on
     /// already-tracked statements are saved together.

@@ -71,6 +71,17 @@ public sealed class CreditCardPurchaseRepository : ICreditCardPurchaseRepository
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<CreditCardPurchase>> ListAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.CreditCardPurchases
+            .Where(purchase => purchase.TenantId == tenantId)
+            .OrderByDescending(purchase => purchase.PurchaseDate)
+            .ThenByDescending(purchase => purchase.CreatedAtUtc)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task DeleteAsync(
         CreditCardPurchase purchase,
         IReadOnlyCollection<CreditCardInstallment> installments,
