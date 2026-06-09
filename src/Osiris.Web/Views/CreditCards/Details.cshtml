@@ -92,8 +92,32 @@
         }
     </div>
 
+    @if (Model.CurrentStatement is not null)
+    {
+        <div class="rounded-lg border border-amber-200 bg-amber-50/50 p-6 shadow-sm">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Fatura atual — @CreditCardStatementStatusViewExtensions.ToReferenceLabel(Model.CurrentStatement.ReferenceMonth, Model.CurrentStatement.ReferenceYear)</p>
+                    <p class="mt-2 text-2xl font-semibold text-slate-950">@Model.CurrentStatement.TotalAmount.ToBrl()</p>
+                    <p class="mt-1 text-sm text-slate-600">
+                        Em aberto: <span class="font-medium">@Model.CurrentStatement.OpenBalance.ToBrl()</span>
+                        · Fecha em @Model.CurrentStatement.ClosingDate.ToString("dd/MM/yyyy")
+                        · Vence em @Model.CurrentStatement.DueDate.ToString("dd/MM/yyyy")
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @Model.CurrentStatement.Status.ToBadgeClasses()">@Model.CurrentStatement.Status.ToDisplayName()</span>
+                    <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@Model.Card.Id" asp-route-id="@Model.CurrentStatement.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Ver fatura atual</a>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="space-y-3">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Faturas</h3>
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Faturas</h3>
+            <a asp-controller="CreditCardStatements" asp-action="Index" asp-route-cardId="@Model.Card.Id" class="text-sm font-medium text-amber-700 hover:text-amber-800">Ver todas</a>
+        </div>
 
         @if (Model.Statements.Count == 0)
         {
@@ -117,6 +141,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
                             <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
                             <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Em aberto</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
@@ -131,6 +156,9 @@
                                 </td>
                                 <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@statement.TotalAmount.ToBrl()</td>
                                 <td class="px-4 py-3 text-right text-sm text-slate-600">@statement.OpenBalance.ToBrl()</td>
+                                <td class="px-4 py-3 text-right">
+                                    <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@Model.Card.Id" asp-route-id="@statement.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Ver fatura</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

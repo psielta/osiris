@@ -13,6 +13,8 @@ public sealed class CreditCardDetailsViewModel
 
     public int TotalPurchases { get; init; }
 
+    public CreditCardStatementListItemDto? CurrentStatement { get; init; }
+
     public IReadOnlyCollection<CreditCardStatementListItemDto> Statements { get; init; } =
         Array.Empty<CreditCardStatementListItemDto>();
 }

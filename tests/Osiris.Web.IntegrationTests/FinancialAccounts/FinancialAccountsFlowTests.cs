@@ -60,7 +60,7 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Contas", html);
-        Assert.Contains("Osiris v0.4.0", html);
+        Assert.Contains("Osiris v0.5.0", html);
     }
 
     [Fact]

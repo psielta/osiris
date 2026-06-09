@@ -11,6 +11,7 @@ using Osiris.Application.Features.CreditCardPurchases.Queries.ListCreditCardPurc
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardDetails;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardForEdit;
 using Osiris.Application.Features.CreditCards.Queries.ListCreditCards;
+using Osiris.Application.Features.CreditCardStatements.Queries.GetCurrentCreditCardStatement;
 using Osiris.Application.Features.CreditCardStatements.Queries.ListCreditCardStatements;
 using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
 using Osiris.Web.Models;
@@ -150,12 +151,14 @@ public sealed class CreditCardsController : AppController
 
         var purchases = await _mediator.Send(new ListCreditCardPurchasesQuery(id), cancellationToken);
         var statements = await _mediator.Send(new ListCreditCardStatementsQuery(id), cancellationToken);
+        var currentStatement = await _mediator.Send(new GetCurrentCreditCardStatementQuery(id), cancellationToken);
 
         return View(new CreditCardDetailsViewModel
         {
             Card = card,
             RecentPurchases = purchases.Take(5).ToArray(),
             TotalPurchases = purchases.Count,
+            CurrentStatement = currentStatement,
             Statements = statements
         });
     }

@@ -1,0 +1,126 @@
+@model CreditCardStatementDetailsDto
+
+@{
+    var referenceLabel = CreditCardStatementStatusViewExtensions.ToReferenceLabel(Model.ReferenceMonth, Model.ReferenceYear);
+    ViewData["Title"] = $"Fatura {referenceLabel}";
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Fatura @referenceLabel — @Model.CreditCardName</h2>
+            <p class="mt-1 text-sm text-slate-600">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @Model.Status.ToBadgeClasses()">@Model.Status.ToDisplayName()</span>
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            @if (Model.OpenBalance > 0m)
+            {
+                <a asp-action="Pay" asp-route-cardId="@Model.CreditCardId" asp-route-id="@Model.Id" asp-route-full="true" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Pagar valor total</a>
+                <a asp-action="Pay" asp-route-cardId="@Model.CreditCardId" asp-route-id="@Model.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Registrar pagamento parcial</a>
+            }
+            <a asp-action="Index" asp-route-cardId="@Model.CreditCardId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Todas as faturas</a>
+        </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total da fatura</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.TotalAmount.ToBrl()</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total pago</p>
+            <p class="mt-2 text-xl font-semibold text-emerald-700">@Model.PaidAmount.ToBrl()</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo em aberto</p>
+            <p class="mt-2 text-xl font-semibold @(Model.OpenBalance > 0m ? "text-red-600" : "text-slate-950")">@Model.OpenBalance.ToBrl()</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fechamento</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.ClosingDate.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.DueDate.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="space-y-3">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Parcelas da fatura</h3>
+            @if (Model.InstallmentItems.Count == 0)
+            {
+                <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-sm text-slate-600 shadow-sm">
+                    Nenhuma parcela nesta fatura.
+                </div>
+            }
+            else
+            {
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Compra</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Parcela</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            @foreach (var installment in Model.InstallmentItems)
+                            {
+                                <tr>
+                                    <td class="px-4 py-3 text-sm font-medium text-slate-950">
+                                        <a asp-controller="CreditCardPurchases" asp-action="Details" asp-route-cardId="@Model.CreditCardId" asp-route-id="@installment.CreditCardPurchaseId" class="hover:text-amber-700">@installment.PurchaseDescription</a>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-slate-600">@installment.InstallmentNumber de @installment.TotalInstallments</td>
+                                    <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@installment.Amount.ToBrl()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Pagamentos</h3>
+            @if (Model.Payments.Count == 0)
+            {
+                <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center text-sm text-slate-600 shadow-sm">
+                    Nenhum pagamento registrado para esta fatura.
+                </div>
+            }
+            else
+            {
+                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Conta</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            @foreach (var payment in Model.Payments)
+                            {
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-slate-600">@payment.PaidAt.ToString("dd/MM/yyyy")</td>
+                                    <td class="px-4 py-3 text-sm text-slate-600">@(payment.FinancialAccountName ?? "Sem conta")</td>
+                                    <td class="px-4 py-3 text-right text-sm font-semibold text-emerald-700">@payment.Amount.ToBrl()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="rounded-lg border border-slate-200 bg-white p-4 text-xs text-slate-500 shadow-sm">
+                O pagamento da fatura quita a dívida do cartão e sai do caixa da conta escolhida. Ele não cria uma nova despesa por categoria: o gasto já foi contado quando a compra aconteceu.
+            </div>
+        </div>
+    </div>
+</section>

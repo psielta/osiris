@@ -56,10 +56,14 @@ Você não precisa criar faturas. Quando uma compra é registrada, o Osiris desc
 - Compras feitas depois do fechamento entram na fatura do mês seguinte.
 - Em meses mais curtos (como fevereiro), vale o último dia do mês.
 
+## Pagar a fatura
+
+Na tela da fatura você vê o total, o quanto já foi pago, o saldo em aberto, o fechamento, o vencimento e a situação dela (aberta, fechada, parcialmente paga, paga ou vencida).
+
+Você pode pagar o valor total ou registrar pagamentos parciais, quantas vezes precisar, até quitar a fatura. Se escolher uma conta, o valor sai do saldo dela como "pagamento de fatura".
+
+Importante: pagar a fatura não cria uma nova despesa por categoria. O gasto já foi contado quando a compra aconteceu — o pagamento apenas quita a dívida e movimenta o caixa. Assim o mesmo gasto nunca conta duas vezes.
+
 ## Arquivar um cartão
 
 Arquivar esconde o cartão das novas escolhas sem apagar o histórico. Use quando parar de usar um cartão, mas quiser manter os registros antigos. Um cartão arquivado continua aparecendo no histórico, mas não recebe novas compras.
-
-## O que ainda não está aqui
-
-O registro do pagamento da fatura será tratado em uma fase seguinte. Quando existir, ele será uma saída de dinheiro da conta — e não uma nova despesa por categoria, para o mesmo gasto não contar duas vezes.

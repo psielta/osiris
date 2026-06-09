@@ -66,7 +66,9 @@
                     {
                         <tr>
                             <td class="px-4 py-3 text-sm font-medium text-slate-950">@installment.InstallmentNumber de @installment.TotalInstallments</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">@CreditCardStatementStatusViewExtensions.ToReferenceLabel(installment.ReferenceMonth, installment.ReferenceYear)</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">
+                                <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@Model.CreditCardId" asp-route-id="@installment.CreditCardStatementId" class="font-medium text-amber-700 hover:text-amber-800">@CreditCardStatementStatusViewExtensions.ToReferenceLabel(installment.ReferenceMonth, installment.ReferenceYear)</a>
+                            </td>
                             <td class="px-4 py-3 text-sm text-slate-600">@installment.DueDate.ToString("dd/MM/yyyy")</td>
                             <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@installment.Amount.ToBrl()</td>
                         </tr>
