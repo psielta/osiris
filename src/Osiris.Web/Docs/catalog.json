@@ -7,5 +7,14 @@
     "icon": "ph ph-tag-simple",
     "markdownFile": "categories.md",
     "order": 10
+  },
+  {
+    "slug": "accounts",
+    "title": "Guia simples de contas",
+    "description": "Saiba o que é uma conta, como registrar entradas e saídas e como o saldo é calculado.",
+    "group": "Financeiro",
+    "icon": "ph ph-bank",
+    "markdownFile": "accounts.md",
+    "order": 20
   }
 ]

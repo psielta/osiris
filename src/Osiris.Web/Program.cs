@@ -1,8 +1,15 @@
+using System.Globalization;
 using Osiris.Application;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Infrastructure;
 using Osiris.Web.Services;
 using Serilog;
+
+// Run the server under an invariant culture so numeric/date model binding is deterministic
+// regardless of the host OS locale. User-facing values are formatted with an explicit pt-BR
+// culture where needed (see MoneyViewExtensions), independent of this default.
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

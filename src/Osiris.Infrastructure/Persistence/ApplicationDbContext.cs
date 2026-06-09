@@ -16,6 +16,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FinancialCategory> FinancialCategories => Set<FinancialCategory>();
 
+    public DbSet<FinancialAccount> FinancialAccounts => Set<FinancialAccount>();
+
+    public DbSet<FinancialAccountMovement> FinancialAccountMovements => Set<FinancialAccountMovement>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
