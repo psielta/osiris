@@ -20,6 +20,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FinancialAccountMovement> FinancialAccountMovements => Set<FinancialAccountMovement>();
 
+    public DbSet<CreditCard> CreditCards => Set<CreditCard>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
