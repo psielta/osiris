@@ -43,6 +43,20 @@ Um lançamento é uma movimentação de dinheiro real naquela conta.
 
 Cada lançamento tem uma data, um valor e uma descrição. Você também pode escolher uma categoria para lembrar o motivo.
 
+## E se eu errar um lançamento?
+
+Os lançamentos funcionam como um histórico do que aconteceu na conta. Depois de salvos, eles **não podem ser editados nem excluídos**. Isso é proposital: mantém o extrato fiel à realidade e evita que o saldo deixe de bater.
+
+Para corrigir um erro, registre um novo lançamento no sentido contrário:
+
+| O que aconteceu | Como corrigir |
+| --- | --- |
+| Lançou uma despesa que não existiu | Registre uma receita do mesmo valor |
+| Lançou uma receita que não existiu | Registre uma despesa do mesmo valor |
+| Lançou um valor maior do que o real | Registre a diferença no sentido contrário |
+
+Vale escrever "Correção" na descrição para se lembrar depois. Assim que você salva o lançamento de correção, o saldo da conta se ajusta sozinho e o histórico continua mostrando tudo o que aconteceu.
+
 ## O que não entra como lançamento de conta
 
 Algumas coisas parecem gasto, mas não são saída de dinheiro da conta neste momento:
