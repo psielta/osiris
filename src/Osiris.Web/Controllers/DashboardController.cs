@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Osiris.Application.Features.Dashboard.Queries.GetDashboard;
+using Osiris.Application.Features.Dashboard.Queries.GetMonthlyDashboardSummary;
+using Osiris.Web.Helpers;
 
 namespace Osiris.Web.Controllers;
 
@@ -17,9 +18,16 @@ public sealed class DashboardController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(int? month, int? year, CancellationToken cancellationToken)
     {
-        var dashboard = await _mediator.Send(new GetDashboardQuery(), cancellationToken);
-        return View(dashboard);
+        var today = BrazilDates.Today();
+        var selectedMonth = month is >= 1 and <= 12 ? month.Value : today.Month;
+        var selectedYear = year is >= 1 and <= 9999 ? year.Value : today.Year;
+
+        var summary = await _mediator.Send(
+            new GetMonthlyDashboardSummaryQuery(selectedYear, selectedMonth),
+            cancellationToken);
+
+        return View(summary);
     }
 }
