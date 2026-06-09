@@ -1,0 +1,78 @@
+@model BillFormViewModel
+
+@{
+    ViewData["Title"] = "Nova conta";
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="mx-auto max-w-2xl space-y-6">
+    <div>
+        <p class="text-sm font-medium text-amber-700">Financeiro</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Nova conta a pagar</h2>
+        <p class="mt-1 text-sm text-slate-600">Use para obrigações fora do cartão de crédito. Compras no cartão devem ser registradas no próprio cartão.</p>
+    </div>
+
+    @if (Model.CategoryOptions.Count == 0)
+    {
+        <div class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Você ainda não tem categorias de despesa ativas.
+            <a asp-controller="Categories" asp-action="Create" class="font-medium underline">Crie uma categoria</a> antes de cadastrar a conta.
+        </div>
+    }
+
+    <form asp-action="Create" method="post" class="space-y-5 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+        <div>
+            <label asp-for="Description" class="block text-sm font-medium text-slate-700"></label>
+            <input asp-for="Description" autocomplete="off" placeholder="Ex.: Aluguel, Internet, Mensalidade escolar" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+            <span asp-validation-for="Description" class="mt-1 block text-sm text-red-600"></span>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+                <label asp-for="Amount" class="block text-sm font-medium text-slate-700"></label>
+                <input asp-for="Amount" type="number" step="0.01" min="0.01" placeholder="0,00" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                <span asp-validation-for="Amount" class="mt-1 block text-sm text-red-600"></span>
+            </div>
+
+            <div>
+                <label asp-for="DueDate" class="block text-sm font-medium text-slate-700"></label>
+                <input asp-for="DueDate" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                <span asp-validation-for="DueDate" class="mt-1 block text-sm text-red-600"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="CategoryId" class="block text-sm font-medium text-slate-700"></label>
+            <select asp-for="CategoryId" asp-items="Model.CategoryOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                <option value="">Selecione a categoria de despesa</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="mt-1 block text-sm text-red-600"></span>
+        </div>
+
+        <div>
+            <label asp-for="PaymentAccountId" class="block text-sm font-medium text-slate-700"></label>
+            <select asp-for="PaymentAccountId" asp-items="Model.AccountOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                <option value="">Sem conta definida</option>
+            </select>
+            <p class="mt-1 text-xs text-slate-500">Conta sugerida para o pagamento. O saldo só é movimentado quando a conta for marcada como paga.</p>
+            <span asp-validation-for="PaymentAccountId" class="mt-1 block text-sm text-red-600"></span>
+        </div>
+
+        <div>
+            <label asp-for="Notes" class="block text-sm font-medium text-slate-700"></label>
+            <textarea asp-for="Notes" rows="3" class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"></textarea>
+            <span asp-validation-for="Notes" class="mt-1 block text-sm text-red-600"></span>
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</a>
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Criar</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,148 @@
+@model BillDetailsViewModel
+
+@{
+    ViewData["Title"] = "Detalhes da conta";
+    Layout = "_AuthenticatedLayout";
+    var bill = Model.Bill;
+}
+
+<section class="mx-auto max-w-3xl space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Contas a pagar</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@bill.Description</h2>
+            <span class="mt-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @bill.Status.ToBadgeClasses()">
+                @bill.Status.ToDisplayName()
+            </span>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@bill.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar</a>
+            <a asp-action="Delete" asp-route-id="@bill.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-red-300 px-4 text-sm font-medium text-red-700 transition hover:bg-red-50">Excluir</a>
+        </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950">@bill.Amount.ToBrl()</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-950">@bill.DueDate.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <dl class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</dt>
+                <dd class="mt-1 text-sm text-slate-950">
+                    @if (string.IsNullOrWhiteSpace(bill.CategoryName))
+                    {
+                        <span class="text-slate-400">Sem categoria</span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center gap-2">
+                            @if (!string.IsNullOrWhiteSpace(bill.CategoryColor))
+                            {
+                                <span class="h-3 w-3 rounded-full border border-slate-200" style="background-color: @bill.CategoryColor"></span>
+                            }
+                            @bill.CategoryName
+                        </span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Conta de pagamento</dt>
+                <dd class="mt-1 text-sm text-slate-950">
+                    @if (string.IsNullOrWhiteSpace(bill.PaymentAccountName))
+                    {
+                        <span class="text-slate-400">Sem conta definida</span>
+                    }
+                    else
+                    {
+                        @bill.PaymentAccountName
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pagamento</dt>
+                <dd class="mt-1 text-sm text-slate-950">
+                    @if (bill.PaidAt is null)
+                    {
+                        <span class="text-slate-400">Ainda não paga</span>
+                    }
+                    else
+                    {
+                        <span>Paga em @bill.PaidAt.Value.ToString("dd/MM/yyyy")</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Observações</dt>
+                <dd class="mt-1 text-sm text-slate-950">
+                    @if (string.IsNullOrWhiteSpace(bill.Notes))
+                    {
+                        <span class="text-slate-400">Sem observações</span>
+                    }
+                    else
+                    {
+                        @bill.Notes
+                    }
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+    @if (bill.PaidAt is null)
+    {
+        <form asp-action="Pay" asp-route-id="@bill.Id" method="post" class="space-y-5 rounded-lg border border-emerald-200 bg-white p-6 shadow-sm">
+            <div>
+                <h3 class="text-base font-semibold text-slate-950">Marcar como paga</h3>
+                <p class="mt-1 text-sm text-slate-600">Se você escolher uma conta, o valor sai do saldo dela como pagamento de conta.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                    <label asp-for="Payment.PaidAt" class="block text-sm font-medium text-slate-700"></label>
+                    <input asp-for="Payment.PaidAt" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                    <span asp-validation-for="Payment.PaidAt" class="mt-1 block text-sm text-red-600"></span>
+                </div>
+                <div>
+                    <label asp-for="Payment.PaymentAccountId" class="block text-sm font-medium text-slate-700"></label>
+                    <select asp-for="Payment.PaymentAccountId" asp-items="Model.AccountOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                        <option value="">Pagar sem movimentar conta</option>
+                    </select>
+                    <span asp-validation-for="Payment.PaymentAccountId" class="mt-1 block text-sm text-red-600"></span>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-medium text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2">
+                    Confirmar pagamento
+                </button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <form asp-action="Pending" asp-route-id="@bill.Id" method="post" class="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-white p-6 shadow-sm">
+            <div>
+                <h3 class="text-base font-semibold text-slate-950">Voltar para pendente</h3>
+                <p class="mt-1 text-sm text-slate-600">Se o pagamento movimentou uma conta, a movimentação será removida e o saldo restaurado.</p>
+            </div>
+            <button type="submit" class="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-amber-300 px-4 text-sm font-medium text-amber-800 transition hover:bg-amber-50">
+                Marcar como pendente
+            </button>
+        </form>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

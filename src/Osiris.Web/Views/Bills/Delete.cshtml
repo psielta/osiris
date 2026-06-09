@@ -1,0 +1,34 @@
+@model BillDetailsDto
+
+@{
+    ViewData["Title"] = "Excluir conta";
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="mx-auto max-w-2xl space-y-6">
+    <div>
+        <p class="text-sm font-medium text-red-700">Contas a pagar</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Excluir conta</h2>
+    </div>
+
+    <div class="space-y-5 rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+        <div>
+            <h3 class="text-base font-semibold text-slate-950">@Model.Description</h3>
+            <p class="mt-1 text-sm text-slate-600">@Model.Amount.ToBrl() — vence em @Model.DueDate.ToString("dd/MM/yyyy")</p>
+        </div>
+
+        @if (Model.PaidAt is not null)
+        {
+            <div class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Esta conta está paga. Ao excluir, a movimentação do pagamento será removida e o saldo da conta será restaurado.
+            </div>
+        }
+
+        <p class="text-sm text-slate-600">Esta ação não pode ser desfeita.</p>
+
+        <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post" class="flex justify-end gap-3">
+            <a asp-action="Details" asp-route-id="@Model.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</a>
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-red-700 px-4 text-sm font-medium text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">Excluir</button>
+        </form>
+    </div>
+</section>
