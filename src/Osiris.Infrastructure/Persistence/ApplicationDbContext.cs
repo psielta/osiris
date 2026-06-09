@@ -30,6 +30,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<CreditCardStatementPayment> CreditCardStatementPayments => Set<CreditCardStatementPayment>();
 
+    public DbSet<Bill> Bills => Set<Bill>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

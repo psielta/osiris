@@ -85,4 +85,38 @@ public sealed class FinancialAccountTests
         Assert.False(account.IsActive);
         Assert.Equal(now, account.UpdatedAtUtc);
     }
+
+    [Fact]
+    public void RevertMovement_WhenOutflow_ShouldAddAmountBack()
+    {
+        var account = new FinancialAccount(Guid.NewGuid(), "Banco", FinancialAccountType.CheckingAccount, 100m);
+        account.ApplyMovement(FinancialAccountMovementType.BillPayment, 30m, DateTime.UtcNow);
+
+        account.RevertMovement(FinancialAccountMovementType.BillPayment, 30m, DateTime.UtcNow);
+
+        Assert.Equal(100m, account.CurrentBalance);
+    }
+
+    [Fact]
+    public void RevertMovement_WhenInflow_ShouldSubtractAmount()
+    {
+        var account = new FinancialAccount(Guid.NewGuid(), "Banco", FinancialAccountType.CheckingAccount, 100m);
+        account.ApplyMovement(FinancialAccountMovementType.Income, 30m, DateTime.UtcNow);
+
+        account.RevertMovement(FinancialAccountMovementType.Income, 30m, DateTime.UtcNow);
+
+        Assert.Equal(100m, account.CurrentBalance);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public void RevertMovement_WhenAmountNotPositive_ShouldThrowAndKeepBalance(decimal amount)
+    {
+        var account = new FinancialAccount(Guid.NewGuid(), "Banco", FinancialAccountType.CheckingAccount, 100m);
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => account.RevertMovement(FinancialAccountMovementType.BillPayment, amount, DateTime.UtcNow));
+        Assert.Equal(100m, account.CurrentBalance);
+    }
 }

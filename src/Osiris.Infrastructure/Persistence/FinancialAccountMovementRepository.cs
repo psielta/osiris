@@ -34,4 +34,18 @@ public sealed class FinancialAccountMovementRepository : IFinancialAccountMoveme
             .ThenByDescending(movement => movement.CreatedAtUtc)
             .ToArrayAsync(cancellationToken);
     }
+
+    public async Task<FinancialAccountMovement?> GetByRelatedEntityAsync(
+        Guid tenantId,
+        string relatedEntityType,
+        Guid relatedEntityId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.FinancialAccountMovements
+            .SingleOrDefaultAsync(
+                movement => movement.TenantId == tenantId
+                    && movement.RelatedEntityType == relatedEntityType
+                    && movement.RelatedEntityId == relatedEntityId,
+                cancellationToken);
+    }
 }

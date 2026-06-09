@@ -69,6 +69,21 @@ public sealed class FinancialAccount : BaseEntity
         UpdatedAtUtc = utcNow;
     }
 
+    /// <summary>
+    /// Undoes a previously applied movement when the movement record itself is being removed
+    /// (e.g. a bill going back to pending); no new movement row should be created for this.
+    /// </summary>
+    public void RevertMovement(FinancialAccountMovementType type, decimal amount, DateTime utcNow)
+    {
+        if (amount <= 0m)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
+        }
+
+        CurrentBalance += type.IsInflow() ? -amount : amount;
+        UpdatedAtUtc = utcNow;
+    }
+
     private static string NormalizeRequiredName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

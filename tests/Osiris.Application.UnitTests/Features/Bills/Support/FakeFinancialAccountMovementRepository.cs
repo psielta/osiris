@@ -1,7 +1,7 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.FinancialAccounts.Support;
+namespace Osiris.Application.UnitTests.Features.Bills.Support;
 
 internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccountMovementRepository
 {
@@ -25,8 +25,6 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
     {
         var movements = _movements
             .Where(movement => movement.TenantId == tenantId && movement.FinancialAccountId == financialAccountId)
-            .OrderByDescending(movement => movement.OccurredOn)
-            .ThenByDescending(movement => movement.CreatedAtUtc)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<FinancialAccountMovement>>(movements);
@@ -44,5 +42,15 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
             && movement.RelatedEntityId == relatedEntityId);
 
         return Task.FromResult(movement);
+    }
+
+    public void Add(FinancialAccountMovement movement)
+    {
+        _movements.Add(movement);
+    }
+
+    public void Remove(FinancialAccountMovement movement)
+    {
+        _movements.Remove(movement);
     }
 }
