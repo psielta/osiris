@@ -56,7 +56,7 @@ public sealed class CreditCardsFlowTests : IAsyncLifetime
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Osiris v0.5.0", html);
+        Assert.Contains(AppVersion.SidebarLabel, html);
         Assert.Contains("ph ph-credit-card", html);
     }
 
