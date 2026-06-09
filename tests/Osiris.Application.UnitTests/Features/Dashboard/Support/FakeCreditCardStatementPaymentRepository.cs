@@ -1,16 +1,13 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.CreditCardStatementPayments.Support;
+namespace Osiris.Application.UnitTests.Features.Dashboard.Support;
 
 internal sealed class FakeCreditCardStatementPaymentRepository : ICreditCardStatementPaymentRepository
 {
     private readonly List<CreditCardStatementPayment> _payments = new();
-    private readonly List<FinancialAccountMovement> _movements = new();
 
     public IReadOnlyList<CreditCardStatementPayment> Payments => _payments;
-
-    public IReadOnlyList<FinancialAccountMovement> Movements => _movements;
 
     public Task AddAsync(
         CreditCardStatementPayment payment,
@@ -20,11 +17,6 @@ internal sealed class FakeCreditCardStatementPaymentRepository : ICreditCardStat
         CancellationToken cancellationToken)
     {
         _payments.Add(payment);
-        if (movement is not null)
-        {
-            _movements.Add(movement);
-        }
-
         return Task.CompletedTask;
     }
 

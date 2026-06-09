@@ -12,6 +12,14 @@ public interface IBillRepository
         int month,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyCollection<Bill>> ListUnpaidAsync(Guid tenantId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<Bill>> ListPaidInMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken);
+
     Task AddAsync(Bill bill, CancellationToken cancellationToken);
 
     Task UpdateAsync(Bill bill, CancellationToken cancellationToken);

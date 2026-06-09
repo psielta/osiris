@@ -37,6 +37,31 @@ public sealed class BillRepository : IBillRepository
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Bill>> ListUnpaidAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Bills
+            .Where(bill => bill.TenantId == tenantId && bill.PaidAt == null)
+            .OrderBy(bill => bill.DueDate)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Bill>> ListPaidInMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        var monthStart = new DateOnly(year, month, 1);
+        var nextMonthStart = monthStart.AddMonths(1);
+
+        return await _dbContext.Bills
+            .Where(bill => bill.TenantId == tenantId
+                && bill.PaidAt != null
+                && bill.PaidAt >= monthStart
+                && bill.PaidAt < nextMonthStart)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Bill bill, CancellationToken cancellationToken)
     {
         await _dbContext.Bills.AddAsync(bill, cancellationToken);

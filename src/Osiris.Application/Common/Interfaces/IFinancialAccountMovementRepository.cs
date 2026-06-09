@@ -19,4 +19,10 @@ public interface IFinancialAccountMovementRepository
         string relatedEntityType,
         Guid relatedEntityId,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<FinancialAccountMovement>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken);
 }

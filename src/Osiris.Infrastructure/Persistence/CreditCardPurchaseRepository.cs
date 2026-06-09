@@ -55,6 +55,22 @@ public sealed class CreditCardPurchaseRepository : ICreditCardPurchaseRepository
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<CreditCardPurchase>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        var monthStart = new DateOnly(year, month, 1);
+        var nextMonthStart = monthStart.AddMonths(1);
+
+        return await _dbContext.CreditCardPurchases
+            .Where(purchase => purchase.TenantId == tenantId
+                && purchase.PurchaseDate >= monthStart
+                && purchase.PurchaseDate < nextMonthStart)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task DeleteAsync(
         CreditCardPurchase purchase,
         IReadOnlyCollection<CreditCardInstallment> installments,

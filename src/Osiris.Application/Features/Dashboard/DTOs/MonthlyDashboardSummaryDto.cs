@@ -1,0 +1,25 @@
+namespace Osiris.Application.Features.Dashboard.DTOs;
+
+public sealed record MonthlyDashboardSummaryDto(
+    int Year,
+    int Month,
+    decimal IncomeTotal,
+    decimal SpendingTotal,
+    IReadOnlyCollection<SpendingByCategoryDto> SpendingByCategory,
+    CashFlowSummaryDto CashFlow,
+    IReadOnlyCollection<CreditCardDashboardDto> CreditCards,
+    IReadOnlyCollection<UpcomingObligationDto> UpcomingObligations,
+    IReadOnlyCollection<DashboardAlertDto> Alerts,
+    decimal BillsDueInMonthTotal,
+    int BillsDueInMonthCount,
+    decimal BillsOpenInMonthTotal,
+    decimal StatementsDueInMonthTotal,
+    int StatementsDueInMonthCount,
+    decimal StatementsOpenInMonthTotal,
+    decimal TotalOpenStatementsBalance,
+    decimal TotalOpenBillsBalance,
+    decimal StatementPaymentsInMonthTotal,
+    decimal FutureInstallmentsTotal,
+    int OverdueStatementsCount,
+    decimal OverdueStatementsBalance,
+    int PartiallyPaidStatementsCount);

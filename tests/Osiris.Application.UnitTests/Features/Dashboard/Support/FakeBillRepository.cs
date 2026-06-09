@@ -1,24 +1,15 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.Bills.Support;
+namespace Osiris.Application.UnitTests.Features.Dashboard.Support;
 
 internal sealed class FakeBillRepository : IBillRepository
 {
     private readonly List<Bill> _bills = new();
-    private readonly FakeFinancialAccountMovementRepository? _movementStore;
-
-    public FakeBillRepository(FakeFinancialAccountMovementRepository? movementStore = null)
-    {
-        _movementStore = movementStore;
-    }
-
-    public IReadOnlyList<Bill> Bills => _bills;
 
     public Task<Bill?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken cancellationToken)
     {
-        var bill = _bills.SingleOrDefault(bill => bill.TenantId == tenantId && bill.Id == id);
-        return Task.FromResult(bill);
+        return Task.FromResult(_bills.SingleOrDefault(bill => bill.TenantId == tenantId && bill.Id == id));
     }
 
     public Task<IReadOnlyCollection<Bill>> ListByMonthAsync(
@@ -29,12 +20,10 @@ internal sealed class FakeBillRepository : IBillRepository
     {
         var monthStart = new DateOnly(year, month, 1);
         var nextMonthStart = monthStart.AddMonths(1);
-
         var bills = _bills
             .Where(bill => bill.TenantId == tenantId
                 && bill.DueDate >= monthStart
                 && bill.DueDate < nextMonthStart)
-            .OrderBy(bill => bill.DueDate)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<Bill>>(bills);
@@ -44,7 +33,6 @@ internal sealed class FakeBillRepository : IBillRepository
     {
         var bills = _bills
             .Where(bill => bill.TenantId == tenantId && !bill.IsPaid)
-            .OrderBy(bill => bill.DueDate)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<Bill>>(bills);
@@ -86,16 +74,6 @@ internal sealed class FakeBillRepository : IBillRepository
         FinancialAccount? account,
         CancellationToken cancellationToken)
     {
-        if (movementToAdd is not null)
-        {
-            _movementStore?.Add(movementToAdd);
-        }
-
-        if (movementToRemove is not null)
-        {
-            _movementStore?.Remove(movementToRemove);
-        }
-
         return Task.CompletedTask;
     }
 
@@ -106,12 +84,6 @@ internal sealed class FakeBillRepository : IBillRepository
         CancellationToken cancellationToken)
     {
         _bills.Remove(bill);
-
-        if (movementToRemove is not null)
-        {
-            _movementStore?.Remove(movementToRemove);
-        }
-
         return Task.CompletedTask;
     }
 

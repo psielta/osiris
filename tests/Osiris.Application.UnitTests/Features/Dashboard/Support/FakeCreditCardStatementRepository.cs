@@ -2,26 +2,23 @@ using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Models;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.CreditCardPurchases.Support;
+namespace Osiris.Application.UnitTests.Features.Dashboard.Support;
 
 internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRepository
 {
     private readonly List<CreditCardStatement> _statements = new();
-    private readonly FakeCreditCardInstallmentRepository _installmentStore;
+    private readonly Dictionary<Guid, decimal> _installmentTotals = new();
+    private readonly FakeCreditCardStatementPaymentRepository _paymentStore;
 
-    public FakeCreditCardStatementRepository(FakeCreditCardInstallmentRepository installmentStore)
+    public FakeCreditCardStatementRepository(FakeCreditCardStatementPaymentRepository paymentStore)
     {
-        _installmentStore = installmentStore;
+        _paymentStore = paymentStore;
     }
-
-    public IReadOnlyList<CreditCardStatement> Statements => _statements;
 
     public Task<CreditCardStatement?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken cancellationToken)
     {
-        var statement = _statements.SingleOrDefault(statement =>
-            statement.TenantId == tenantId && statement.Id == id);
-
-        return Task.FromResult(statement);
+        return Task.FromResult(_statements.SingleOrDefault(statement =>
+            statement.TenantId == tenantId && statement.Id == id));
     }
 
     public Task<CreditCardStatement?> GetByReferenceAsync(
@@ -31,13 +28,11 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
         int referenceMonth,
         CancellationToken cancellationToken)
     {
-        var statement = _statements.SingleOrDefault(statement =>
+        return Task.FromResult(_statements.SingleOrDefault(statement =>
             statement.TenantId == tenantId
             && statement.CreditCardId == creditCardId
             && statement.ReferenceYear == referenceYear
-            && statement.ReferenceMonth == referenceMonth);
-
-        return Task.FromResult(statement);
+            && statement.ReferenceMonth == referenceMonth));
     }
 
     public Task<IReadOnlyCollection<CreditCardStatement>> ListByCardAsync(
@@ -47,8 +42,6 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
     {
         var statements = _statements
             .Where(statement => statement.TenantId == tenantId && statement.CreditCardId == creditCardId)
-            .OrderByDescending(statement => statement.ReferenceYear)
-            .ThenByDescending(statement => statement.ReferenceMonth)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<CreditCardStatement>>(statements);
@@ -88,11 +81,10 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
             .ToDictionary(
                 id => id,
                 id => new CreditCardStatementTotals(
-                    _installmentStore.Installments
-                        .Where(installment => installment.TenantId == tenantId
-                            && installment.CreditCardStatementId == id)
-                        .Sum(installment => installment.Amount),
-                    0m));
+                    _installmentTotals.GetValueOrDefault(id),
+                    _paymentStore.Payments
+                        .Where(payment => payment.TenantId == tenantId && payment.CreditCardStatementId == id)
+                        .Sum(payment => payment.Amount)));
 
         return Task.FromResult<IReadOnlyDictionary<Guid, CreditCardStatementTotals>>(totals);
     }
@@ -102,13 +94,9 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
         return Task.CompletedTask;
     }
 
-    public void Add(CreditCardStatement statement)
+    public void Add(CreditCardStatement statement, decimal installmentsTotal)
     {
         _statements.Add(statement);
-    }
-
-    public void AddRange(IEnumerable<CreditCardStatement> statements)
-    {
-        _statements.AddRange(statements);
+        _installmentTotals[statement.Id] = installmentsTotal;
     }
 }

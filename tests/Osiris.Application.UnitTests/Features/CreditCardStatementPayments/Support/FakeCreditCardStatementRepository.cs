@@ -53,6 +53,18 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
         return Task.FromResult<IReadOnlyCollection<CreditCardStatement>>(statements);
     }
 
+    public Task<IReadOnlyCollection<CreditCardStatement>> ListAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var statements = _statements
+            .Where(statement => statement.TenantId == tenantId)
+            .OrderBy(statement => statement.DueDate)
+            .ToArray();
+
+        return Task.FromResult<IReadOnlyCollection<CreditCardStatement>>(statements);
+    }
+
     public Task<IReadOnlyCollection<CreditCardStatement>> ListByIdsAsync(
         Guid tenantId,
         IReadOnlyCollection<Guid> ids,

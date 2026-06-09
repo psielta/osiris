@@ -48,4 +48,20 @@ public sealed class CreditCardStatementPaymentRepository : ICreditCardStatementP
             .ThenByDescending(payment => payment.CreatedAtUtc)
             .ToArrayAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<CreditCardStatementPayment>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        var monthStart = new DateOnly(year, month, 1);
+        var nextMonthStart = monthStart.AddMonths(1);
+
+        return await _dbContext.CreditCardStatementPayments
+            .Where(payment => payment.TenantId == tenantId
+                && payment.PaidAt >= monthStart
+                && payment.PaidAt < nextMonthStart)
+            .ToArrayAsync(cancellationToken);
+    }
 }

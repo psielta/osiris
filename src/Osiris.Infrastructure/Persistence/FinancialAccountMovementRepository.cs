@@ -48,4 +48,20 @@ public sealed class FinancialAccountMovementRepository : IFinancialAccountMoveme
                     && movement.RelatedEntityId == relatedEntityId,
                 cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<FinancialAccountMovement>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        var monthStart = new DateOnly(year, month, 1);
+        var nextMonthStart = monthStart.AddMonths(1);
+
+        return await _dbContext.FinancialAccountMovements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.OccurredOn >= monthStart
+                && movement.OccurredOn < nextMonthStart)
+            .ToArrayAsync(cancellationToken);
+    }
 }

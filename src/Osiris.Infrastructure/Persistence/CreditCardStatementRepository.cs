@@ -50,6 +50,16 @@ public sealed class CreditCardStatementRepository : ICreditCardStatementReposito
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<CreditCardStatement>> ListAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.CreditCardStatements
+            .Where(statement => statement.TenantId == tenantId)
+            .OrderBy(statement => statement.DueDate)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<CreditCardStatement>> ListByIdsAsync(
         Guid tenantId,
         IReadOnlyCollection<Guid> ids,

@@ -45,4 +45,21 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
 
         return Task.FromResult(movement);
     }
+
+    public Task<IReadOnlyCollection<FinancialAccountMovement>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        var monthStart = new DateOnly(year, month, 1);
+        var nextMonthStart = monthStart.AddMonths(1);
+        var movements = _movements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.OccurredOn >= monthStart
+                && movement.OccurredOn < nextMonthStart)
+            .ToArray();
+
+        return Task.FromResult<IReadOnlyCollection<FinancialAccountMovement>>(movements);
+    }
 }

@@ -1,13 +1,11 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.Bills.Support;
+namespace Osiris.Application.UnitTests.Features.Dashboard.Support;
 
 internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccountMovementRepository
 {
     private readonly List<FinancialAccountMovement> _movements = new();
-
-    public IReadOnlyList<FinancialAccountMovement> Movements => _movements;
 
     public Task AddAsync(
         FinancialAccountMovement movement,
@@ -24,7 +22,8 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
         CancellationToken cancellationToken)
     {
         var movements = _movements
-            .Where(movement => movement.TenantId == tenantId && movement.FinancialAccountId == financialAccountId)
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<FinancialAccountMovement>>(movements);
@@ -36,12 +35,10 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
         Guid relatedEntityId,
         CancellationToken cancellationToken)
     {
-        var movement = _movements.SingleOrDefault(movement =>
+        return Task.FromResult(_movements.SingleOrDefault(movement =>
             movement.TenantId == tenantId
             && movement.RelatedEntityType == relatedEntityType
-            && movement.RelatedEntityId == relatedEntityId);
-
-        return Task.FromResult(movement);
+            && movement.RelatedEntityId == relatedEntityId));
     }
 
     public Task<IReadOnlyCollection<FinancialAccountMovement>> ListByMonthAsync(
@@ -64,10 +61,5 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
     public void Add(FinancialAccountMovement movement)
     {
         _movements.Add(movement);
-    }
-
-    public void Remove(FinancialAccountMovement movement)
-    {
-        _movements.Remove(movement);
     }
 }

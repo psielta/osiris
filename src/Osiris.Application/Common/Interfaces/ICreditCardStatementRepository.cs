@@ -19,6 +19,8 @@ public interface ICreditCardStatementRepository
         Guid creditCardId,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyCollection<CreditCardStatement>> ListAsync(Guid tenantId, CancellationToken cancellationToken);
+
     Task<IReadOnlyCollection<CreditCardStatement>> ListByIdsAsync(
         Guid tenantId,
         IReadOnlyCollection<Guid> ids,

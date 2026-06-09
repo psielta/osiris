@@ -1,23 +1,11 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
-namespace Osiris.Application.UnitTests.Features.CreditCardPurchases.Support;
+namespace Osiris.Application.UnitTests.Features.Dashboard.Support;
 
 internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepository
 {
     private readonly List<CreditCardPurchase> _purchases = new();
-    private readonly FakeCreditCardInstallmentRepository _installmentStore;
-    private readonly FakeCreditCardStatementRepository _statementStore;
-
-    public FakeCreditCardPurchaseRepository(
-        FakeCreditCardInstallmentRepository installmentStore,
-        FakeCreditCardStatementRepository statementStore)
-    {
-        _installmentStore = installmentStore;
-        _statementStore = statementStore;
-    }
-
-    public IReadOnlyList<CreditCardPurchase> Purchases => _purchases;
 
     public Task AddAsync(
         CreditCardPurchase purchase,
@@ -25,18 +13,14 @@ internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepo
         IReadOnlyCollection<CreditCardStatement> newStatements,
         CancellationToken cancellationToken)
     {
-        _statementStore.AddRange(newStatements);
         _purchases.Add(purchase);
-        _installmentStore.AddRange(installments);
         return Task.CompletedTask;
     }
 
     public Task<CreditCardPurchase?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken cancellationToken)
     {
-        var purchase = _purchases.SingleOrDefault(purchase =>
-            purchase.TenantId == tenantId && purchase.Id == id);
-
-        return Task.FromResult(purchase);
+        return Task.FromResult(_purchases.SingleOrDefault(purchase =>
+            purchase.TenantId == tenantId && purchase.Id == id));
     }
 
     public Task<IReadOnlyCollection<CreditCardPurchase>> ListByCardAsync(
@@ -46,7 +30,6 @@ internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepo
     {
         var purchases = _purchases
             .Where(purchase => purchase.TenantId == tenantId && purchase.CreditCardId == creditCardId)
-            .OrderByDescending(purchase => purchase.PurchaseDate)
             .ToArray();
 
         return Task.FromResult<IReadOnlyCollection<CreditCardPurchase>>(purchases);
@@ -86,7 +69,6 @@ internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepo
         IReadOnlyCollection<CreditCardInstallment> installments,
         CancellationToken cancellationToken)
     {
-        _installmentStore.RemoveRange(installments);
         _purchases.Remove(purchase);
         return Task.CompletedTask;
     }

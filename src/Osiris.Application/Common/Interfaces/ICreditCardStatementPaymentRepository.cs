@@ -19,4 +19,10 @@ public interface ICreditCardStatementPaymentRepository
         Guid tenantId,
         Guid creditCardStatementId,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<CreditCardStatementPayment>> ListByMonthAsync(
+        Guid tenantId,
+        int year,
+        int month,
+        CancellationToken cancellationToken);
 }
