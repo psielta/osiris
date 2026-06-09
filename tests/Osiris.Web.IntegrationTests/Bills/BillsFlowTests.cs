@@ -82,8 +82,8 @@ public sealed class BillsFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
-        var firstCategory = await CreateExpenseCategoryAsync(firstClient, "Moradia");
-        var secondCategory = await CreateExpenseCategoryAsync(secondClient, "Educacao");
+        var firstCategory = await CreateExpenseCategoryAsync(firstClient, "Moradia", "first@osiris.test");
+        var secondCategory = await CreateExpenseCategoryAsync(secondClient, "Educacao", "second@osiris.test");
 
         Assert.Equal(
             HttpStatusCode.Redirect,
@@ -114,7 +114,7 @@ public sealed class BillsFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
-        var categoryId = await CreateExpenseCategoryAsync(firstClient, "Moradia");
+        var categoryId = await CreateExpenseCategoryAsync(firstClient, "Moradia", "first@osiris.test");
         Assert.Equal(
             HttpStatusCode.Redirect,
             (await PostCreateBillAsync(firstClient, "Aluguel", "1200.00", "2026-06-10", categoryId)).StatusCode);
@@ -156,7 +156,7 @@ public sealed class BillsFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
-        var foreignCategoryId = await CreateExpenseCategoryAsync(firstClient, "Moradia");
+        var foreignCategoryId = await CreateExpenseCategoryAsync(firstClient, "Moradia", "first@osiris.test");
 
         var response = await PostCreateBillAsync(secondClient, "Aluguel", "1200.00", "2026-06-10", foreignCategoryId);
 
@@ -284,25 +284,12 @@ public sealed class BillsFlowTests : IAsyncLifetime
         Assert.DoesNotContain("Conta de junho", julyHtml);
     }
 
-    private async Task<Guid> CreateExpenseCategoryAsync(HttpClient client, string name)
+    private Task<Guid> CreateExpenseCategoryAsync(
+        HttpClient client,
+        string name,
+        string email = IntegrationTestHelpers.DefaultEmail)
     {
-        var token = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, "/categories/create");
-        var response = await client.PostAsync(
-            "/categories/create",
-            new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["Name"] = name,
-                ["Type"] = "2",
-                ["__RequestVerificationToken"] = token
-            }));
-        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await dbContext.FinancialCategories
-            .Where(category => category.NormalizedName == FinancialCategory.NormalizeName(name))
-            .Select(category => category.Id)
-            .SingleAsync();
+        return IntegrationTestHelpers.GetOrCreateExpenseCategoryAsync(_factory, client, email, name);
     }
 
     private async Task<Guid> CreateAccountAsync(HttpClient client, string name, string initialBalance)

@@ -213,7 +213,7 @@ public sealed class CreditCardPurchasesFlowTests : IAsyncLifetime
             email: "second@osiris.test");
 
         var cardId = await CreateCardAsync(firstClient, "Cartao Privado", closingDay: 25, dueDay: 5);
-        var categoryId = await CreateExpenseCategoryAsync(firstClient, "Mercado");
+        var categoryId = await CreateExpenseCategoryAsync(firstClient, "Mercado", "first@osiris.test");
         await PostPurchaseAsync(firstClient, cardId, categoryId, "Compra Sigilosa", "80.00", "2026-06-10", "1");
 
         Assert.Equal(HttpStatusCode.NotFound, (await secondClient.GetAsync($"/cards/{cardId}/purchases")).StatusCode);
@@ -244,7 +244,7 @@ public sealed class CreditCardPurchasesFlowTests : IAsyncLifetime
             email: "second@osiris.test");
 
         var foreignCardId = await CreateCardAsync(firstClient, "Cartao do A", closingDay: 25, dueDay: 5);
-        var ownCategoryId = await CreateExpenseCategoryAsync(secondClient, "Mercado B");
+        var ownCategoryId = await CreateExpenseCategoryAsync(secondClient, "Mercado B", "second@osiris.test");
 
         var token = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(secondClient, "/cards/create");
         var response = await secondClient.PostAsync(
@@ -279,7 +279,7 @@ public sealed class CreditCardPurchasesFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
-        var foreignCategoryId = await CreateExpenseCategoryAsync(firstClient, "Categoria do A");
+        var foreignCategoryId = await CreateExpenseCategoryAsync(firstClient, "Categoria do A", "first@osiris.test");
         var ownCardId = await CreateCardAsync(secondClient, "Cartao do B", closingDay: 25, dueDay: 5);
 
         var response = await PostPurchaseAsync(
@@ -348,26 +348,11 @@ public sealed class CreditCardPurchasesFlowTests : IAsyncLifetime
             .SingleAsync();
     }
 
-    private async Task<Guid> CreateExpenseCategoryAsync(HttpClient client, string name)
+    private Task<Guid> CreateExpenseCategoryAsync(
+        HttpClient client,
+        string name,
+        string email = IntegrationTestHelpers.DefaultEmail)
     {
-        var token = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, "/categories/create");
-        var response = await client.PostAsync(
-            "/categories/create",
-            new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["Name"] = name,
-                ["Type"] = "2",
-                ["__RequestVerificationToken"] = token
-            }));
-
-        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var normalizedName = FinancialCategory.NormalizeName(name);
-        return await dbContext.FinancialCategories
-            .Where(category => category.NormalizedName == normalizedName)
-            .Select(category => category.Id)
-            .SingleAsync();
+        return IntegrationTestHelpers.GetOrCreateExpenseCategoryAsync(_factory, client, email, name);
     }
 }

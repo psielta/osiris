@@ -153,7 +153,7 @@ public sealed class CreditCardStatementsFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
-        var context = await SeedPurchaseAsync(firstClient, totalAmount: "100.00", installments: "1");
+        var context = await SeedPurchaseAsync(firstClient, totalAmount: "100.00", installments: "1", email: "first@osiris.test");
 
         Assert.Equal(
             HttpStatusCode.NotFound,
@@ -192,7 +192,7 @@ public sealed class CreditCardStatementsFlowTests : IAsyncLifetime
             email: "second@osiris.test");
 
         var foreignAccountId = await CreateAccountAsync(firstClient, "Banco do A", initialBalance: "500.00");
-        var context = await SeedPurchaseAsync(secondClient, totalAmount: "100.00", installments: "1");
+        var context = await SeedPurchaseAsync(secondClient, totalAmount: "100.00", installments: "1", email: "second@osiris.test");
 
         var response = await PostPaymentAsync(
             secondClient,
@@ -213,7 +213,11 @@ public sealed class CreditCardStatementsFlowTests : IAsyncLifetime
 
     private sealed record SeededPurchase(Guid CardId, Guid StatementId);
 
-    private async Task<SeededPurchase> SeedPurchaseAsync(HttpClient client, string totalAmount, string installments)
+    private async Task<SeededPurchase> SeedPurchaseAsync(
+        HttpClient client,
+        string totalAmount,
+        string installments,
+        string email = IntegrationTestHelpers.DefaultEmail)
     {
         var cardToken = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, "/cards/create");
         Assert.Equal(HttpStatusCode.Redirect, (await client.PostAsync(
@@ -227,28 +231,19 @@ public sealed class CreditCardStatementsFlowTests : IAsyncLifetime
                 ["__RequestVerificationToken"] = cardToken
             }))).StatusCode);
 
-        var categoryToken = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, "/categories/create");
-        Assert.Equal(HttpStatusCode.Redirect, (await client.PostAsync(
-            "/categories/create",
-            new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["Name"] = "Mercado",
-                ["Type"] = "2",
-                ["__RequestVerificationToken"] = categoryToken
-            }))).StatusCode);
+        var categoryId = await IntegrationTestHelpers.GetOrCreateExpenseCategoryAsync(
+            _factory,
+            client,
+            email,
+            "Mercado");
 
         Guid cardId;
-        Guid categoryId;
         using (var scope = _factory.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             cardId = await dbContext.CreditCards
                 .Where(card => card.NormalizedName == CreditCard.NormalizeName("Cartao Teste"))
                 .Select(card => card.Id)
-                .SingleAsync();
-            categoryId = await dbContext.FinancialCategories
-                .Where(category => category.NormalizedName == FinancialCategory.NormalizeName("Mercado"))
-                .Select(category => category.Id)
                 .SingleAsync();
         }
 

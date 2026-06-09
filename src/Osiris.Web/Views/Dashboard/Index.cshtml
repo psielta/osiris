@@ -43,6 +43,37 @@
         </form>
     </div>
 
+    @if (!Model.Onboarding.IsComplete)
+    {
+        var steps = new[]
+        {
+            (Done: Model.Onboarding.HasFinancialAccount, Title: "Criar uma conta financeira", Description: "Cadastre a conta de onde o dinheiro entra e sai.", Controller: "FinancialAccounts", Action: "Index"),
+            (Done: Model.Onboarding.HasCreditCard, Title: "Cadastrar seu cartão de crédito", Description: "Informe limite, fechamento e vencimento para acompanhar faturas.", Controller: "CreditCards", Action: "Index"),
+            (Done: Model.Onboarding.HasActiveCategories, Title: "Conferir suas categorias", Description: "Você já começa com categorias padrão; ajuste como preferir.", Controller: "Categories", Action: "Index"),
+            (Done: Model.Onboarding.HasFirstSpending, Title: "Registrar a primeira compra ou conta", Description: "Lance uma compra no cartão ou uma conta a pagar.", Controller: "Bills", Action: "Index")
+        };
+        <div class="rounded-lg border border-amber-200 bg-amber-50/50 p-6 shadow-sm" data-testid="onboarding-card">
+            <h3 class="text-base font-semibold text-slate-950">Primeiros passos no Osiris</h3>
+            <p class="mt-1 text-sm text-slate-600">Configure o básico para acompanhar gastos, faturas e caixa em um só lugar.</p>
+            <ol class="mt-4 grid gap-3 lg:grid-cols-2">
+                @foreach (var step in steps)
+                {
+                    <li>
+                        <a asp-controller="@step.Controller" asp-action="@step.Action" class="flex items-start gap-3 rounded-md border bg-white px-4 py-3 transition hover:border-amber-400 @(step.Done ? "border-emerald-200" : "border-slate-200")">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full @(step.Done ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500")">
+                                <i class="ph @(step.Done ? "ph-check" : "ph-arrow-right") text-sm" aria-hidden="true"></i>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-medium @(step.Done ? "text-slate-500 line-through" : "text-slate-950")">@step.Title</span>
+                                <span class="block text-xs text-slate-500">@step.Description</span>
+                            </span>
+                        </a>
+                    </li>
+                }
+            </ol>
+        </div>
+    }
+
     @if (Model.Alerts.Count > 0)
     {
         <div class="space-y-2" data-testid="dashboard-alerts">

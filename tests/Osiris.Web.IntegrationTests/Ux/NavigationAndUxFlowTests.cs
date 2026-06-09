@@ -212,25 +212,11 @@ public sealed class NavigationAndUxFlowTests : IAsyncLifetime
     {
         var cardId = await CreateCardAsync(client);
 
-        var categoryToken = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, "/categories/create");
-        Assert.Equal(HttpStatusCode.Redirect, (await client.PostAsync(
-            "/categories/create",
-            new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["Name"] = "Mercado",
-                ["Type"] = "2",
-                ["__RequestVerificationToken"] = categoryToken
-            }))).StatusCode);
-
-        Guid categoryId;
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            categoryId = await dbContext.FinancialCategories
-                .Where(category => category.NormalizedName == FinancialCategory.NormalizeName("Mercado"))
-                .Select(category => category.Id)
-                .SingleAsync();
-        }
+        var categoryId = await IntegrationTestHelpers.GetOrCreateExpenseCategoryAsync(
+            _factory,
+            client,
+            IntegrationTestHelpers.DefaultEmail,
+            "Mercado");
 
         var purchasePath = $"/cards/{cardId}/purchases/create";
         var purchaseToken = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, purchasePath);

@@ -82,6 +82,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
     public async Task Index_WhenEmpty_ShouldShowIconEmptyState()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await ClearSeededCategoriesAsync();
 
         var html = await client.GetStringAsync("/categories");
 
@@ -110,6 +111,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
     public async Task CreateEditArchiveDelete_ShouldPersistExpectedCategoryFlow()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await ClearSeededCategoriesAsync();
 
         var createResponse = await PostCategoryAsync(client, "/categories/create", "Food", "2", "#A1B2C3");
 
@@ -165,6 +167,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
     public async Task Create_WhenTypeMissingOrInvalid_ShouldRejectWithoutCreatingRow()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await ClearSeededCategoriesAsync();
 
         var missingType = await PostCategoryAsync(client, "/categories/create", "Food", type: null, color: null);
 
@@ -182,6 +185,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
     public async Task Create_WhenDuplicateNameAndTypeInSameTenant_ShouldReject()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await ClearSeededCategoriesAsync();
 
         Assert.Equal(HttpStatusCode.Redirect, (await PostCategoryAsync(client, "/categories/create", "Food", "2", null)).StatusCode);
 
@@ -213,6 +217,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
     public async Task ArchivedName_ShouldStayReservedUntilPhysicalDelete()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await ClearSeededCategoriesAsync();
         Assert.Equal(HttpStatusCode.Redirect, (await PostCategoryAsync(client, "/categories/create", "Food", "2", null)).StatusCode);
         var category = await SingleCategoryAsync();
 
@@ -259,6 +264,8 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
             tenantName: "Second Tenant",
             email: "second@osiris.test");
 
+        await ClearSeededCategoriesAsync();
+
         Assert.Equal(HttpStatusCode.Redirect, (await PostCategoryAsync(firstClient, "/categories/create", "Food", "2", null)).StatusCode);
         Assert.Equal(HttpStatusCode.Redirect, (await PostCategoryAsync(secondClient, "/categories/create", "Food", "2", null)).StatusCode);
         Assert.Equal(2, await CategoryCountAsync());
@@ -276,6 +283,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
             _factory,
             tenantName: "Second Tenant",
             email: "second@osiris.test");
+        await ClearSeededCategoriesAsync();
         Assert.Equal(HttpStatusCode.Redirect, (await PostCategoryAsync(firstClient, "/categories/create", "Private Food", "2", null)).StatusCode);
         var category = await SingleCategoryAsync();
 
@@ -333,6 +341,17 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         }
 
         return await client.PostAsync(path, new FormUrlEncodedContent(values));
+    }
+
+    /// <summary>
+    /// Removes the categories seeded for new tenants so tests can assert exact rows/counts.
+    /// </summary>
+    private async Task ClearSeededCategoriesAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.FinancialCategories.RemoveRange(dbContext.FinancialCategories);
+        await dbContext.SaveChangesAsync();
     }
 
     private async Task<FinancialCategory> SingleCategoryAsync()
