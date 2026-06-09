@@ -18,3 +18,20 @@
 [x-cloak] {
   display: none !important;
 }
+
+/*
+ * Validation state for form controls.
+ * MVC adds `input-validation-error` to inputs/selects/textareas whose field failed
+ * validation -- both on server-side ModelState re-render and via jQuery unobtrusive
+ * validation on the client. Turn the control red so the field itself stands out, not
+ * just its message. These rules are unlayered, so they win over Tailwind border utilities.
+ */
+.input-validation-error,
+.input-validation-error:focus {
+  border-color: #ef4444; /* red-500 */
+}
+
+.input-validation-error:focus {
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.2); /* red-500 / 20% ring */
+  outline: none;
+}
