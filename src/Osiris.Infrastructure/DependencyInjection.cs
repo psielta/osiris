@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<ICreditCardPurchaseRepository, CreditCardPurchaseRepository>();
         services.AddScoped<ICreditCardInstallmentRepository, CreditCardInstallmentRepository>();
         services.AddScoped<ICreditCardStatementRepository, CreditCardStatementRepository>();
+        services.AddScoped<ICreditCardStatementPaymentRepository, CreditCardStatementPaymentRepository>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
 

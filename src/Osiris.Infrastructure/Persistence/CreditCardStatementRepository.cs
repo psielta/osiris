@@ -72,11 +72,20 @@ public sealed class CreditCardStatementRepository : ICreditCardStatementReposito
             .Select(group => new { StatementId = group.Key, Total = group.Sum(installment => installment.Amount) })
             .ToDictionaryAsync(entry => entry.StatementId, entry => entry.Total, cancellationToken);
 
+        var paymentTotals = await _dbContext.CreditCardStatementPayments
+            .Where(payment => payment.TenantId == tenantId
+                && statementIds.Contains(payment.CreditCardStatementId))
+            .GroupBy(payment => payment.CreditCardStatementId)
+            .Select(group => new { StatementId = group.Key, Total = group.Sum(payment => payment.Amount) })
+            .ToDictionaryAsync(entry => entry.StatementId, entry => entry.Total, cancellationToken);
+
         return statementIds
             .Distinct()
             .ToDictionary(
                 id => id,
-                id => new CreditCardStatementTotals(installmentTotals.GetValueOrDefault(id), 0m));
+                id => new CreditCardStatementTotals(
+                    installmentTotals.GetValueOrDefault(id),
+                    paymentTotals.GetValueOrDefault(id)));
     }
 
     public async Task UpdateAsync(CreditCardStatement statement, CancellationToken cancellationToken)
