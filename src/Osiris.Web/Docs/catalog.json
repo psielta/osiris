@@ -16,5 +16,14 @@
     "icon": "ph ph-bank",
     "markdownFile": "accounts.md",
     "order": 20
+  },
+  {
+    "slug": "cards",
+    "title": "Guia simples de cartões",
+    "description": "Entenda o que é um cartão de crédito no Osiris, limite, fechamento e vencimento, e como ele difere de uma conta.",
+    "group": "Financeiro",
+    "icon": "ph ph-credit-card",
+    "markdownFile": "cards.md",
+    "order": 30
   }
 ]
