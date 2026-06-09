@@ -215,7 +215,6 @@ tests/
 
 ## Next Steps
 
-- Add finance modules for bills, categories, and monthly summaries.
 - Add real email delivery for password recovery.
 - Add tenant resolution by subdomain or custom domain.
 - Add roles and authorization policies.
