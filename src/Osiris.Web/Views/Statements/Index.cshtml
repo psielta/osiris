@@ -1,0 +1,81 @@
+@model IReadOnlyCollection<CreditCardStatementOverviewDto>
+
+@{
+    ViewData["Title"] = "Faturas";
+    Layout = "_AuthenticatedLayout";
+    var today = BrazilDates.Today();
+    var dueSoonLimit = today.AddDays(7);
+}
+
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Faturas</h2>
+            <p class="mt-1 text-sm text-slate-600">Todas as faturas dos seus cartões, com destaque para risco de vencimento.</p>
+        </div>
+        <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+            Ver cartões
+        </a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                <i class="ph ph-receipt text-3xl" aria-hidden="true"></i>
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhuma fatura ainda</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">As faturas são criadas automaticamente quando você registra compras nos seus cartões de crédito.</p>
+            <div class="mt-6">
+                <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800">Ir para cartões</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Cartão</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Referência</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Situação</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Em aberto</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                    @foreach (var statement in Model)
+                    {
+                        var isOverdue = statement.Status == CreditCardStatementStatus.Overdue;
+                        var isDueSoon = statement.OpenBalance > 0m
+                            && statement.DueDate >= today
+                            && statement.DueDate <= dueSoonLimit;
+                        <tr class="@(isOverdue ? "bg-red-50/60" : isDueSoon ? "bg-amber-50/60" : "")">
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950">@statement.CreditCardName</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">@CreditCardStatementStatusViewExtensions.ToReferenceLabel(statement.ReferenceMonth, statement.ReferenceYear)</td>
+                            <td class="px-4 py-3 text-sm @(isOverdue ? "font-semibold text-red-700" : "text-slate-600")">
+                                @statement.DueDate.ToString("dd/MM/yyyy")
+                                @if (isDueSoon)
+                                {
+                                    <span class="ml-2 inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">Vence em breve</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @statement.Status.ToBadgeClasses()">@statement.Status.ToDisplayName()</span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@statement.TotalAmount.ToBrl()</td>
+                            <td class="px-4 py-3 text-right text-sm @(statement.OpenBalance > 0m ? "font-medium text-amber-700" : "text-slate-600")">@statement.OpenBalance.ToBrl()</td>
+                            <td class="px-4 py-3 text-right">
+                                <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@statement.CreditCardId" asp-route-id="@statement.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Ver fatura</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

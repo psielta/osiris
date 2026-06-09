@@ -1,0 +1,63 @@
+@model PurchasePreviewDto?
+
+@if (Model is null)
+{
+    <p class="text-sm text-slate-500">Preencha valor, data e parcelas para ver a prévia da compra.</p>
+}
+else
+{
+    <div class="space-y-4" data-testid="purchase-preview">
+        @if (Model.HighLimitUsage)
+        {
+            <div class="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <i class="ph ph-warning-circle mt-0.5 text-lg" aria-hidden="true"></i>
+                <span>Atenção: com esta compra, o cartão ficará com cerca de @Model.ProjectedUsagePercentage.ToString("0.#")% do limite usado.</span>
+            </div>
+        }
+
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor das parcelas</p>
+                <p class="mt-1 text-sm font-semibold text-slate-950">
+                    @(Model.Installments.Count)x de @Model.Installments.First().Amount.ToBrl()
+                    @if (Model.Installments.Count > 1 && Model.Installments.Last().Amount != Model.Installments.First().Amount)
+                    {
+                        <span class="block text-xs font-normal text-slate-500">última de @Model.Installments.Last().Amount.ToBrl()</span>
+                    }
+                </p>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Limite disponível hoje</p>
+                <p class="mt-1 text-sm font-semibold @(Model.AvailableLimit < 0m ? "text-red-700" : "text-slate-950")">@Model.AvailableLimit.ToBrl()</p>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Parcelado futuro após a compra</p>
+                <p class="mt-1 text-sm font-semibold text-slate-950">@Model.ProjectedFutureInstallmentsTotal.ToBrl()</p>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-md border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Parcela</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fatura</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</th>
+                        <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                    @foreach (var installment in Model.Installments)
+                    {
+                        <tr>
+                            <td class="px-3 py-2 text-slate-600">@installment.Number de @Model.Installments.Count</td>
+                            <td class="px-3 py-2 font-medium text-slate-950">@($"{installment.ReferenceMonth:00}/{installment.ReferenceYear}")</td>
+                            <td class="px-3 py-2 text-slate-600">@installment.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td class="px-3 py-2 text-right font-medium text-slate-950">@installment.Amount.ToBrl()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

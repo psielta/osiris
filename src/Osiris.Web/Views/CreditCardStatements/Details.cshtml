@@ -4,6 +4,13 @@
     var referenceLabel = CreditCardStatementStatusViewExtensions.ToReferenceLabel(Model.ReferenceMonth, Model.ReferenceYear);
     ViewData["Title"] = $"Fatura {referenceLabel}";
     Layout = "_AuthenticatedLayout";
+    var today = BrazilDates.Today();
+    var isOverdue = Model.Status == CreditCardStatementStatus.Overdue;
+    var isDueSoon = !isOverdue
+        && Model.OpenBalance > 0m
+        && Model.DueDate >= today
+        && Model.DueDate <= today.AddDays(7);
+    var isPartiallyPaid = Model.Status == CreditCardStatementStatus.PartiallyPaid;
 }
 
 <section class="space-y-6">
@@ -24,6 +31,28 @@
             <a asp-action="Index" asp-route-cardId="@Model.CreditCardId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Todas as faturas</a>
         </div>
     </div>
+
+    @if (isOverdue)
+    {
+        <div class="flex items-start gap-3 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <i class="ph ph-warning-circle mt-0.5 text-lg" aria-hidden="true"></i>
+            <span>Esta fatura está vencida desde @Model.DueDate.ToString("dd/MM/yyyy") com @Model.OpenBalance.ToBrl() em aberto.</span>
+        </div>
+    }
+    else if (isDueSoon)
+    {
+        <div class="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <i class="ph ph-clock mt-0.5 text-lg" aria-hidden="true"></i>
+            <span>Esta fatura vence em breve: @Model.DueDate.ToString("dd/MM/yyyy"), com @Model.OpenBalance.ToBrl() em aberto.</span>
+        </div>
+    }
+    else if (isPartiallyPaid)
+    {
+        <div class="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <i class="ph ph-coins mt-0.5 text-lg" aria-hidden="true"></i>
+            <span>Pagamento em andamento: ainda restam @Model.OpenBalance.ToBrl() para quitar esta fatura.</span>
+        </div>
+    }
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">

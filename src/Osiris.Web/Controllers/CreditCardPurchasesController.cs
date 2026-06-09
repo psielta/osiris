@@ -8,6 +8,7 @@ using Osiris.Application.Features.Categories.Queries.ListCategories;
 using Osiris.Application.Features.CreditCardPurchases.Commands.CreateCreditCardPurchase;
 using Osiris.Application.Features.CreditCardPurchases.Commands.DeleteCreditCardPurchase;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
+using Osiris.Application.Features.CreditCardPurchases.Queries.GetPurchasePreview;
 using Osiris.Application.Features.CreditCardPurchases.Queries.ListCreditCardPurchases;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardDetails;
 using Osiris.Domain.Enums;
@@ -104,6 +105,21 @@ public sealed class CreditCardPurchasesController : AppController
         }
 
         return await ViewWithOptionsAsync(cardId, model, cancellationToken);
+    }
+
+    [HttpGet("preview")]
+    public async Task<IActionResult> Preview(
+        Guid cardId,
+        decimal? totalAmount,
+        DateOnly? purchaseDate,
+        int? installments,
+        CancellationToken cancellationToken)
+    {
+        var preview = await _mediator.Send(
+            new GetPurchasePreviewQuery(cardId, totalAmount, purchaseDate, installments),
+            cancellationToken);
+
+        return PartialView("_PurchasePreview", preview);
     }
 
     [HttpGet("{id:guid}")]

@@ -15,6 +15,8 @@ public sealed class CreditCardDetailsViewModel
 
     public CreditCardStatementListItemDto? CurrentStatement { get; init; }
 
+    public CreditCardOverviewDto? Overview { get; init; }
+
     public IReadOnlyCollection<CreditCardStatementListItemDto> Statements { get; init; } =
         Array.Empty<CreditCardStatementListItemDto>();
 }

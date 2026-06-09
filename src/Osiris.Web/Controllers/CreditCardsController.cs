@@ -10,6 +10,7 @@ using Osiris.Application.Features.CreditCards.Commands.UpdateCreditCard;
 using Osiris.Application.Features.CreditCardPurchases.Queries.ListCreditCardPurchases;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardDetails;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardForEdit;
+using Osiris.Application.Features.CreditCards.Queries.GetCreditCardOverview;
 using Osiris.Application.Features.CreditCards.Queries.ListCreditCards;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCurrentCreditCardStatement;
 using Osiris.Application.Features.CreditCardStatements.Queries.ListCreditCardStatements;
@@ -152,6 +153,7 @@ public sealed class CreditCardsController : AppController
         var purchases = await _mediator.Send(new ListCreditCardPurchasesQuery(id), cancellationToken);
         var statements = await _mediator.Send(new ListCreditCardStatementsQuery(id), cancellationToken);
         var currentStatement = await _mediator.Send(new GetCurrentCreditCardStatementQuery(id), cancellationToken);
+        var overview = await _mediator.Send(new GetCreditCardOverviewQuery(id), cancellationToken);
 
         return View(new CreditCardDetailsViewModel
         {
@@ -159,6 +161,7 @@ public sealed class CreditCardsController : AppController
             RecentPurchases = purchases.Take(5).ToArray(),
             TotalPurchases = purchases.Count,
             CurrentStatement = currentStatement,
+            Overview = overview,
             Statements = statements
         });
     }
