@@ -50,6 +50,11 @@ internal sealed class FakeBillRepository : IBillRepository
         return Task.FromResult<IReadOnlyCollection<Bill>>(bills);
     }
 
+    public Task<bool> AnyAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_bills.Any(bill => bill.TenantId == tenantId));
+    }
+
     public Task<IReadOnlyCollection<Bill>> ListPaidInMonthAsync(
         Guid tenantId,
         int year,

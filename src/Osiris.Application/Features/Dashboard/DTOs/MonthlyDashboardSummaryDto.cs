@@ -3,6 +3,7 @@ namespace Osiris.Application.Features.Dashboard.DTOs;
 public sealed record MonthlyDashboardSummaryDto(
     int Year,
     int Month,
+    OnboardingDto Onboarding,
     decimal IncomeTotal,
     decimal SpendingTotal,
     IReadOnlyCollection<SpendingByCategoryDto> SpendingByCategory,

@@ -14,6 +14,8 @@ public interface IBillRepository
 
     Task<IReadOnlyCollection<Bill>> ListUnpaidAsync(Guid tenantId, CancellationToken cancellationToken);
 
+    Task<bool> AnyAsync(Guid tenantId, CancellationToken cancellationToken);
+
     Task<IReadOnlyCollection<Bill>> ListPaidInMonthAsync(
         Guid tenantId,
         int year,

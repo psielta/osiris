@@ -23,7 +23,7 @@ public sealed class IdentityService : IIdentityService
         _userManager = userManager;
     }
 
-    public async Task<Result<string>> RegisterTenantAndUserAsync(
+    public async Task<Result<TenantRegistration>> RegisterTenantAndUserAsync(
         string tenantName,
         string fullName,
         string email,
@@ -33,7 +33,7 @@ public sealed class IdentityService : IIdentityService
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser is not null)
         {
-            return Result<string>.Failure(new ResultError("Este e-mail já está cadastrado.", nameof(email)));
+            return Result<TenantRegistration>.Failure(new ResultError("Este e-mail já está cadastrado.", nameof(email)));
         }
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -54,11 +54,11 @@ public sealed class IdentityService : IIdentityService
         if (!creationResult.Succeeded)
         {
             await transaction.RollbackAsync(cancellationToken);
-            return Result<string>.Failure(MapIdentityErrors(creationResult.Errors));
+            return Result<TenantRegistration>.Failure(MapIdentityErrors(creationResult.Errors));
         }
 
         await transaction.CommitAsync(cancellationToken);
-        return Result<string>.Success(user.Id);
+        return Result<TenantRegistration>.Success(new TenantRegistration(user.Id, tenant.Id));
     }
 
     public async Task<Result> PasswordSignInAsync(

@@ -338,6 +338,43 @@ public sealed class GetMonthlyDashboardSummaryQueryHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WhenTenantHasNoData_ShouldShowIncompleteOnboarding()
+    {
+        var result = await HandleAsync();
+
+        Assert.False(result.Onboarding.HasFinancialAccount);
+        Assert.False(result.Onboarding.HasCreditCard);
+        Assert.True(result.Onboarding.HasActiveCategories);
+        Assert.False(result.Onboarding.HasFirstSpending);
+        Assert.False(result.Onboarding.IsComplete);
+    }
+
+    [Fact]
+    public async Task Handle_WhenTenantHasAccountCardAndSpending_ShouldCompleteOnboarding()
+    {
+        SeedAccount(100m);
+        var card = SeedCard();
+        SeedStatement(card, 6, 2026, 100m, new DateOnly(2026, 6, 25), new DateOnly(2026, 7, 5));
+
+        var result = await HandleAsync();
+
+        Assert.True(result.Onboarding.HasFinancialAccount);
+        Assert.True(result.Onboarding.HasCreditCard);
+        Assert.True(result.Onboarding.HasFirstSpending);
+        Assert.True(result.Onboarding.IsComplete);
+    }
+
+    [Fact]
+    public async Task Handle_WhenOnlyBillExists_ShouldCountAsFirstSpending()
+    {
+        _bills.Add(new Bill(_tenantId, _housingCategory.Id, "Aluguel", 100m, new DateOnly(2026, 1, 10)));
+
+        var result = await HandleAsync();
+
+        Assert.True(result.Onboarding.HasFirstSpending);
+    }
+
+    [Fact]
     public async Task Handle_UpcomingObligations_ShouldIncludeUnpaidBillsAndOpenStatements()
     {
         var card = SeedCard();

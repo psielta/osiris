@@ -45,6 +45,11 @@ public sealed class BillRepository : IBillRepository
             .ToArrayAsync(cancellationToken);
     }
 
+    public async Task<bool> AnyAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Bills.AnyAsync(bill => bill.TenantId == tenantId, cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<Bill>> ListPaidInMonthAsync(
         Guid tenantId,
         int year,

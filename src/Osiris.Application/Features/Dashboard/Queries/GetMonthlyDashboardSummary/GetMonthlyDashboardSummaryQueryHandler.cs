@@ -149,6 +149,14 @@ public sealed class GetMonthlyDashboardSummaryQueryHandler
             request,
             nextMonthStart);
 
+        // Statements only exist when purchases were made, so they double as the card-spending signal.
+        var hasAnyBill = await _bills.AnyAsync(tenantId, cancellationToken);
+        var onboarding = new OnboardingDto(
+            HasFinancialAccount: activeAccounts.Count > 0,
+            HasCreditCard: allCards.Any(card => card.IsActive),
+            HasActiveCategories: categories.Any(category => category.IsActive),
+            HasFirstSpending: statementInfos.Length > 0 || hasAnyBill);
+
         var upcomingObligations = BuildUpcomingObligations(
             monthBills,
             statementsDueInMonth,
@@ -179,6 +187,7 @@ public sealed class GetMonthlyDashboardSummaryQueryHandler
         return new MonthlyDashboardSummaryDto(
             request.Year,
             request.Month,
+            onboarding,
             incomeTotal,
             spendingTotal,
             spendingByCategory,

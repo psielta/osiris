@@ -4,7 +4,7 @@ namespace Osiris.Application.Common.Interfaces;
 
 public interface IIdentityService
 {
-    Task<Result<string>> RegisterTenantAndUserAsync(
+    Task<Result<TenantRegistration>> RegisterTenantAndUserAsync(
         string tenantName,
         string fullName,
         string email,

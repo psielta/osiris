@@ -1,28 +1,46 @@
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Features.Authentication.Commands.RegisterUser;
+using Osiris.Application.Features.Categories.Services;
+using Osiris.Application.UnitTests.Features.Categories.Support;
+using Osiris.Domain.Enums;
 
 namespace Osiris.Application.UnitTests.Features.Authentication;
 
 public sealed class RegisterUserCommandHandlerTests
 {
-    [Fact]
-    public async Task Handle_WhenRegistrationSucceeds_ShouldSignInCreatedUser()
+    private static readonly Guid TenantId = Guid.NewGuid();
+
+    private readonly FakeCategoryRepository _categories = new();
+
+    private RegisterUserCommandHandler CreateHandler(FakeIdentityService identityService)
     {
-        var identityService = new FakeIdentityService
-        {
-            RegisterResult = Result<string>.Success("user-123"),
-            SignInResult = Result.Success()
-        };
-        var handler = new RegisterUserCommandHandler(identityService);
-        var command = new RegisterUserCommand(
+        return new RegisterUserCommandHandler(
+            identityService,
+            new DefaultFinancialCategoriesSeeder(_categories));
+    }
+
+    private static RegisterUserCommand Command()
+    {
+        return new RegisterUserCommand(
             "Acme Finance",
             "Jane Owner",
             "jane@osiris.test",
             "password1",
             "password1");
+    }
 
-        var result = await handler.Handle(command, CancellationToken.None);
+    [Fact]
+    public async Task Handle_WhenRegistrationSucceeds_ShouldSignInCreatedUser()
+    {
+        var identityService = new FakeIdentityService
+        {
+            RegisterResult = Result<TenantRegistration>.Success(new TenantRegistration("user-123", TenantId)),
+            SignInResult = Result.Success()
+        };
+        var handler = CreateHandler(identityService);
+
+        var result = await handler.Handle(Command(), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal("Acme Finance", identityService.RegisteredTenantName);
@@ -33,31 +51,48 @@ public sealed class RegisterUserCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenRegistrationFails_ShouldNotSignIn()
+    public async Task Handle_WhenRegistrationSucceeds_ShouldSeedDefaultCategoriesForTenant()
+    {
+        var identityService = new FakeIdentityService
+        {
+            RegisterResult = Result<TenantRegistration>.Success(new TenantRegistration("user-123", TenantId))
+        };
+        var handler = CreateHandler(identityService);
+
+        var result = await handler.Handle(Command(), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        var categories = await _categories.ListAsync(TenantId, includeArchived: true, CancellationToken.None);
+        Assert.NotEmpty(categories);
+        Assert.All(categories, category => Assert.Equal(TenantId, category.TenantId));
+        Assert.Contains(categories, category =>
+            category.Name == "Salário" && category.Type == CategoryType.Income);
+        Assert.Contains(categories, category =>
+            category.Name == "Moradia" && category.Type == CategoryType.Expense);
+    }
+
+    [Fact]
+    public async Task Handle_WhenRegistrationFails_ShouldNotSignInNorSeed()
     {
         var expectedError = new ResultError("Email already exists.", nameof(RegisterUserCommand.Email));
         var identityService = new FakeIdentityService
         {
-            RegisterResult = Result<string>.Failure(expectedError)
+            RegisterResult = Result<TenantRegistration>.Failure(expectedError)
         };
-        var handler = new RegisterUserCommandHandler(identityService);
-        var command = new RegisterUserCommand(
-            "Acme Finance",
-            "Jane Owner",
-            "jane@osiris.test",
-            "password1",
-            "password1");
+        var handler = CreateHandler(identityService);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(Command(), CancellationToken.None);
 
         Assert.True(result.IsFailure);
         Assert.Contains(expectedError, result.Errors);
         Assert.Null(identityService.SignedInUserId);
+        Assert.Empty(await _categories.ListAsync(TenantId, includeArchived: true, CancellationToken.None));
     }
 
     private sealed class FakeIdentityService : IIdentityService
     {
-        public Result<string> RegisterResult { get; init; } = Result<string>.Success("user-id");
+        public Result<TenantRegistration> RegisterResult { get; init; } =
+            Result<TenantRegistration>.Success(new TenantRegistration("user-id", Guid.NewGuid()));
 
         public Result SignInResult { get; init; } = Result.Success();
 
@@ -71,7 +106,7 @@ public sealed class RegisterUserCommandHandlerTests
 
         public string? SignedInUserId { get; private set; }
 
-        public Task<Result<string>> RegisterTenantAndUserAsync(
+        public Task<Result<TenantRegistration>> RegisterTenantAndUserAsync(
             string tenantName,
             string fullName,
             string email,

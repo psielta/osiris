@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Osiris.Application.Common.Behaviors;
+using Osiris.Application.Features.Categories.Services;
 using Osiris.Application.Features.CreditCardStatements.Services;
 
 namespace Osiris.Application;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
         services.AddScoped<CreditCardStatementResolver>();
+        services.AddScoped<DefaultFinancialCategoriesSeeder>();
 
         return services;
     }
