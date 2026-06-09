@@ -54,7 +54,7 @@ public sealed class CreateManualMovementCommandHandler : IRequestHandler<CreateM
         var account = await _accounts.GetByIdAsync(tenantId, request.AccountId, cancellationToken);
         if (account is null)
         {
-            return Result<Guid>.Failure(new ResultError("Conta não encontrada."));
+            return Result<Guid>.Failure(new ResultError("Conta não encontrada.", Code: ResultErrorCodes.NotFound));
         }
 
         if (!account.IsActive)

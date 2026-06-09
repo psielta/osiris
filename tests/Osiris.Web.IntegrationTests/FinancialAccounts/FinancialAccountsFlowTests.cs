@@ -207,6 +207,16 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
             }));
         Assert.Equal(HttpStatusCode.NotFound, archive.StatusCode);
 
+        var edit = await secondClient.PostAsync(
+            $"/accounts/{account.Id}/edit",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["Name"] = "Invadida",
+                ["Type"] = IncomeAccountType(),
+                ["__RequestVerificationToken"] = token
+            }));
+        Assert.Equal(HttpStatusCode.NotFound, edit.StatusCode);
+
         var movement = await secondClient.PostAsync(
             $"/accounts/{account.Id}/movements",
             new FormUrlEncodedContent(new Dictionary<string, string>
@@ -222,8 +232,32 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
         var unchanged = await FindAccountAsync(account.Id);
         Assert.NotNull(unchanged);
         Assert.True(unchanged!.IsActive);
+        Assert.Equal("Conta Privada", unchanged.Name);
         Assert.Equal(100.00m, unchanged.CurrentBalance);
         Assert.Equal(0, await MovementCountAsync());
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Edit_WhenDuplicateNameInSameTenant_ShouldRejectWithoutNotFound()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        Assert.Equal(HttpStatusCode.Redirect, (await PostAccountAsync(client, "Banco", IncomeAccountType(), "0.00")).StatusCode);
+        Assert.Equal(HttpStatusCode.Redirect, (await PostAccountAsync(client, "Reserva", IncomeAccountType(), "0.00")).StatusCode);
+        var reserva = await FindAccountByNameAsync("Reserva");
+
+        var token = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, $"/accounts/{reserva.Id}/edit");
+        var response = await client.PostAsync(
+            $"/accounts/{reserva.Id}/edit",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["Name"] = "Banco",
+                ["Type"] = IncomeAccountType(),
+                ["__RequestVerificationToken"] = token
+            }));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Reserva", (await FindAccountAsync(reserva.Id))!.Name);
     }
 
     private static string IncomeAccountType() => ((int)FinancialAccountType.CheckingAccount).ToString();
@@ -280,6 +314,15 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         return await dbContext.FinancialAccounts.SingleOrDefaultAsync(account => account.Id == id);
+    }
+
+    private async Task<FinancialAccount> FindAccountByNameAsync(string name)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var normalizedName = FinancialAccount.NormalizeName(name);
+
+        return await dbContext.FinancialAccounts.SingleAsync(account => account.NormalizedName == normalizedName);
     }
 
     private async Task<int> AccountCountAsync()

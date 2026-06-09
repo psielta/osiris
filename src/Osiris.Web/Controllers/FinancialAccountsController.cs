@@ -22,6 +22,10 @@ public sealed class FinancialAccountsController : AppController
 {
     private const string MovementPrefix = "Movement";
 
+    // The app serves Brazilian users; default the movement calendar date from Brasília time so it
+    // matches the user's local day rather than the server's UTC day around midnight.
+    private static readonly TimeZoneInfo BrazilTimeZone = ResolveBrazilTimeZone();
+
     private readonly IMediator _mediator;
 
     public FinancialAccountsController(IMediator mediator)
@@ -99,6 +103,11 @@ public sealed class FinancialAccountsController : AppController
 
             if (result.IsFailure)
             {
+                if (result.Errors.Any(error => error.Code == ResultErrorCodes.NotFound))
+                {
+                    return NotFound();
+                }
+
                 AddResultErrors(result);
                 return View(model);
             }
@@ -128,7 +137,7 @@ public sealed class FinancialAccountsController : AppController
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
     {
-        var movement = new ManualMovementFormViewModel { OccurredOn = DateOnly.FromDateTime(DateTime.UtcNow) };
+        var movement = new ManualMovementFormViewModel { OccurredOn = Today() };
         var model = await BuildDetailsViewModelAsync(id, movement, cancellationToken);
         if (model is null)
         {
@@ -225,6 +234,23 @@ public sealed class FinancialAccountsController : AppController
             ModelState.AddModelError(
                 $"{MovementPrefix}.{NormalizeField(error.PropertyName)}",
                 error.ErrorMessage);
+        }
+    }
+
+    private static DateOnly Today()
+    {
+        return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, BrazilTimeZone));
+    }
+
+    private static TimeZoneInfo ResolveBrazilTimeZone()
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+        }
+        catch (Exception exception) when (exception is TimeZoneNotFoundException or InvalidTimeZoneException)
+        {
+            return TimeZoneInfo.Utc;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Osiris.Application.Common.Models;
 using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
 using Osiris.Application.UnitTests.Features.FinancialAccounts.Support;
 using Osiris.Domain.Entities;
@@ -49,6 +50,7 @@ public sealed class UpdateFinancialAccountCommandHandlerTests
             CancellationToken.None);
 
         Assert.True(result.IsFailure);
+        Assert.Contains(result.Errors, error => error.Code == ResultErrorCodes.NotFound);
         Assert.Equal("Banco", account.Name);
     }
 

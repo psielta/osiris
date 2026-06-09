@@ -25,7 +25,7 @@ public sealed class ArchiveFinancialAccountCommandHandler : IRequestHandler<Arch
         var account = await _accounts.GetByIdAsync(_currentUser.TenantId, request.Id, cancellationToken);
         if (account is null)
         {
-            return Result.Failure(new ResultError("Conta não encontrada."));
+            return Result.Failure(new ResultError("Conta não encontrada.", Code: ResultErrorCodes.NotFound));
         }
 
         account.Archive(_dateTimeProvider.UtcNow);
