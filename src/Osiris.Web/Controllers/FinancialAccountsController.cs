@@ -12,6 +12,7 @@ using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAcco
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountDetails;
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountForEdit;
 using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
+using Osiris.Web.Helpers;
 using Osiris.Web.Models;
 
 namespace Osiris.Web.Controllers;
@@ -21,10 +22,6 @@ namespace Osiris.Web.Controllers;
 public sealed class FinancialAccountsController : AppController
 {
     private const string MovementPrefix = "Movement";
-
-    // The app serves Brazilian users; default the movement calendar date from Brasília time so it
-    // matches the user's local day rather than the server's UTC day around midnight.
-    private static readonly TimeZoneInfo BrazilTimeZone = ResolveBrazilTimeZone();
 
     private readonly IMediator _mediator;
 
@@ -137,7 +134,7 @@ public sealed class FinancialAccountsController : AppController
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
     {
-        var movement = new ManualMovementFormViewModel { OccurredOn = Today() };
+        var movement = new ManualMovementFormViewModel { OccurredOn = BrazilDates.Today() };
         var model = await BuildDetailsViewModelAsync(id, movement, cancellationToken);
         if (model is null)
         {
@@ -234,23 +231,6 @@ public sealed class FinancialAccountsController : AppController
             ModelState.AddModelError(
                 $"{MovementPrefix}.{NormalizeField(error.PropertyName)}",
                 error.ErrorMessage);
-        }
-    }
-
-    private static DateOnly Today()
-    {
-        return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, BrazilTimeZone));
-    }
-
-    private static TimeZoneInfo ResolveBrazilTimeZone()
-    {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
-        }
-        catch (Exception exception) when (exception is TimeZoneNotFoundException or InvalidTimeZoneException)
-        {
-            return TimeZoneInfo.Utc;
         }
     }
 }

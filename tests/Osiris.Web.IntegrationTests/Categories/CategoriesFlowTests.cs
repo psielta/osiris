@@ -57,7 +57,7 @@ public sealed class CategoriesFlowTests : IAsyncLifetime
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Osiris v0.3.1", html);
+        Assert.Contains("Osiris v0.4.0", html);
         Assert.DoesNotContain("SaaS skeleton", html);
     }
 

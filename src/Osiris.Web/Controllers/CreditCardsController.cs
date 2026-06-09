@@ -7,9 +7,11 @@ using Osiris.Application.Common.Models;
 using Osiris.Application.Features.CreditCards.Commands.ArchiveCreditCard;
 using Osiris.Application.Features.CreditCards.Commands.CreateCreditCard;
 using Osiris.Application.Features.CreditCards.Commands.UpdateCreditCard;
+using Osiris.Application.Features.CreditCardPurchases.Queries.ListCreditCardPurchases;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardDetails;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardForEdit;
 using Osiris.Application.Features.CreditCards.Queries.ListCreditCards;
+using Osiris.Application.Features.CreditCardStatements.Queries.ListCreditCardStatements;
 using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
 using Osiris.Web.Models;
 
@@ -146,7 +148,16 @@ public sealed class CreditCardsController : AppController
             return NotFound();
         }
 
-        return View(card);
+        var purchases = await _mediator.Send(new ListCreditCardPurchasesQuery(id), cancellationToken);
+        var statements = await _mediator.Send(new ListCreditCardStatementsQuery(id), cancellationToken);
+
+        return View(new CreditCardDetailsViewModel
+        {
+            Card = card,
+            RecentPurchases = purchases.Take(5).ToArray(),
+            TotalPurchases = purchases.Count,
+            Statements = statements
+        });
     }
 
     private async Task<IActionResult> ViewWithOptionsAsync(

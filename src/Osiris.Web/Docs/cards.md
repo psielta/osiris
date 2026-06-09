@@ -4,7 +4,7 @@ Um cartão de crédito responde a uma pergunta diferente da conta:
 
 > Quanto eu posso gastar agora para pagar depois?
 
-No Osiris, o cartão guarda as informações de como ele funciona: o limite, o dia em que a fatura fecha e o dia em que ela vence. As compras, as faturas e os pagamentos serão adicionados em fases seguintes.
+No Osiris, o cartão guarda as informações de como ele funciona: o limite, o dia em que a fatura fecha e o dia em que ela vence. Você também registra as compras feitas no cartão, e o Osiris monta as faturas automaticamente.
 
 ## Cartão não é a mesma coisa que conta
 
@@ -40,10 +40,26 @@ Por exemplo, uma fatura pode fechar no dia 3 e vencer no dia 10. Você informa e
 
 Você pode escolher uma conta para ser a forma padrão de pagar a fatura do cartão. Isso é opcional e só aparecem contas do seu próprio cadastro. Se a conta escolhida for arquivada depois, o cartão continua apontando para ela até você trocar.
 
+## Compras no cartão
+
+Cada compra que você faz no cartão é registrada com descrição, valor, data e uma categoria de despesa. É a compra que conta como gasto na sua visão por categoria — e ela conta no momento em que acontece, não quando a fatura é paga.
+
+Se a compra for parcelada, você informa o número de parcelas. O Osiris divide o valor em partes iguais (centavos que sobrarem vão para a última parcela) e coloca cada parcela na fatura do mês correspondente.
+
+Você pode excluir uma compra enquanto nenhuma fatura dela estiver paga. Ao excluir, as parcelas saem das faturas.
+
+## Faturas criadas automaticamente
+
+Você não precisa criar faturas. Quando uma compra é registrada, o Osiris descobre em qual fatura cada parcela entra:
+
+- Compras feitas até o dia do fechamento entram na fatura daquele mês.
+- Compras feitas depois do fechamento entram na fatura do mês seguinte.
+- Em meses mais curtos (como fevereiro), vale o último dia do mês.
+
 ## Arquivar um cartão
 
-Arquivar esconde o cartão das novas escolhas sem apagar o histórico. Use quando parar de usar um cartão, mas quiser manter os registros antigos. Um cartão arquivado continua aparecendo no histórico, mas não é oferecido como opção em novos lançamentos.
+Arquivar esconde o cartão das novas escolhas sem apagar o histórico. Use quando parar de usar um cartão, mas quiser manter os registros antigos. Um cartão arquivado continua aparecendo no histórico, mas não recebe novas compras.
 
 ## O que ainda não está aqui
 
-Esta fase cuida apenas do cadastro do cartão. Lançar compras, gerar faturas e registrar o pagamento da fatura serão tratados em fases seguintes. Quando o pagamento da fatura existir, ele será uma saída de dinheiro da conta — e não uma nova despesa por categoria, para o mesmo gasto não contar duas vezes.
+O registro do pagamento da fatura será tratado em uma fase seguinte. Quando existir, ele será uma saída de dinheiro da conta — e não uma nova despesa por categoria, para o mesmo gasto não contar duas vezes.

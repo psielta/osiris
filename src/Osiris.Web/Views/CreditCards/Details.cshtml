@@ -1,7 +1,7 @@
-@model CreditCardDetailsDto
+@model CreditCardDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.Card.Name;
     Layout = "_AuthenticatedLayout";
 }
 
@@ -9,41 +9,133 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@Model.Name</h2>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@Model.Card.Name</h2>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar cartão</a>
+            <a asp-controller="CreditCardPurchases" asp-action="Create" asp-route-cardId="@Model.Card.Id" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Nova compra</a>
+            <a asp-action="Edit" asp-route-id="@Model.Card.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar cartão</a>
             <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Voltar</a>
         </div>
     </div>
 
-    @if (!Model.IsActive)
+    @if (!Model.Card.IsActive)
     {
         <div class="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Este cartão está arquivado.
+            Este cartão está arquivado. Não é possível registrar novas compras.
         </div>
     }
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Limite</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.Limit.ToBrl()</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.Card.Limit.ToBrl()</p>
         </div>
         <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Dia de fechamento</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">Dia @Model.ClosingDay</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">Dia @Model.Card.ClosingDay</p>
         </div>
         <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Dia de vencimento</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">Dia @Model.DueDay</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">Dia @Model.Card.DueDay</p>
         </div>
         <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Conta de pagamento</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">@(Model.PaymentAccountName ?? "—")</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@(Model.Card.PaymentAccountName ?? "—")</p>
         </div>
     </div>
 
-    <div class="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-        As compras, faturas e pagamentos do cartão serão adicionados em uma próxima fase. Por enquanto, esta tela mostra a configuração do cartão.
+    <div class="space-y-3">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Compras recentes</h3>
+            <a asp-controller="CreditCardPurchases" asp-action="Index" asp-route-cardId="@Model.Card.Id" class="text-sm font-medium text-amber-700 hover:text-amber-800">Ver todas (@Model.TotalPurchases)</a>
+        </div>
+
+        @if (Model.RecentPurchases.Count == 0)
+        {
+            <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-sm">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                    <i class="ph ph-shopping-cart text-2xl" aria-hidden="true"></i>
+                </div>
+                <h4 class="mt-4 text-base font-semibold text-slate-950">Nenhuma compra registrada</h4>
+                <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Registre a primeira compra deste cartão para acompanhar gastos e faturas.</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Descrição</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Parcelas</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        @foreach (var purchase in Model.RecentPurchases)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 text-sm text-slate-600">@purchase.PurchaseDate.ToString("dd/MM/yyyy")</td>
+                                <td class="px-4 py-3 text-sm font-medium text-slate-950">
+                                    <a asp-controller="CreditCardPurchases" asp-action="Details" asp-route-cardId="@Model.Card.Id" asp-route-id="@purchase.Id" class="hover:text-amber-700">@purchase.Description</a>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-slate-600">@(purchase.CategoryName ?? "—")</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-600">@(purchase.Installments)x</td>
+                                <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@purchase.TotalAmount.ToBrl()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="space-y-3">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Faturas</h3>
+
+        @if (Model.Statements.Count == 0)
+        {
+            <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-sm">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                    <i class="ph ph-receipt text-2xl" aria-hidden="true"></i>
+                </div>
+                <h4 class="mt-4 text-base font-semibold text-slate-950">Nenhuma fatura ainda</h4>
+                <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">As faturas são criadas automaticamente quando você registra compras no cartão.</p>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Referência</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fechamento</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Em aberto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        @foreach (var statement in Model.Statements)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 text-sm font-medium text-slate-950">@CreditCardStatementStatusViewExtensions.ToReferenceLabel(statement.ReferenceMonth, statement.ReferenceYear)</td>
+                                <td class="px-4 py-3 text-sm text-slate-600">@statement.ClosingDate.ToString("dd/MM/yyyy")</td>
+                                <td class="px-4 py-3 text-sm text-slate-600">@statement.DueDate.ToString("dd/MM/yyyy")</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @statement.Status.ToBadgeClasses()">@statement.Status.ToDisplayName()</span>
+                                </td>
+                                <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@statement.TotalAmount.ToBrl()</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-600">@statement.OpenBalance.ToBrl()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </section>

@@ -1,0 +1,78 @@
+@model CreditCardPurchaseDetailsDto
+
+@{
+    ViewData["Title"] = Model.Description;
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-medium text-amber-700">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@Model.Description</h2>
+            <p class="mt-1 text-sm text-slate-600">Compra no cartão @Model.CreditCardName</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a asp-action="Index" asp-route-cardId="@Model.CreditCardId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Voltar</a>
+            <form asp-action="Delete" asp-route-cardId="@Model.CreditCardId" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Excluir esta compra? As parcelas dela serão removidas das faturas.');">
+                <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md border border-red-300 px-4 text-sm font-medium text-red-700 transition hover:bg-red-50">Excluir compra</button>
+            </form>
+        </div>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Valor total</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.TotalAmount.ToBrl()</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Data da compra</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.PurchaseDate.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Parcelas</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@(Model.Installments)x</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950">@(Model.CategoryName ?? "—")</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <div class="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Observações</p>
+            <p class="mt-2">@Model.Notes</p>
+        </div>
+    }
+
+    <div class="space-y-3">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Parcelas e faturas</h3>
+        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Parcela</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fatura</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                    @foreach (var installment in Model.InstallmentItems)
+                    {
+                        <tr>
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950">@installment.InstallmentNumber de @installment.TotalInstallments</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">@CreditCardStatementStatusViewExtensions.ToReferenceLabel(installment.ReferenceMonth, installment.ReferenceYear)</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">@installment.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@installment.Amount.ToBrl()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
