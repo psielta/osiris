@@ -32,7 +32,7 @@ public sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategor
         var category = await _categories.GetByIdAsync(tenantId, request.Id, cancellationToken);
         if (category is null)
         {
-            return Result.Failure(new ResultError("Categoria não encontrada."));
+            return Result.Failure(new ResultError("Categoria não encontrada.", null, ResultErrorCodes.NotFound));
         }
 
         var normalizedName = FinancialCategory.NormalizeName(request.Name);

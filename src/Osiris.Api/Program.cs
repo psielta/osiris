@@ -38,6 +38,7 @@ try
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<ICurrentUser, CurrentUser>();
     builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<DbUpdateExceptionHandler>();
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
     builder.Services.AddOpenApi();
 

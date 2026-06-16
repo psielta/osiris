@@ -1,3 +1,4 @@
+using Osiris.Application.Common.Models;
 using Osiris.Application.Features.Categories.Commands.ArchiveCategory;
 using Osiris.Application.UnitTests.Features.Categories.Support;
 using Osiris.Domain.Entities;
@@ -41,6 +42,7 @@ public sealed class ArchiveCategoryCommandHandlerTests
         var result = await handler.Handle(new ArchiveCategoryCommand(category.Id), CancellationToken.None);
 
         Assert.True(result.IsFailure);
+        Assert.Contains(result.Errors, error => error.Code == ResultErrorCodes.NotFound);
         Assert.True(category.IsActive);
     }
 }
