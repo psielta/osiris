@@ -36,7 +36,8 @@ RUN dotnet tool install --global dotnet-ef --version 10.0.8
 COPY Directory.Build.props ./
 COPY src ./src
 RUN dotnet restore src/Osiris.Web/Osiris.Web.csproj
-ENTRYPOINT ["dotnet-ef", "database", "update", "--project", "src/Osiris.Infrastructure", "--startup-project", "src/Osiris.Web", "/p:SkipWebAssetBuild=true"]
+RUN dotnet build src/Osiris.Web/Osiris.Web.csproj -c Release --no-restore /p:SkipWebAssetBuild=true
+ENTRYPOINT ["dotnet-ef", "database", "update", "--project", "src/Osiris.Infrastructure", "--startup-project", "src/Osiris.Web", "--configuration", "Release", "--no-build"]
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
