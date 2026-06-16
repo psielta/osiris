@@ -13,15 +13,15 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Painel de @monthLabel</h2>
-            <p class="mt-1 text-sm text-slate-600">Visão de gastos e visão de caixa do mês, sem contar duas vezes o cartão.</p>
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Painel de @monthLabel</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visão de gastos e visão de caixa do mês, sem contar duas vezes o cartão.</p>
         </div>
 
         <form asp-action="Index" method="get" class="flex flex-wrap items-end gap-3">
             <div>
-                <label for="month" class="block text-sm font-medium text-slate-700">Mês</label>
-                <select id="month" name="month" class="mt-1 block h-11 w-40 rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                <label for="month" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Mês</label>
+                <select id="month" name="month" class="mt-1 block h-11 w-40 rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                     @foreach (var option in monthOptions)
                     {
                         <option value="@option.Value" selected="@option.Selected">@option.Text</option>
@@ -29,15 +29,15 @@
                 </select>
             </div>
             <div>
-                <label for="year" class="block text-sm font-medium text-slate-700">Ano</label>
-                <select id="year" name="year" class="mt-1 block h-11 w-28 rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                <label for="year" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Ano</label>
+                <select id="year" name="year" class="mt-1 block h-11 w-28 rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                     @foreach (var option in yearOptions)
                     {
                         <option value="@option.Value" selected="@option.Selected">@option.Text</option>
                     }
                 </select>
             </div>
-            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                 Filtrar
             </button>
         </form>
@@ -52,20 +52,20 @@
             (Done: Model.Onboarding.HasActiveCategories, Title: "Conferir suas categorias", Description: "Você já começa com categorias padrão; ajuste como preferir.", Controller: "Categories", Action: "Index"),
             (Done: Model.Onboarding.HasFirstSpending, Title: "Registrar a primeira compra ou conta", Description: "Lance uma compra no cartão ou uma conta a pagar.", Controller: "Bills", Action: "Index")
         };
-        <div class="rounded-lg border border-amber-200 bg-amber-50/50 p-6 shadow-sm" data-testid="onboarding-card">
-            <h3 class="text-base font-semibold text-slate-950">Primeiros passos no Osiris</h3>
-            <p class="mt-1 text-sm text-slate-600">Configure o básico para acompanhar gastos, faturas e caixa em um só lugar.</p>
+        <div class="rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/10 p-6 shadow-sm" data-testid="onboarding-card">
+            <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Primeiros passos no Osiris</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Configure o básico para acompanhar gastos, faturas e caixa em um só lugar.</p>
             <ol class="mt-4 grid gap-3 lg:grid-cols-2">
                 @foreach (var step in steps)
                 {
                     <li>
-                        <a asp-controller="@step.Controller" asp-action="@step.Action" class="flex items-start gap-3 rounded-md border bg-white px-4 py-3 transition hover:border-amber-400 @(step.Done ? "border-emerald-200" : "border-slate-200")">
-                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full @(step.Done ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500")">
+                        <a asp-controller="@step.Controller" asp-action="@step.Action" class="flex items-start gap-3 rounded-md border bg-white dark:bg-slate-900 px-4 py-3 transition hover:border-amber-400 @(step.Done ? "border-emerald-200 dark:border-emerald-500/30" : "border-slate-200 dark:border-slate-800")">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full @(step.Done ? "bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400")">
                                 <i class="ph @(step.Done ? "ph-check" : "ph-arrow-right") text-sm" aria-hidden="true"></i>
                             </span>
                             <span>
-                                <span class="block text-sm font-medium @(step.Done ? "text-slate-500 line-through" : "text-slate-950")">@step.Title</span>
-                                <span class="block text-xs text-slate-500">@step.Description</span>
+                                <span class="block text-sm font-medium @(step.Done ? "text-slate-500 dark:text-slate-400 line-through" : "text-slate-950 dark:text-slate-100")">@step.Title</span>
+                                <span class="block text-xs text-slate-500 dark:text-slate-400">@step.Description</span>
                             </span>
                         </a>
                     </li>
@@ -81,9 +81,9 @@
             {
                 var alertClasses = alert.Severity switch
                 {
-                    DashboardAlertSeverity.Danger => "border-red-300 bg-red-50 text-red-800",
-                    DashboardAlertSeverity.Warning => "border-amber-300 bg-amber-50 text-amber-800",
-                    _ => "border-sky-300 bg-sky-50 text-sky-800"
+                    DashboardAlertSeverity.Danger => "border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-800 dark:text-red-300",
+                    DashboardAlertSeverity.Warning => "border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300",
+                    _ => "border-sky-300 dark:border-sky-500/40 bg-sky-50 dark:bg-sky-500/10 text-sky-800 dark:text-sky-300"
                 };
                 <div class="flex items-start gap-3 rounded-md border px-4 py-3 text-sm @alertClasses">
                     <i class="ph ph-warning-circle mt-0.5 text-lg" aria-hidden="true"></i>
@@ -94,110 +94,110 @@
     }
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Receitas do mês</p>
-            <p class="mt-3 text-2xl font-semibold text-emerald-700">@Model.CashFlow.IncomeTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Entradas registradas nas contas</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Receitas do mês</p>
+            <p class="mt-3 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">@Model.CashFlow.IncomeTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Entradas registradas nas contas</p>
         </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Gastos do mês</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.SpendingTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Compras no cartão, contas e despesas diretas</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Gastos do mês</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.SpendingTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Compras no cartão, contas e despesas diretas</p>
         </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Saldo em contas</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.CashFlow.TotalAccountsBalance.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Somatório das contas financeiras ativas</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Saldo em contas</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.CashFlow.TotalAccountsBalance.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Somatório das contas financeiras ativas</p>
         </article>
-        <article class="rounded-lg border @(Model.CashFlow.ProjectedCashBalance < 0 ? "border-red-300" : "border-slate-200") bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Saldo previsto do mês</p>
-            <p class="mt-3 text-2xl font-semibold @(Model.CashFlow.ProjectedCashBalance < 0 ? "text-red-700" : "text-slate-950")">@Model.CashFlow.ProjectedCashBalance.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Saldo atual menos contas e faturas em aberto do mês</p>
-        </article>
-
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Contas vencendo no mês</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.BillsDueInMonthTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">@Model.BillsDueInMonthCount conta(s), @Model.BillsOpenInMonthTotal.ToBrl() em aberto</p>
-        </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Faturas vencendo no mês</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.StatementsDueInMonthTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">@Model.StatementsDueInMonthCount fatura(s), @Model.StatementsOpenInMonthTotal.ToBrl() em aberto</p>
-        </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Faturas em aberto (total)</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.TotalOpenStatementsBalance.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Saldo devedor de todas as faturas</p>
-        </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Contas a pagar em aberto (total)</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.TotalOpenBillsBalance.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Todas as contas pendentes, de qualquer mês</p>
+        <article class="rounded-lg border @(Model.CashFlow.ProjectedCashBalance < 0 ? "border-red-300 dark:border-red-500/40" : "border-slate-200 dark:border-slate-800") bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Saldo previsto do mês</p>
+            <p class="mt-3 text-2xl font-semibold @(Model.CashFlow.ProjectedCashBalance < 0 ? "text-red-700 dark:text-red-400" : "text-slate-950 dark:text-slate-100")">@Model.CashFlow.ProjectedCashBalance.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Saldo atual menos contas e faturas em aberto do mês</p>
         </article>
 
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Pagamentos de fatura no mês</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.StatementPaymentsInMonthTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Saída de caixa, sem duplicar gasto por categoria</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Contas vencendo no mês</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.BillsDueInMonthTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">@Model.BillsDueInMonthCount conta(s), @Model.BillsOpenInMonthTotal.ToBrl() em aberto</p>
         </article>
-        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Total parcelado futuro</p>
-            <p class="mt-3 text-2xl font-semibold text-slate-950">@Model.FutureInstallmentsTotal.ToBrl()</p>
-            <p class="mt-2 text-sm text-slate-600">Parcelas em faturas após este mês</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Faturas vencendo no mês</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.StatementsDueInMonthTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">@Model.StatementsDueInMonthCount fatura(s), @Model.StatementsOpenInMonthTotal.ToBrl() em aberto</p>
         </article>
-        <article class="rounded-lg border @(Model.OverdueStatementsCount > 0 ? "border-red-300" : "border-slate-200") bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Faturas vencidas</p>
-            <p class="mt-3 text-2xl font-semibold @(Model.OverdueStatementsCount > 0 ? "text-red-700" : "text-slate-950")">@Model.OverdueStatementsCount</p>
-            <p class="mt-2 text-sm text-slate-600">@Model.OverdueStatementsBalance.ToBrl() em atraso</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Faturas em aberto (total)</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.TotalOpenStatementsBalance.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Saldo devedor de todas as faturas</p>
         </article>
-        <article class="rounded-lg border @(Model.PartiallyPaidStatementsCount > 0 ? "border-amber-300" : "border-slate-200") bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-slate-500">Faturas parcialmente pagas</p>
-            <p class="mt-3 text-2xl font-semibold @(Model.PartiallyPaidStatementsCount > 0 ? "text-amber-700" : "text-slate-950")">@Model.PartiallyPaidStatementsCount</p>
-            <p class="mt-2 text-sm text-slate-600">Faturas com pagamento em andamento</p>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Contas a pagar em aberto (total)</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.TotalOpenBillsBalance.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Todas as contas pendentes, de qualquer mês</p>
+        </article>
+
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pagamentos de fatura no mês</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.StatementPaymentsInMonthTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Saída de caixa, sem duplicar gasto por categoria</p>
+        </article>
+        <article class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total parcelado futuro</p>
+            <p class="mt-3 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.FutureInstallmentsTotal.ToBrl()</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Parcelas em faturas após este mês</p>
+        </article>
+        <article class="rounded-lg border @(Model.OverdueStatementsCount > 0 ? "border-red-300 dark:border-red-500/40" : "border-slate-200 dark:border-slate-800") bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Faturas vencidas</p>
+            <p class="mt-3 text-2xl font-semibold @(Model.OverdueStatementsCount > 0 ? "text-red-700 dark:text-red-400" : "text-slate-950 dark:text-slate-100")">@Model.OverdueStatementsCount</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">@Model.OverdueStatementsBalance.ToBrl() em atraso</p>
+        </article>
+        <article class="rounded-lg border @(Model.PartiallyPaidStatementsCount > 0 ? "border-amber-300 dark:border-amber-500/40" : "border-slate-200 dark:border-slate-800") bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Faturas parcialmente pagas</p>
+            <p class="mt-3 text-2xl font-semibold @(Model.PartiallyPaidStatementsCount > 0 ? "text-amber-700 dark:text-amber-400" : "text-slate-950 dark:text-slate-100")">@Model.PartiallyPaidStatementsCount</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Faturas com pagamento em andamento</p>
         </article>
     </div>
 
     <div class="grid gap-6 xl:grid-cols-2">
         <section class="space-y-3">
-            <h3 class="text-base font-semibold text-slate-950">Gastos por categoria</h3>
+            <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Gastos por categoria</h3>
             @if (!hasSpending)
             {
-                <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-sm">
-                    <p class="text-sm text-slate-600">Nenhum gasto registrado em @monthLabel.</p>
-                    <p class="mt-1 text-sm text-slate-500">Registre compras no cartão, contas a pagar ou despesas nas contas.</p>
+                <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-10 text-center shadow-sm">
+                    <p class="text-sm text-slate-600 dark:text-slate-300">Nenhum gasto registrado em @monthLabel.</p>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Registre compras no cartão, contas a pagar ou despesas nas contas.</p>
                 </div>
             }
             else
             {
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-testid="spending-by-category">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm" data-testid="spending-by-category">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                        <thead class="bg-slate-50 dark:bg-slate-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Cartão</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Contas</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Diretas</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Cartão</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contas</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Diretas</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200">
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                             @foreach (var entry in Model.SpendingByCategory)
                             {
                                 <tr>
-                                    <td class="px-4 py-3 text-sm font-medium text-slate-950">
+                                    <td class="px-4 py-3 text-sm font-medium text-slate-950 dark:text-slate-100">
                                         <span class="inline-flex items-center gap-2">
                                             @if (!string.IsNullOrWhiteSpace(entry.CategoryColor))
                                             {
-                                                <span class="h-3 w-3 rounded-full border border-slate-200" style="background-color: @entry.CategoryColor"></span>
+                                                <span class="h-3 w-3 rounded-full border border-slate-200 dark:border-slate-800" style="background-color: @entry.CategoryColor"></span>
                                             }
                                             @entry.CategoryName
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-right text-sm text-slate-600">@entry.CardPurchasesTotal.ToBrl()</td>
-                                    <td class="px-4 py-3 text-right text-sm text-slate-600">@entry.BillsTotal.ToBrl()</td>
-                                    <td class="px-4 py-3 text-right text-sm text-slate-600">@entry.DirectExpensesTotal.ToBrl()</td>
-                                    <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@entry.Total.ToBrl()</td>
+                                    <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">@entry.CardPurchasesTotal.ToBrl()</td>
+                                    <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">@entry.BillsTotal.ToBrl()</td>
+                                    <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">@entry.DirectExpensesTotal.ToBrl()</td>
+                                    <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950 dark:text-slate-100">@entry.Total.ToBrl()</td>
                                 </tr>
                             }
                         </tbody>
@@ -207,65 +207,65 @@
         </section>
 
         <section class="space-y-3">
-            <h3 class="text-base font-semibold text-slate-950">Visão de caixa</h3>
-            <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Visão de caixa</h3>
+            <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
                 <dl class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <dt class="text-sm text-slate-600">Receitas recebidas</dt>
-                        <dd class="text-sm font-semibold text-emerald-700">+ @Model.CashFlow.IncomeTotal.ToBrl()</dd>
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Receitas recebidas</dt>
+                        <dd class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">+ @Model.CashFlow.IncomeTotal.ToBrl()</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-sm text-slate-600">Contas pagas no mês</dt>
-                        <dd class="text-sm font-semibold text-slate-950">− @Model.CashFlow.BillsPaidTotal.ToBrl()</dd>
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Contas pagas no mês</dt>
+                        <dd class="text-sm font-semibold text-slate-950 dark:text-slate-100">− @Model.CashFlow.BillsPaidTotal.ToBrl()</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-sm text-slate-600">Pagamentos de fatura</dt>
-                        <dd class="text-sm font-semibold text-slate-950">− @Model.CashFlow.StatementPaymentsTotal.ToBrl()</dd>
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Pagamentos de fatura</dt>
+                        <dd class="text-sm font-semibold text-slate-950 dark:text-slate-100">− @Model.CashFlow.StatementPaymentsTotal.ToBrl()</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-sm text-slate-600">Despesas diretas nas contas</dt>
-                        <dd class="text-sm font-semibold text-slate-950">− @Model.CashFlow.DirectExpensesTotal.ToBrl()</dd>
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Despesas diretas nas contas</dt>
+                        <dd class="text-sm font-semibold text-slate-950 dark:text-slate-100">− @Model.CashFlow.DirectExpensesTotal.ToBrl()</dd>
                     </div>
-                    <div class="flex items-center justify-between border-t border-slate-200 pt-3">
-                        <dt class="text-sm text-slate-600">Contas em aberto no mês</dt>
-                        <dd class="text-sm font-semibold text-amber-700">@Model.CashFlow.BillsOpenInMonthTotal.ToBrl()</dd>
+                    <div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-3">
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Contas em aberto no mês</dt>
+                        <dd class="text-sm font-semibold text-amber-700 dark:text-amber-400">@Model.CashFlow.BillsOpenInMonthTotal.ToBrl()</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-sm text-slate-600">Faturas em aberto no mês</dt>
-                        <dd class="text-sm font-semibold text-amber-700">@Model.CashFlow.StatementsOpenInMonthTotal.ToBrl()</dd>
+                        <dt class="text-sm text-slate-600 dark:text-slate-300">Faturas em aberto no mês</dt>
+                        <dd class="text-sm font-semibold text-amber-700 dark:text-amber-400">@Model.CashFlow.StatementsOpenInMonthTotal.ToBrl()</dd>
                     </div>
-                    <div class="flex items-center justify-between border-t border-slate-200 pt-3">
-                        <dt class="text-sm font-medium text-slate-950">Saldo previsto após pagar tudo</dt>
-                        <dd class="text-base font-semibold @(Model.CashFlow.ProjectedCashBalance < 0 ? "text-red-700" : "text-emerald-700")">@Model.CashFlow.ProjectedCashBalance.ToBrl()</dd>
+                    <div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-3">
+                        <dt class="text-sm font-medium text-slate-950 dark:text-slate-100">Saldo previsto após pagar tudo</dt>
+                        <dd class="text-base font-semibold @(Model.CashFlow.ProjectedCashBalance < 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-300")">@Model.CashFlow.ProjectedCashBalance.ToBrl()</dd>
                     </div>
                 </dl>
             </div>
 
-            <h3 class="pt-2 text-base font-semibold text-slate-950">Vencimentos do mês</h3>
+            <h3 class="pt-2 text-base font-semibold text-slate-950 dark:text-slate-100">Vencimentos do mês</h3>
             @if (Model.UpcomingObligations.Count == 0)
             {
-                <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-8 text-center shadow-sm">
-                    <p class="text-sm text-slate-600">Nenhuma conta ou fatura em aberto vencendo em @monthLabel.</p>
+                <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-8 text-center shadow-sm">
+                    <p class="text-sm text-slate-600 dark:text-slate-300">Nenhuma conta ou fatura em aberto vencendo em @monthLabel.</p>
                 </div>
             }
             else
             {
-                <ul class="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" data-testid="upcoming-obligations">
+                <ul class="divide-y divide-slate-200 dark:divide-slate-800 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm" data-testid="upcoming-obligations">
                     @foreach (var obligation in Model.UpcomingObligations)
                     {
                         <li class="flex items-center justify-between gap-4 px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 items-center justify-center rounded-full @(obligation.Kind == UpcomingObligationKind.CreditCardStatement ? "bg-violet-50 text-violet-700" : "bg-amber-50 text-amber-700")">
+                                <span class="flex h-9 w-9 items-center justify-center rounded-full @(obligation.Kind == UpcomingObligationKind.CreditCardStatement ? "bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300" : "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400")">
                                     <i class="ph @(obligation.Kind == UpcomingObligationKind.CreditCardStatement ? "ph-credit-card" : "ph-receipt")" aria-hidden="true"></i>
                                 </span>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-950">@obligation.Description</p>
-                                    <p class="text-xs @(obligation.IsOverdue ? "font-semibold text-red-700" : "text-slate-500")">
+                                    <p class="text-sm font-medium text-slate-950 dark:text-slate-100">@obligation.Description</p>
+                                    <p class="text-xs @(obligation.IsOverdue ? "font-semibold text-red-700 dark:text-red-400" : "text-slate-500 dark:text-slate-400")">
                                         @(obligation.IsOverdue ? "Venceu em" : "Vence em") @obligation.DueDate.ToString("dd/MM/yyyy")
                                     </p>
                                 </div>
                             </div>
-                            <span class="text-sm font-semibold text-slate-950">@obligation.Amount.ToBrl()</span>
+                            <span class="text-sm font-semibold text-slate-950 dark:text-slate-100">@obligation.Amount.ToBrl()</span>
                         </li>
                     }
                 </ul>
@@ -274,12 +274,12 @@
     </div>
 
     <section class="space-y-3">
-        <h3 class="text-base font-semibold text-slate-950">Cartões de crédito</h3>
+        <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Cartões de crédito</h3>
         @if (!hasCards)
         {
-            <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-sm">
-                <p class="text-sm text-slate-600">Nenhum cartão ativo ainda.</p>
-                <a asp-controller="CreditCards" asp-action="Create" class="mt-3 inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800">Cadastrar cartão</a>
+            <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-10 text-center shadow-sm">
+                <p class="text-sm text-slate-600 dark:text-slate-300">Nenhum cartão ativo ainda.</p>
+                <a asp-controller="CreditCards" asp-action="Create" class="mt-3 inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400">Cadastrar cartão</a>
             </div>
         }
         else
@@ -289,41 +289,41 @@
                 {
                     var usageWidth = Math.Clamp(card.UsagePercentage, 0m, 100m);
                     var usageBarColor = card.UsagePercentage >= 80m ? "bg-red-500" : card.UsagePercentage >= 50m ? "bg-amber-500" : "bg-emerald-500";
-                    <article class="space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <article class="space-y-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <h4 class="text-base font-semibold text-slate-950">@card.Name</h4>
-                                <p class="text-xs text-slate-500">Limite @card.Limit.ToBrl()</p>
+                                <h4 class="text-base font-semibold text-slate-950 dark:text-slate-100">@card.Name</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Limite @card.Limit.ToBrl()</p>
                             </div>
-                            <a asp-controller="CreditCards" asp-action="Details" asp-route-id="@card.CreditCardId" class="text-sm font-medium text-amber-700 hover:underline">Ver cartão</a>
+                            <a asp-controller="CreditCards" asp-action="Details" asp-route-id="@card.CreditCardId" class="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline">Ver cartão</a>
                         </div>
 
                         <div>
-                            <div class="flex items-center justify-between text-xs text-slate-600">
+                            <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
                                 <span>Limite usado: @card.UsedLimit.ToBrl()</span>
                                 <span>@card.UsagePercentage.ToString("0.#")%</span>
                             </div>
-                            <div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                            <div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                 <div class="h-full rounded-full @usageBarColor" style="width: @usageWidth.ToString(System.Globalization.CultureInfo.InvariantCulture)%"></div>
                             </div>
-                            <p class="mt-1 text-xs text-slate-500">Disponível: @card.AvailableLimit.ToBrl()</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Disponível: @card.AvailableLimit.ToBrl()</p>
                         </div>
 
-                        <dl class="space-y-2 border-t border-slate-200 pt-3 text-sm">
+                        <dl class="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3 text-sm">
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Fatura de @($"{Model.Month:00}/{Model.Year}")</dt>
-                                <dd class="font-semibold text-slate-950">@card.CurrentStatementTotal.ToBrl()</dd>
+                                <dt class="text-slate-600 dark:text-slate-300">Fatura de @($"{Model.Month:00}/{Model.Year}")</dt>
+                                <dd class="font-semibold text-slate-950 dark:text-slate-100">@card.CurrentStatementTotal.ToBrl()</dd>
                             </div>
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Vencimento</dt>
-                                <dd class="text-slate-950">@(card.CurrentStatementDueDate?.ToString("dd/MM/yyyy") ?? "—")</dd>
+                                <dt class="text-slate-600 dark:text-slate-300">Vencimento</dt>
+                                <dd class="text-slate-950 dark:text-slate-100">@(card.CurrentStatementDueDate?.ToString("dd/MM/yyyy") ?? "—")</dd>
                             </div>
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Situação</dt>
+                                <dt class="text-slate-600 dark:text-slate-300">Situação</dt>
                                 <dd>
                                     @if (card.CurrentStatementStatus is null)
                                     {
-                                        <span class="text-slate-400">Sem fatura</span>
+                                        <span class="text-slate-400 dark:text-slate-500">Sem fatura</span>
                                     }
                                     else
                                     {
@@ -334,22 +334,22 @@
                                 </dd>
                             </div>
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Total pago</dt>
-                                <dd class="text-slate-950">@card.CurrentStatementPaidTotal.ToBrl()</dd>
+                                <dt class="text-slate-600 dark:text-slate-300">Total pago</dt>
+                                <dd class="text-slate-950 dark:text-slate-100">@card.CurrentStatementPaidTotal.ToBrl()</dd>
                             </div>
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Saldo em aberto</dt>
-                                <dd class="font-semibold @(card.CurrentStatementOpenBalance > 0 ? "text-amber-700" : "text-slate-950")">@card.CurrentStatementOpenBalance.ToBrl()</dd>
+                                <dt class="text-slate-600 dark:text-slate-300">Saldo em aberto</dt>
+                                <dd class="font-semibold @(card.CurrentStatementOpenBalance > 0 ? "text-amber-700 dark:text-amber-400" : "text-slate-950 dark:text-slate-100")">@card.CurrentStatementOpenBalance.ToBrl()</dd>
                             </div>
                             <div class="flex items-center justify-between">
-                                <dt class="text-slate-600">Parcelado futuro</dt>
-                                <dd class="text-slate-950">@card.FutureInstallmentsTotal.ToBrl()</dd>
+                                <dt class="text-slate-600 dark:text-slate-300">Parcelado futuro</dt>
+                                <dd class="text-slate-950 dark:text-slate-100">@card.FutureInstallmentsTotal.ToBrl()</dd>
                             </div>
                         </dl>
 
                         @if (card.CurrentStatementId is not null)
                         {
-                            <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@card.CreditCardId" asp-route-id="@card.CurrentStatementId" class="inline-flex h-9 w-full items-center justify-center rounded-md border border-slate-300 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                            <a asp-controller="CreditCardStatements" asp-action="Details" asp-route-cardId="@card.CreditCardId" asp-route-id="@card.CurrentStatementId" class="inline-flex h-9 w-full items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                                 Ver fatura do mês
                             </a>
                         }

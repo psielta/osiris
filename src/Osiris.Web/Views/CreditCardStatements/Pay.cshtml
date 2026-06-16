@@ -8,61 +8,61 @@
 
 <section class="mx-auto max-w-2xl space-y-6">
     <div>
-        <p class="text-sm font-medium text-amber-700">Financeiro</p>
-        <h2 class="mt-2 text-2xl font-semibold text-slate-950">Pagar fatura @referenceLabel — @Model.Statement.CreditCardName</h2>
-        <p class="mt-1 text-sm text-slate-600">Você pode pagar o valor total ou registrar um pagamento parcial. O pagamento não cria uma nova despesa por categoria.</p>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Pagar fatura @referenceLabel — @Model.Statement.CreditCardName</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Você pode pagar o valor total ou registrar um pagamento parcial. O pagamento não cria uma nova despesa por categoria.</p>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total</p>
-            <p class="mt-1 text-lg font-semibold text-slate-950">@Model.Statement.TotalAmount.ToBrl()</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total</p>
+            <p class="mt-1 text-lg font-semibold text-slate-950 dark:text-slate-100">@Model.Statement.TotalAmount.ToBrl()</p>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pago</p>
-            <p class="mt-1 text-lg font-semibold text-emerald-700">@Model.Statement.PaidAmount.ToBrl()</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pago</p>
+            <p class="mt-1 text-lg font-semibold text-emerald-700 dark:text-emerald-300">@Model.Statement.PaidAmount.ToBrl()</p>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Em aberto</p>
-            <p class="mt-1 text-lg font-semibold text-red-600">@Model.Statement.OpenBalance.ToBrl()</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Em aberto</p>
+            <p class="mt-1 text-lg font-semibold text-red-600 dark:text-red-400">@Model.Statement.OpenBalance.ToBrl()</p>
         </div>
     </div>
 
-    <form asp-action="Pay" asp-route-cardId="@Model.Statement.CreditCardId" asp-route-id="@Model.Statement.Id" method="post" class="space-y-5 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+    <form asp-action="Pay" asp-route-cardId="@Model.Statement.CreditCardId" asp-route-id="@Model.Statement.Id" method="post" class="space-y-5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"></div>
 
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
-                <label asp-for="Payment.Amount" class="block text-sm font-medium text-slate-700"></label>
-                <input asp-for="Payment.Amount" type="number" step="0.01" min="0.01" inputmode="decimal" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
-                <p class="mt-1 text-xs text-slate-500">Máximo: @Model.Statement.OpenBalance.ToBrl()</p>
-                <span asp-validation-for="Payment.Amount" class="mt-1 block text-sm text-red-600"></span>
+                <label asp-for="Payment.Amount" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                <input asp-for="Payment.Amount" type="number" step="0.01" min="0.01" inputmode="decimal" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Máximo: @Model.Statement.OpenBalance.ToBrl()</p>
+                <span asp-validation-for="Payment.Amount" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
             </div>
             <div>
-                <label asp-for="Payment.PaidAt" class="block text-sm font-medium text-slate-700"></label>
-                <input asp-for="Payment.PaidAt" type="date" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
-                <span asp-validation-for="Payment.PaidAt" class="mt-1 block text-sm text-red-600"></span>
+                <label asp-for="Payment.PaidAt" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                <input asp-for="Payment.PaidAt" type="date" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                <span asp-validation-for="Payment.PaidAt" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
             </div>
         </div>
 
         <div>
-            <label asp-for="Payment.FinancialAccountId" class="block text-sm font-medium text-slate-700"></label>
-            <select asp-for="Payment.FinancialAccountId" asp-items="Model.AccountOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+            <label asp-for="Payment.FinancialAccountId" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+            <select asp-for="Payment.FinancialAccountId" asp-items="Model.AccountOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                 <option value="">Sem conta (não movimentar caixa)</option>
             </select>
-            <p class="mt-1 text-xs text-slate-500">Se você escolher uma conta, o valor sai do saldo dela como pagamento de fatura.</p>
-            <span asp-validation-for="Payment.FinancialAccountId" class="mt-1 block text-sm text-red-600"></span>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Se você escolher uma conta, o valor sai do saldo dela como pagamento de fatura.</p>
+            <span asp-validation-for="Payment.FinancialAccountId" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
         </div>
 
         <div>
-            <label asp-for="Payment.Notes" class="block text-sm font-medium text-slate-700"></label>
-            <textarea asp-for="Payment.Notes" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"></textarea>
-            <span asp-validation-for="Payment.Notes" class="mt-1 block text-sm text-red-600"></span>
+            <label asp-for="Payment.Notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+            <textarea asp-for="Payment.Notes" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"></textarea>
+            <span asp-validation-for="Payment.Notes" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
         </div>
 
         <div class="flex justify-end gap-3">
-            <a asp-action="Details" asp-route-cardId="@Model.Statement.CreditCardId" asp-route-id="@Model.Statement.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</a>
-            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Registrar pagamento</button>
+            <a asp-action="Details" asp-route-cardId="@Model.Statement.CreditCardId" asp-route-id="@Model.Statement.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Cancelar</a>
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Registrar pagamento</button>
         </div>
     </form>
 </section>

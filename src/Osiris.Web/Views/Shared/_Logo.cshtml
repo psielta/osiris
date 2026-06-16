@@ -1,0 +1,18 @@
+@*
+    Osiris brand mark — a stylized Eye of Horus (Wedjat).
+    Inline SVG using `currentColor` so it follows the theme: slate (light primary) in
+    light mode and amber (dark primary) in dark mode, via the text-color classes below.
+    Model is an optional extra class string (size / responsive visibility).
+*@
+@model string
+@{
+    var sizeClasses = string.IsNullOrWhiteSpace(Model) ? "h-10 w-10" : Model;
+}
+<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Osiris" class="shrink-0 text-slate-950 dark:text-amber-400 @sizeClasses">
+    <path d="M9 21 C19 12 36 10 49 17" />
+    <path d="M7 30 C17 19 43 19 57 29" />
+    <path d="M7 30 C16 40 41 41 57 29" />
+    <circle cx="31" cy="29" r="6" fill="currentColor" stroke="none" />
+    <path d="M17 37 C15 46 15 55 22 55 C27 55 27 48.5 23 48.5 C20 48.5 20 52 22.5 52" />
+    <path d="M43 39 L55 54" />
+</svg>

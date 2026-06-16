@@ -8,54 +8,54 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Compras no cartão</h2>
-            <p class="mt-1 text-sm text-slate-600">Todas as compras dos seus cartões. Para registrar uma nova compra, abra o cartão.</p>
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Compras no cartão</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Todas as compras dos seus cartões. Para registrar uma nova compra, abra o cartão.</p>
         </div>
-        <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+        <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
             Ver cartões
         </a>
     </div>
 
     @if (Model.Count == 0)
     {
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+        <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-12 text-center shadow-sm">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
                 <i class="ph ph-shopping-cart text-3xl" aria-hidden="true"></i>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhuma compra registrada</h3>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Abra um cartão para registrar a primeira compra. Compras parceladas geram parcelas nas faturas seguintes.</p>
+            <h3 class="mt-4 text-base font-semibold text-slate-950 dark:text-slate-100">Nenhuma compra registrada</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-slate-300">Abra um cartão para registrar a primeira compra. Compras parceladas geram parcelas nas faturas seguintes.</p>
             <div class="mt-6">
-                <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800">Ir para cartões</a>
+                <a asp-controller="CreditCards" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800">Ir para cartões</a>
             </div>
         </div>
     }
     else
     {
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
+        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Descrição</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Cartão</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Parcelas</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Data</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Descrição</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Cartão</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Parcelas</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Valor</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
                     @foreach (var purchase in Model)
                     {
                         <tr>
-                            <td class="px-4 py-3 text-sm text-slate-600">@purchase.PurchaseDate.ToString("dd/MM/yyyy")</td>
-                            <td class="px-4 py-3 text-sm font-medium text-slate-950">
+                            <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@purchase.PurchaseDate.ToString("dd/MM/yyyy")</td>
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950 dark:text-slate-100">
                                 <a asp-controller="CreditCardPurchases" asp-action="Details" asp-route-cardId="@purchase.CreditCardId" asp-route-id="@purchase.Id" class="hover:text-amber-700">@purchase.Description</a>
                             </td>
-                            <td class="px-4 py-3 text-sm text-slate-600">@purchase.CreditCardName</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">@(purchase.CategoryName ?? "—")</td>
-                            <td class="px-4 py-3 text-right text-sm text-slate-600">@(purchase.Installments)x</td>
-                            <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950">@purchase.TotalAmount.ToBrl()</td>
+                            <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@purchase.CreditCardName</td>
+                            <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@(purchase.CategoryName ?? "—")</td>
+                            <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">@(purchase.Installments)x</td>
+                            <td class="px-4 py-3 text-right text-sm font-semibold text-slate-950 dark:text-slate-100">@purchase.TotalAmount.ToBrl()</td>
                         </tr>
                     }
                 </tbody>

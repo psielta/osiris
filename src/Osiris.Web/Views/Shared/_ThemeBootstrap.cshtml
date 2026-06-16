@@ -1,0 +1,16 @@
+@*
+    No-flash theme bootstrap. Runs synchronously in <head>, before first paint, so the
+    correct theme is applied with no flash of the wrong colors. Must stay inline and
+    dependency-free (Alpine loads later, deferred). The `theme` store in site.js keeps
+    the same logic for runtime toggling.
+*@
+<script>
+    (function () {
+        try {
+            var mode = localStorage.getItem('theme'); // "light" | "dark" | "system" | null
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var dark = mode === 'dark' || ((mode === 'system' || !mode) && prefersDark);
+            document.documentElement.classList.toggle('dark', dark);
+        } catch (e) { /* localStorage/matchMedia unavailable: stay on light theme */ }
+    })();
+</script>

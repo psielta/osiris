@@ -10,15 +10,15 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Contas</h2>
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Contas</h2>
         </div>
 
         <div class="flex flex-wrap gap-3">
-            <a asp-controller="Docs" asp-action="Show" asp-route-slug="accounts" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+            <a asp-controller="Docs" asp-action="Show" asp-route-slug="accounts" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                 Guia de contas
             </a>
-            <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+            <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
                 Nova conta
             </a>
         </div>
@@ -26,17 +26,17 @@
 
     @if (activeAccounts.Length == 0)
     {
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+        <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-12 text-center shadow-sm">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
                 <i class="ph ph-bank text-3xl" aria-hidden="true"></i>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhuma conta ativa ainda</h3>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Cadastre sua primeira conta para começar a registrar entradas e saídas de dinheiro.</p>
+            <h3 class="mt-4 text-base font-semibold text-slate-950 dark:text-slate-100">Nenhuma conta ativa ainda</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-slate-300">Cadastre sua primeira conta para começar a registrar entradas e saídas de dinheiro.</p>
             <div class="mt-6 flex flex-wrap justify-center gap-3">
-                <a asp-controller="Docs" asp-action="Show" asp-route-slug="accounts" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                <a asp-controller="Docs" asp-action="Show" asp-route-slug="accounts" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                     Guia de contas
                 </a>
-                <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+                <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
                     Nova conta
                 </a>
             </div>
@@ -44,29 +44,29 @@
     }
     else
     {
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
+        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nome</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo atual</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ações</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Nome</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tipo</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saldo atual</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
                     @foreach (var account in activeAccounts)
                     {
                         <tr>
-                            <td class="px-4 py-3 text-sm font-medium text-slate-950">@account.Name</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">@(account.Type.ToDisplayName())</td>
-                            <td class="px-4 py-3 text-right text-sm font-medium text-slate-950">@account.CurrentBalance.ToBrl()</td>
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950 dark:text-slate-100">@account.Name</td>
+                            <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@(account.Type.ToDisplayName())</td>
+                            <td class="px-4 py-3 text-right text-sm font-medium text-slate-950 dark:text-slate-100">@account.CurrentBalance.ToBrl()</td>
                             <td class="px-4 py-3">
                                 <div class="flex flex-wrap justify-end gap-2">
-                                    <a asp-action="Details" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Extrato</a>
-                                    <a asp-action="Edit" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Extrato</a>
+                                    <a asp-action="Edit" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Editar</a>
                                     <form asp-action="Archive" asp-route-id="@account.Id" method="post">
-                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 px-3 text-sm font-medium text-amber-800 transition hover:bg-amber-50">Arquivar</button>
+                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 dark:border-amber-500/40 px-3 text-sm font-medium text-amber-800 dark:text-amber-300 transition hover:bg-amber-50 dark:hover:bg-amber-500/10">Arquivar</button>
                                     </form>
                                 </div>
                             </td>
@@ -80,19 +80,19 @@
     @if (archivedAccounts.Length > 0)
     {
         <div class="space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Arquivadas</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Arquivadas</h3>
 
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <tbody class="divide-y divide-slate-200">
+            <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                         @foreach (var account in archivedAccounts)
                         {
-                            <tr class="bg-slate-50">
-                                <td class="px-4 py-3 text-sm font-medium text-slate-500">@account.Name</td>
-                                <td class="px-4 py-3 text-sm text-slate-500">@(account.Type.ToDisplayName())</td>
-                                <td class="px-4 py-3 text-right text-sm text-slate-500">@account.CurrentBalance.ToBrl()</td>
+                            <tr class="bg-slate-50 dark:bg-slate-800">
+                                <td class="px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">@account.Name</td>
+                                <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">@(account.Type.ToDisplayName())</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">@account.CurrentBalance.ToBrl()</td>
                                 <td class="px-4 py-3 text-right">
-                                    <a asp-action="Details" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Extrato</a>
+                                    <a asp-action="Details" asp-route-id="@account.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Extrato</a>
                                 </td>
                             </tr>
                         }

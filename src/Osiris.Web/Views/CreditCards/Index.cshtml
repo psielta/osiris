@@ -10,15 +10,15 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Cartões</h2>
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Cartões</h2>
         </div>
 
         <div class="flex flex-wrap gap-3">
-            <a asp-controller="Docs" asp-action="Show" asp-route-slug="cards" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+            <a asp-controller="Docs" asp-action="Show" asp-route-slug="cards" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                 Guia de cartões
             </a>
-            <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+            <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
                 Novo cartão
             </a>
         </div>
@@ -26,17 +26,17 @@
 
     @if (activeCards.Length == 0)
     {
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+        <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-12 text-center shadow-sm">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
                 <i class="ph ph-credit-card text-3xl" aria-hidden="true"></i>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhum cartão ativo ainda</h3>
-            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Cadastre seu primeiro cartão de crédito para organizar limite, fechamento e vencimento.</p>
+            <h3 class="mt-4 text-base font-semibold text-slate-950 dark:text-slate-100">Nenhum cartão ativo ainda</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-slate-300">Cadastre seu primeiro cartão de crédito para organizar limite, fechamento e vencimento.</p>
             <div class="mt-6 flex flex-wrap justify-center gap-3">
-                <a asp-controller="Docs" asp-action="Show" asp-route-slug="cards" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                <a asp-controller="Docs" asp-action="Show" asp-route-slug="cards" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
                     Guia de cartões
                 </a>
-                <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+                <a asp-action="Create" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
                     Novo cartão
                 </a>
             </div>
@@ -44,31 +44,31 @@
     }
     else
     {
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
+        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nome</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Limite</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Fechamento</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimento</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ações</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Nome</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Limite</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Fechamento</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Vencimento</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 bg-white">
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
                     @foreach (var card in activeCards)
                     {
                         <tr>
-                            <td class="px-4 py-3 text-sm font-medium text-slate-950">@card.Name</td>
-                            <td class="px-4 py-3 text-right text-sm text-slate-600">@card.Limit.ToBrl()</td>
-                            <td class="px-4 py-3 text-right text-sm text-slate-600">Dia @card.ClosingDay</td>
-                            <td class="px-4 py-3 text-right text-sm text-slate-600">Dia @card.DueDay</td>
+                            <td class="px-4 py-3 text-sm font-medium text-slate-950 dark:text-slate-100">@card.Name</td>
+                            <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">@card.Limit.ToBrl()</td>
+                            <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">Dia @card.ClosingDay</td>
+                            <td class="px-4 py-3 text-right text-sm text-slate-600 dark:text-slate-300">Dia @card.DueDay</td>
                             <td class="px-4 py-3">
                                 <div class="flex flex-wrap justify-end gap-2">
-                                    <a asp-action="Details" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Detalhes</a>
-                                    <a asp-action="Edit" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Detalhes</a>
+                                    <a asp-action="Edit" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Editar</a>
                                     <form asp-action="Archive" asp-route-id="@card.Id" method="post">
-                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 px-3 text-sm font-medium text-amber-800 transition hover:bg-amber-50">Arquivar</button>
+                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-amber-300 dark:border-amber-500/40 px-3 text-sm font-medium text-amber-800 dark:text-amber-300 transition hover:bg-amber-50 dark:hover:bg-amber-500/10">Arquivar</button>
                                     </form>
                                 </div>
                             </td>
@@ -82,20 +82,20 @@
     @if (archivedCards.Length > 0)
     {
         <div class="space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Arquivados</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Arquivados</h3>
 
-            <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <tbody class="divide-y divide-slate-200">
+            <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                         @foreach (var card in archivedCards)
                         {
-                            <tr class="bg-slate-50">
-                                <td class="px-4 py-3 text-sm font-medium text-slate-500">@card.Name</td>
-                                <td class="px-4 py-3 text-right text-sm text-slate-500">@card.Limit.ToBrl()</td>
-                                <td class="px-4 py-3 text-right text-sm text-slate-500">Dia @card.ClosingDay</td>
-                                <td class="px-4 py-3 text-right text-sm text-slate-500">Dia @card.DueDay</td>
+                            <tr class="bg-slate-50 dark:bg-slate-800">
+                                <td class="px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400">@card.Name</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">@card.Limit.ToBrl()</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">Dia @card.ClosingDay</td>
+                                <td class="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">Dia @card.DueDay</td>
                                 <td class="px-4 py-3 text-right">
-                                    <a asp-action="Details" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Detalhes</a>
+                                    <a asp-action="Details" asp-route-id="@card.Id" class="inline-flex h-9 items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Detalhes</a>
                                 </td>
                             </tr>
                         }

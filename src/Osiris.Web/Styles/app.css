@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode by class (Tailwind v4 has no `darkMode: "class"` config option).
+ * The `.dark` class is toggled on <html> by the no-flash bootstrap script and the
+ * Alpine `theme` store. `:where()` keeps specificity at zero so `dark:` utilities
+ * still behave like normal variants.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../Views/**/*.cshtml";
 @source "../Controllers/**/*.cs";
 @source "../Models/**/*.cs";
+@source "../Helpers/**/*.cs";
 
 /*
  * Osiris brand palette
@@ -17,6 +26,17 @@
 
 [x-cloak] {
   display: none !important;
+}
+
+/*
+ * Let native controls (selects, date pickers, scrollbars) follow the active theme.
+ */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
 }
 
 /*

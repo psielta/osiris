@@ -9,71 +9,71 @@
 <section class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-amber-700">Financeiro</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">@Model.Account.Name</h2>
-            <p class="mt-1 text-sm text-slate-600">@(Model.Account.Type.ToDisplayName())</p>
+            <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">@Model.Account.Name</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">@(Model.Account.Type.ToDisplayName())</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a asp-action="Edit" asp-route-id="@Model.Account.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar conta</a>
-            <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Account.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Editar conta</a>
+            <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Voltar</a>
         </div>
     </div>
 
     @if (!Model.Account.IsActive)
     {
-        <div class="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div class="rounded-md border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
             Esta conta está arquivada. Não é possível registrar novos lançamentos.
         </div>
     }
 
     <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo inicial</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.Account.InitialBalance.ToBrl()</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saldo inicial</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">@Model.Account.InitialBalance.ToBrl()</p>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo atual</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.Account.CurrentBalance.ToBrl()</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saldo atual</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">@Model.Account.CurrentBalance.ToBrl()</p>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Lançamentos</p>
-            <p class="mt-2 text-xl font-semibold text-slate-950">@Model.Account.Movements.Count</p>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lançamentos</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">@Model.Account.Movements.Count</p>
         </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-3 lg:col-span-2">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Extrato</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Extrato</h3>
             @if (Model.Account.Movements.Count == 0)
             {
-                <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-12 text-center shadow-sm">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
                         <i class="ph ph-receipt text-3xl" aria-hidden="true"></i>
                     </div>
-                    <h3 class="mt-4 text-base font-semibold text-slate-950">Nenhum lançamento ainda</h3>
-                    <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">Registre uma receita ou uma despesa para acompanhar o saldo desta conta.</p>
+                    <h3 class="mt-4 text-base font-semibold text-slate-950 dark:text-slate-100">Nenhum lançamento ainda</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-slate-300">Registre uma receita ou uma despesa para acompanhar o saldo desta conta.</p>
                 </div>
             }
             else
             {
-                <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                        <thead class="bg-slate-50 dark:bg-slate-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Data</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Descrição</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Data</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Descrição</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tipo</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Valor</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 bg-white">
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
                             @foreach (var movement in Model.Account.Movements)
                             {
                                 <tr>
-                                    <td class="px-4 py-3 text-sm text-slate-600">@movement.OccurredOn.ToString("dd/MM/yyyy")</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-slate-950">@movement.Description</td>
-                                    <td class="px-4 py-3 text-sm text-slate-600">@(movement.Type.ToDisplayName())</td>
-                                    <td class="px-4 py-3 text-right text-sm font-semibold @(movement.IsInflow ? "text-emerald-600" : "text-red-600")">
+                                    <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@movement.OccurredOn.ToString("dd/MM/yyyy")</td>
+                                    <td class="px-4 py-3 text-sm font-medium text-slate-950 dark:text-slate-100">@movement.Description</td>
+                                    <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">@(movement.Type.ToDisplayName())</td>
+                                    <td class="px-4 py-3 text-right text-sm font-semibold @(movement.IsInflow ? "text-emerald-600" : "text-red-600 dark:text-red-400")">
                                         @(movement.IsInflow ? "+" : "−")@movement.Amount.ToBrl()
                                     </td>
                                 </tr>
@@ -85,51 +85,51 @@
         </div>
 
         <div class="space-y-3">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Novo lançamento</h3>
-            <form asp-action="CreateMovement" asp-route-id="@Model.Account.Id" method="post" class="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Novo lançamento</h3>
+            <form asp-action="CreateMovement" asp-route-id="@Model.Account.Id" method="post" class="space-y-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"></div>
 
                 <div>
-                    <label asp-for="Movement.Type" class="block text-sm font-medium text-slate-700"></label>
-                    <select asp-for="Movement.Type" asp-items="movementTypeOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                    <label asp-for="Movement.Type" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <select asp-for="Movement.Type" asp-items="movementTypeOptions" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                         <option value="">Selecione o tipo</option>
                     </select>
-                    <span asp-validation-for="Movement.Type" class="mt-1 block text-sm text-red-600"></span>
+                    <span asp-validation-for="Movement.Type" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
                 <div>
-                    <label asp-for="Movement.Amount" class="block text-sm font-medium text-slate-700"></label>
-                    <input asp-for="Movement.Amount" type="number" step="0.01" min="0" inputmode="decimal" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
-                    <span asp-validation-for="Movement.Amount" class="mt-1 block text-sm text-red-600"></span>
+                    <label asp-for="Movement.Amount" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <input asp-for="Movement.Amount" type="number" step="0.01" min="0" inputmode="decimal" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                    <span asp-validation-for="Movement.Amount" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
                 <div>
-                    <label asp-for="Movement.OccurredOn" class="block text-sm font-medium text-slate-700"></label>
-                    <input asp-for="Movement.OccurredOn" type="date" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
-                    <span asp-validation-for="Movement.OccurredOn" class="mt-1 block text-sm text-red-600"></span>
+                    <label asp-for="Movement.OccurredOn" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <input asp-for="Movement.OccurredOn" type="date" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                    <span asp-validation-for="Movement.OccurredOn" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
                 <div>
-                    <label asp-for="Movement.Description" class="block text-sm font-medium text-slate-700"></label>
-                    <input asp-for="Movement.Description" autocomplete="off" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
-                    <span asp-validation-for="Movement.Description" class="mt-1 block text-sm text-red-600"></span>
+                    <label asp-for="Movement.Description" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <input asp-for="Movement.Description" autocomplete="off" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
+                    <span asp-validation-for="Movement.Description" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
                 <div>
-                    <label asp-for="Movement.CategoryId" class="block text-sm font-medium text-slate-700"></label>
-                    <select asp-for="Movement.CategoryId" asp-items="Model.Categories" class="mt-1 block h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                    <label asp-for="Movement.CategoryId" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <select asp-for="Movement.CategoryId" asp-items="Model.Categories" class="mt-1 block h-11 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                         <option value="">Sem categoria</option>
                     </select>
-                    <span asp-validation-for="Movement.CategoryId" class="mt-1 block text-sm text-red-600"></span>
+                    <span asp-validation-for="Movement.CategoryId" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
                 <div>
-                    <label asp-for="Movement.Notes" class="block text-sm font-medium text-slate-700"></label>
-                    <textarea asp-for="Movement.Notes" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"></textarea>
-                    <span asp-validation-for="Movement.Notes" class="mt-1 block text-sm text-red-600"></span>
+                    <label asp-for="Movement.Notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
+                    <textarea asp-for="Movement.Notes" rows="2" class="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"></textarea>
+                    <span asp-validation-for="Movement.Notes" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
                 </div>
 
-                <button type="submit" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Registrar lançamento</button>
+                <button type="submit" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Registrar lançamento</button>
             </form>
         </div>
     </div>

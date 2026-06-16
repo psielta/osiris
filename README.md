@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="src/Osiris.Web/wwwroot/images/osiris-logo.svg" alt="Osiris logo" width="180" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="src/Osiris.Web/wwwroot/images/osiris-logo-dark.svg" />
+    <img src="src/Osiris.Web/wwwroot/images/osiris-logo-light.svg" alt="Osiris logo" width="120" />
+  </picture>
 </p>
 
 <h1 align="center">Osiris</h1>

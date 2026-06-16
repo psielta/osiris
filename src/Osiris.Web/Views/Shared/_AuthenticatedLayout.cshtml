@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Osiris</title>
     <partial name="_Favicons" />
+    <partial name="_ThemeBootstrap" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <script src="https://unpkg.com/@@phosphor-icons/web@2.1.1"></script>
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
+<body class="min-h-screen bg-slate-100 text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100">
     <div x-data="{ sidebarOpen: false, userMenuOpen: false }" class="min-h-screen">
         <partial name="_Sidebar" />
 

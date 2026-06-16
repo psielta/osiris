@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Osiris</title>
     <partial name="_Favicons" />
+    <partial name="_ThemeBootstrap" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <script src="https://unpkg.com/@@phosphor-icons/web@2.1.1"></script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-950 antialiased">
+<body class="min-h-screen bg-slate-50 text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100">
+    <div class="fixed right-4 top-4 z-50">
+        <partial name="_ThemeToggle" />
+    </div>
+
     <main>
         @RenderBody()
     </main>
