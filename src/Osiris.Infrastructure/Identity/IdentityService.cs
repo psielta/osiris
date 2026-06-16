@@ -118,6 +118,62 @@ public sealed class IdentityService : IIdentityService
         return Result<string?>.Success(token);
     }
 
+    public async Task<Result<UserProfileDto>> CheckCredentialsAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(email.Trim());
+        if (user is null)
+        {
+            return Result<UserProfileDto>.Failure(
+                new ResultError("E-mail ou senha inválidos.", null, ResultErrorCodes.Unauthorized));
+        }
+
+        // CheckPasswordSignInAsync validates the password and honors lockout WITHOUT issuing a cookie.
+        var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+        if (result.IsLockedOut)
+        {
+            return Result<UserProfileDto>.Failure(
+                new ResultError("Esta conta está temporariamente bloqueada.", null, ResultErrorCodes.LockedOut));
+        }
+
+        if (!result.Succeeded)
+        {
+            return Result<UserProfileDto>.Failure(
+                new ResultError("E-mail ou senha inválidos.", null, ResultErrorCodes.Unauthorized));
+        }
+
+        return await BuildProfileAsync(user, cancellationToken);
+    }
+
+    public async Task<Result<UserProfileDto>> GetProfileAsync(string userId, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Result<UserProfileDto>.Failure(
+                new ResultError("Usuário não encontrado.", null, ResultErrorCodes.NotFound));
+        }
+
+        return await BuildProfileAsync(user, cancellationToken);
+    }
+
+    private async Task<Result<UserProfileDto>> BuildProfileAsync(
+        ApplicationUser user,
+        CancellationToken cancellationToken)
+    {
+        var tenant = await _dbContext.Tenants
+            .FirstOrDefaultAsync(tenant => tenant.Id == user.TenantId, cancellationToken);
+
+        return Result<UserProfileDto>.Success(new UserProfileDto(
+            user.Id,
+            user.Email ?? string.Empty,
+            user.FullName,
+            user.TenantId,
+            tenant?.Name ?? string.Empty));
+    }
+
     private static IEnumerable<ResultError> MapIdentityErrors(IEnumerable<IdentityError> errors)
     {
         return errors.Select(error =>

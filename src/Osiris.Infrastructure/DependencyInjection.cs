@@ -53,7 +53,11 @@ public static class DependencyInjection
             options.SlidingExpiration = true;
         });
 
+        services.Configure<RefreshTokenOptions>(configuration.GetSection("Jwt"));
+
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddSingleton<IRefreshTokenFactory, RefreshTokenFactory>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IFinancialAccountRepository, FinancialAccountRepository>();
         services.AddScoped<IFinancialAccountMovementRepository, FinancialAccountMovementRepository>();

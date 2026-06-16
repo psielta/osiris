@@ -32,6 +32,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Bill> Bills => Set<Bill>();
 
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

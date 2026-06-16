@@ -130,6 +130,19 @@ public sealed class RegisterUserCommandHandlerTests
             throw new NotSupportedException();
         }
 
+        public Task<Result<UserProfileDto>> CheckCredentialsAsync(
+            string email,
+            string password,
+            CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task<Result<UserProfileDto>> GetProfileAsync(string userId, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException();
+        }
+
         public Task<Result> SignInAsync(string userId, CancellationToken cancellationToken)
         {
             SignedInUserId = userId;
