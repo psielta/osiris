@@ -29,4 +29,27 @@
     <string name="home_logout">Sair</string>
 
     <string name="coming_soon">Em breve.</string>
+
+    <!-- Categories -->
+    <string name="categories_title">Categorias</string>
+    <string name="category_new">Nova categoria</string>
+    <string name="category_edit">Editar categoria</string>
+    <string name="category_name_label">Nome</string>
+    <string name="category_type_label">Tipo</string>
+    <string name="category_type_income">Receita</string>
+    <string name="category_type_expense">Despesa</string>
+    <string name="category_color_label">Cor</string>
+    <string name="category_save">Salvar</string>
+    <string name="category_archive">Arquivar</string>
+    <string name="category_delete">Excluir</string>
+    <string name="category_edit_action">Editar</string>
+    <string name="category_active_section">Ativas</string>
+    <string name="category_archived_section">Arquivadas</string>
+    <string name="category_delete_confirm">Excluir \"%1$s\"?</string>
+    <string name="category_archive_confirm">Arquivar \"%1$s\"?</string>
+    <string name="categories_empty">Nenhuma categoria ainda.</string>
+    <string name="retry">Tentar novamente</string>
+    <string name="back">Voltar</string>
+    <string name="actions">Ações</string>
+    <string name="cancel">Cancelar</string>
 </resources>

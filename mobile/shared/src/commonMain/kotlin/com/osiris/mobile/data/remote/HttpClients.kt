@@ -12,6 +12,8 @@ import io.ktor.serialization.kotlinx.json.json
 
 /** Anonymous client (no bearer) used for login/register/refresh. */
 internal fun buildPlainClient(): HttpClient = HttpClient(osirisHttpEngine()) {
+    // Non-2xx throws a ResponseException so NetworkErrorMapper can parse the ProblemDetails body.
+    expectSuccess = true
     install(ContentNegotiation) { json(osirisJson) }
     install(Logging) { level = LogLevel.INFO }
 }
@@ -21,6 +23,9 @@ internal fun buildPlainClient(): HttpClient = HttpClient(osirisHttpEngine()) {
  * a 401, refreshes (single-flight, with rotation) through [SessionManager] and retries the request.
  */
 internal fun buildAuthClient(session: SessionManager): HttpClient = HttpClient(osirisHttpEngine()) {
+    // Non-2xx throws a ResponseException so NetworkErrorMapper can parse the ProblemDetails body.
+    // The Bearer plugin still intercepts 401 for token refresh before this validator sees the response.
+    expectSuccess = true
     install(ContentNegotiation) { json(osirisJson) }
     install(Logging) { level = LogLevel.INFO }
     install(Auth) {

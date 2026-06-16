@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     onSignedOut: () -> Unit,
+    onNavigateCategories: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -76,6 +78,13 @@ fun HomeScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+            OutlinedButton(
+                onClick = onNavigateCategories,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.categories_title))
+            }
+            Spacer(Modifier.height(12.dp))
             Button(
                 onClick = viewModel::signOut,
                 enabled = !state.isSigningOut,

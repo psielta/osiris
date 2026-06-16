@@ -4,11 +4,14 @@ import com.osiris.mobile.android.BuildConfig
 import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.data.session.DataStoreTokenStore
 import com.osiris.mobile.data.session.TokenStore
+import com.osiris.mobile.presentation.categories.CategoriesListViewModel
+import com.osiris.mobile.presentation.categories.CategoryFormViewModel
 import com.osiris.mobile.presentation.home.HomeViewModel
 import com.osiris.mobile.presentation.login.LoginViewModel
 import com.osiris.mobile.presentation.register.RegisterViewModel
 import com.osiris.mobile.presentation.splash.SplashViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -20,4 +23,6 @@ val appModule = module {
     viewModelOf(::RegisterViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::SplashViewModel)
+    viewModelOf(::CategoriesListViewModel)
+    viewModel { parameters -> CategoryFormViewModel(get(), parameters.getOrNull<String>()) }
 }

@@ -36,8 +36,11 @@ object NetworkErrorMapper {
             if (fieldErrors.isNotEmpty()) {
                 return OsirisError(fieldErrors.values.first(), fieldErrors)
             }
-            if (!problem.title.isNullOrBlank()) {
-                return OsirisError(problem.title)
+            // Prefer the friendly detail (e.g. the 409 "categoria em uso" or the 401 message) over the
+            // generic reason-phrase title ("Conflict"/"Unauthorized").
+            val message = problem.detail?.takeIf { it.isNotBlank() } ?: problem.title?.takeIf { it.isNotBlank() }
+            if (message != null) {
+                return OsirisError(message)
             }
         }
         runCatching {

@@ -1,9 +1,13 @@
 package com.osiris.mobile.android.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.osiris.mobile.android.feature.categories.CategoriesListScreen
+import com.osiris.mobile.android.feature.categories.CategoryFormScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
 import com.osiris.mobile.android.feature.login.LoginScreen
 import com.osiris.mobile.android.feature.register.RegisterScreen
@@ -55,6 +59,29 @@ fun OsirisNavHost() {
                         popUpTo(Routes.Home) { inclusive = true }
                     }
                 },
+                onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
+            )
+        }
+        composable(Routes.CategoriesList) {
+            CategoriesListScreen(
+                onCreate = { navController.navigate(Routes.categoryForm()) },
+                onEdit = { id -> navController.navigate(Routes.categoryForm(id)) },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.CategoryFormPattern,
+            arguments = listOf(
+                navArgument(Routes.CategoryIdArg) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
+            CategoryFormScreen(
+                categoryId = backStackEntry.arguments?.getString(Routes.CategoryIdArg),
+                onDone = { navController.popBackStack() },
             )
         }
     }
