@@ -53,6 +53,26 @@ services:
       - osiris-net
       - trx_trxnet
 
+  osiris-api:
+    build:
+      context: .
+      dockerfile: src/Osiris.Api/Dockerfile
+      target: runtime
+    container_name: osiris-api
+    restart: unless-stopped
+    env_file:
+      - ${OSIRIS_ENV_FILE:-.env}
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:13455
+      ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY}
+    depends_on:
+      osiris-db:
+        condition: service_healthy
+    networks:
+      - osiris-net
+      - trx_trxnet
+
 networks:
   osiris-net:
     internal: true

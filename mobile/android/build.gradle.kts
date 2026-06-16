@@ -23,11 +23,14 @@ android {
 
     buildTypes {
         getByName("debug") {
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:13455/\"")
+            // Defaults to the emulator's host loopback; override for a prod-pointing test build with
+            // -PapiBaseUrl=https://osiris-api.mateussalgueiro.com.br/
+            val apiBaseUrl = (project.findProperty("apiBaseUrl") as String?) ?: "http://10.0.2.2:13455/"
+            buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         }
         getByName("release") {
             isMinifyEnabled = false
-            buildConfigField("String", "BASE_URL", "\"https://osiris.example.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://osiris-api.mateussalgueiro.com.br/\"")
         }
     }
 

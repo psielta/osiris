@@ -9,8 +9,9 @@ usage() {
 Usage: ./deploy.sh <command>
 
 Commands:
-  all       Pull origin/main, build, migrate and start Osiris
+  all       Pull origin/main, build, migrate and start Osiris (Web + API)
   web       Pull origin/main, build/update only the Web app after migrations
+  api       Pull origin/main, migrate and build/update only the mobile API
   migrate   Run EF Core migrations against the production database
   status    Show compose status and resource summary
   logs [S]  Follow logs. Optional service name S.
@@ -50,9 +51,18 @@ update_web() {
   "${COMPOSE[@]}" up -d osiris-web
 }
 
+update_api() {
+  require_prod_files
+  echo ">>> Building API image"
+  "${COMPOSE[@]}" build osiris-api
+  echo ">>> Recreating API"
+  "${COMPOSE[@]}" up -d osiris-api
+}
+
 update_all() {
   run_migrations
   update_web
+  update_api
 }
 
 status() {
@@ -86,6 +96,12 @@ case "$cmd" in
     pull_main
     run_migrations
     update_web
+    status
+    ;;
+  api)
+    pull_main
+    run_migrations
+    update_api
     status
     ;;
   migrate)

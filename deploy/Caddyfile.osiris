@@ -2,3 +2,8 @@ osiris.mateussalgueiro.com.br {
     encode zstd gzip
     reverse_proxy osiris-web:13453
 }
+
+osiris-api.mateussalgueiro.com.br {
+    encode zstd gzip
+    reverse_proxy osiris-api:13455
+}
