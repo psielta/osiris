@@ -26,9 +26,10 @@
     <Version>0.10.1</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SkipWebAssetBuild Condition="'$(SkipWebAssetBuild)' == ''">false</SkipWebAssetBuild>
   </PropertyGroup>
 
-  <Target Name="BuildTailwind" BeforeTargets="Build">
+  <Target Name="BuildTailwind" BeforeTargets="Build" Condition="'$(SkipWebAssetBuild)' != 'true'">
     <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules')" />
     <Exec Command="npm run copy:assets" WorkingDirectory="$(MSBuildProjectDirectory)" />
     <Exec Command="npm run css:build" WorkingDirectory="$(MSBuildProjectDirectory)" />

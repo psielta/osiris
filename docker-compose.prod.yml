@@ -1,0 +1,64 @@
+services:
+  osiris-db:
+    image: postgres:17-alpine
+    container_name: osiris-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+    volumes:
+      - osiris-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - osiris-net
+
+  osiris-migrate:
+    build:
+      context: .
+      dockerfile: src/Osiris.Web/Dockerfile
+      target: migrations
+    container_name: osiris-migrate
+    restart: "no"
+    env_file:
+      - ${OSIRIS_ENV_FILE:-.env}
+    environment:
+      ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    depends_on:
+      osiris-db:
+        condition: service_healthy
+    networks:
+      - osiris-net
+
+  osiris-web:
+    build:
+      context: .
+      dockerfile: src/Osiris.Web/Dockerfile
+      target: runtime
+    container_name: osiris-web
+    restart: unless-stopped
+    env_file:
+      - ${OSIRIS_ENV_FILE:-.env}
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:13453
+      ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    depends_on:
+      osiris-db:
+        condition: service_healthy
+    networks:
+      - osiris-net
+      - trx_trxnet
+
+networks:
+  osiris-net:
+    internal: true
+  trx_trxnet:
+    external: true
+    name: trx_trxnet
+
+volumes:
+  osiris-pgdata:

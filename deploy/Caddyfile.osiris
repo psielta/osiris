@@ -1,0 +1,4 @@
+osiris.mateussalgueiro.com.br {
+    encode zstd gzip
+    reverse_proxy osiris-web:13453
+}
