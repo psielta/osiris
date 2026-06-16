@@ -4,6 +4,10 @@ import com.osiris.mobile.android.BuildConfig
 import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.data.session.DataStoreTokenStore
 import com.osiris.mobile.data.session.TokenStore
+import com.osiris.mobile.presentation.accounts.AccountFormViewModel
+import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
+import com.osiris.mobile.presentation.accounts.AccountsListViewModel
+import com.osiris.mobile.presentation.accounts.MovementFormViewModel
 import com.osiris.mobile.presentation.categories.CategoriesListViewModel
 import com.osiris.mobile.presentation.categories.CategoryFormViewModel
 import com.osiris.mobile.presentation.home.HomeViewModel
@@ -25,4 +29,8 @@ val appModule = module {
     viewModelOf(::SplashViewModel)
     viewModelOf(::CategoriesListViewModel)
     viewModel { parameters -> CategoryFormViewModel(get(), parameters.getOrNull<String>()) }
+    viewModelOf(::AccountsListViewModel)
+    viewModel { parameters -> AccountFormViewModel(get(), parameters.getOrNull<String>()) }
+    viewModel { parameters -> AccountStatementViewModel(get(), parameters.get<String>()) }
+    viewModel { parameters -> MovementFormViewModel(get(), get(), parameters.get<String>()) }
 }

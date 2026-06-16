@@ -1,0 +1,26 @@
+package com.osiris.mobile.domain.repository
+
+import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.domain.model.Account
+import com.osiris.mobile.domain.model.AccountEdit
+import com.osiris.mobile.domain.model.AccountStatement
+import com.osiris.mobile.domain.model.AccountType
+import com.osiris.mobile.domain.model.MovementType
+
+interface AccountRepository {
+    suspend fun list(): OsirisResult<List<Account>>
+    suspend fun get(id: String): OsirisResult<AccountEdit>
+    suspend fun create(name: String, type: AccountType, initialBalance: Double): OsirisResult<Unit>
+    suspend fun update(id: String, name: String, type: AccountType): OsirisResult<Unit>
+    suspend fun archive(id: String): OsirisResult<Unit>
+    suspend fun statement(id: String): OsirisResult<AccountStatement>
+    suspend fun createMovement(
+        accountId: String,
+        type: MovementType,
+        amount: Double,
+        occurredOn: String,
+        description: String,
+        categoryId: String?,
+        notes: String?,
+    ): OsirisResult<Unit>
+}

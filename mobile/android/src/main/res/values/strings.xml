@@ -52,4 +52,50 @@
     <string name="back">Voltar</string>
     <string name="actions">Ações</string>
     <string name="cancel">Cancelar</string>
+
+    <!-- Accounts -->
+    <string name="accounts_title">Contas</string>
+    <string name="account_new">Nova conta</string>
+    <string name="account_edit">Editar conta</string>
+    <string name="account_name_label">Nome</string>
+    <string name="account_type_label">Tipo</string>
+    <string name="account_type_checking">Conta corrente</string>
+    <string name="account_type_savings">Poupança</string>
+    <string name="account_type_cash">Dinheiro</string>
+    <string name="account_type_other">Outra</string>
+    <string name="account_initial_balance_label">Saldo inicial</string>
+    <string name="account_balance_locked">O saldo é definido na criação e só muda por lançamentos.</string>
+    <string name="account_save">Salvar</string>
+    <string name="account_archive">Arquivar</string>
+    <string name="account_edit_action">Editar</string>
+    <string name="account_active_section">Ativas</string>
+    <string name="account_archived_section">Arquivadas</string>
+    <string name="account_archive_confirm">Arquivar \"%1$s\"?</string>
+    <string name="accounts_empty">Nenhuma conta ainda.</string>
+
+    <!-- Statement -->
+    <string name="statement_title">Extrato</string>
+    <string name="statement_initial_balance">Saldo inicial</string>
+    <string name="statement_current_balance">Saldo atual</string>
+    <string name="statement_empty">Nenhum lançamento ainda.</string>
+
+    <!-- Movements -->
+    <string name="movement_new">Novo lançamento</string>
+    <string name="movement_type_label">Tipo</string>
+    <string name="movement_income">Entrada</string>
+    <string name="movement_expense">Saída</string>
+    <string name="movement_amount_label">Valor</string>
+    <string name="movement_date_label">Data</string>
+    <string name="movement_description_label">Descrição</string>
+    <string name="movement_category_label">Categoria</string>
+    <string name="movement_no_category">Sem categoria</string>
+    <string name="movement_notes_label">Observações</string>
+    <string name="movement_save">Registrar</string>
+    <string name="movement_type_income">Entrada</string>
+    <string name="movement_type_expense">Saída</string>
+    <string name="movement_type_bill">Pagamento de conta</string>
+    <string name="movement_type_card">Pagamento de fatura</string>
+    <string name="movement_type_transfer_in">Transferência recebida</string>
+    <string name="movement_type_transfer_out">Transferência enviada</string>
+    <string name="movement_type_adjustment">Ajuste</string>
 </resources>

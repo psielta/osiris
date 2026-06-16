@@ -31,6 +31,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     onSignedOut: () -> Unit,
     onNavigateCategories: () -> Unit,
+    onNavigateAccounts: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -78,6 +79,13 @@ fun HomeScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+            OutlinedButton(
+                onClick = onNavigateAccounts,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.accounts_title))
+            }
+            Spacer(Modifier.height(12.dp))
             OutlinedButton(
                 onClick = onNavigateCategories,
                 modifier = Modifier.fillMaxWidth(),

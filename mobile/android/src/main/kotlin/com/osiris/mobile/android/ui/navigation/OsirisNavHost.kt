@@ -6,6 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.osiris.mobile.android.feature.accounts.AccountFormScreen
+import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
+import com.osiris.mobile.android.feature.accounts.AccountsListScreen
+import com.osiris.mobile.android.feature.accounts.MovementFormScreen
 import com.osiris.mobile.android.feature.categories.CategoriesListScreen
 import com.osiris.mobile.android.feature.categories.CategoryFormScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
@@ -60,6 +64,7 @@ fun OsirisNavHost() {
                     }
                 },
                 onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
+                onNavigateAccounts = { navController.navigate(Routes.AccountsList) },
             )
         }
         composable(Routes.CategoriesList) {
@@ -81,6 +86,49 @@ fun OsirisNavHost() {
         ) { backStackEntry ->
             CategoryFormScreen(
                 categoryId = backStackEntry.arguments?.getString(Routes.CategoryIdArg),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.AccountsList) {
+            AccountsListScreen(
+                onCreate = { navController.navigate(Routes.accountForm()) },
+                onEdit = { id -> navController.navigate(Routes.accountForm(id)) },
+                onOpenStatement = { id -> navController.navigate(Routes.accountStatement(id)) },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.AccountFormPattern,
+            arguments = listOf(
+                navArgument(Routes.AccountIdArg) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
+            AccountFormScreen(
+                accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.AccountStatementPattern,
+            arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty()
+            AccountStatementScreen(
+                accountId = accountId,
+                onAddMovement = { navController.navigate(Routes.movementForm(accountId)) },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.MovementFormPattern,
+            arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            MovementFormScreen(
+                accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
                 onDone = { navController.popBackStack() },
             )
         }

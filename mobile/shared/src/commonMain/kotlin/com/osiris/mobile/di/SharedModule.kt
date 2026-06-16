@@ -1,12 +1,15 @@
 package com.osiris.mobile.di
 
+import com.osiris.mobile.data.remote.AccountApi
 import com.osiris.mobile.data.remote.AuthApi
 import com.osiris.mobile.data.remote.CategoryApi
 import com.osiris.mobile.data.remote.buildAuthClient
 import com.osiris.mobile.data.remote.buildPlainClient
+import com.osiris.mobile.data.repository.AccountRepositoryImpl
 import com.osiris.mobile.data.repository.AuthRepositoryImpl
 import com.osiris.mobile.data.repository.CategoryRepositoryImpl
 import com.osiris.mobile.data.session.SessionManager
+import com.osiris.mobile.domain.repository.AccountRepository
 import com.osiris.mobile.domain.repository.AuthRepository
 import com.osiris.mobile.domain.repository.CategoryRepository
 import io.ktor.client.HttpClient
@@ -25,4 +28,6 @@ val sharedModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single { CategoryApi(get(named("auth")), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get()) }
+    single { AccountApi(get(named("auth")), get()) }
+    single<AccountRepository> { AccountRepositoryImpl(get()) }
 }
