@@ -162,6 +162,33 @@ public sealed class DashboardFlowTests : IAsyncLifetime
         Assert.DoesNotContain("250,00", secondHtml);
     }
 
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Index_WhenSpendingExists_ShouldRenderPieChart()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        await SeedCardWithPurchaseAsync(client, "317.00");
+
+        var today = BrazilToday();
+        var html = await client.GetStringAsync($"/dashboard?month={today.Month}&year={today.Year}");
+
+        Assert.Contains("spending-pie-chart", html);
+        Assert.Contains("lib/chartjs/chart.umd.js", html);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Index_WhenNoSpending_ShouldNotRenderPieChart()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var today = BrazilToday();
+        var html = await client.GetStringAsync($"/dashboard?month={today.Month}&year={today.Year}");
+
+        Assert.DoesNotContain("spending-pie-chart", html);
+        Assert.DoesNotContain("chart.umd.js", html);
+    }
+
     private sealed record SeededCardPurchase(Guid CardId, Guid StatementId);
 
     private async Task<SeededCardPurchase> SeedCardWithPurchaseAsync(

@@ -8,6 +8,7 @@
     var monthLabel = $"{BrazilMonths.MonthName(Model.Month)} de {Model.Year}";
     var hasCards = Model.CreditCards.Count > 0;
     var hasSpending = Model.SpendingByCategory.Count > 0;
+    var spendingChartSlices = Model.SpendingByCategory.BuildSpendingChartSlices();
 }
 
 <section class="space-y-6">
@@ -170,6 +171,11 @@
             }
             else
             {
+                <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <div class="relative h-64">
+                        <canvas id="spending-pie-chart" data-testid="spending-pie-chart" role="img" aria-label="Distribuição dos gastos por categoria"></canvas>
+                    </div>
+                </div>
                 <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm" data-testid="spending-by-category">
                     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
                         <thead class="bg-slate-50 dark:bg-slate-800">
@@ -359,3 +365,75 @@
         }
     </section>
 </section>
+
+@section Scripts {
+@if (hasSpending)
+{
+    <script src="~/lib/chartjs/chart.umd.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            const canvas = document.getElementById('spending-pie-chart');
+            if (!canvas || typeof Chart === 'undefined') {
+                return;
+            }
+
+            const slices = @Json.Serialize(spendingChartSlices);
+            const labels = slices.map(function (s) { return s.label; });
+            const values = slices.map(function (s) { return s.value; });
+            const colors = slices.map(function (s) { return s.color; });
+            const total = values.reduce(function (sum, v) { return sum + v; }, 0);
+
+            const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+            const root = document.documentElement;
+            const palette = function () {
+                return root.classList.contains('dark')
+                    ? { text: '#e2e8f0', border: '#0f172a' }
+                    : { text: '#0f172a', border: '#ffffff' };
+            };
+
+            const theme = palette();
+            const chart = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: theme.border,
+                        borderWidth: 2,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: theme.text, padding: 16, usePointStyle: true }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    const value = ctx.parsed;
+                                    const pct = total > 0 ? (value / total) * 100 : 0;
+                                    return ctx.label + ': ' + brl.format(value) + ' (' + pct.toFixed(1) + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const observer = new MutationObserver(function () {
+                const next = palette();
+                chart.data.datasets[0].borderColor = next.border;
+                chart.options.plugins.legend.labels.color = next.text;
+                chart.update();
+            });
+            observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+        })();
+    </script>
+}
+}

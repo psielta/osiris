@@ -12,6 +12,10 @@ const assets = [
   {
     from: join(root, "node_modules", "htmx.org", "dist", "htmx.min.js"),
     to: join(root, "wwwroot", "lib", "htmx", "htmx.min.js")
+  },
+  {
+    from: join(root, "node_modules", "chart.js", "dist", "chart.umd.js"),
+    to: join(root, "wwwroot", "lib", "chartjs", "chart.umd.js")
   }
 ];
 
