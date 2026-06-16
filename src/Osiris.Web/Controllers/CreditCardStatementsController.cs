@@ -7,6 +7,7 @@ using Osiris.Application.Common.Models;
 using Osiris.Application.Features.CreditCards.Queries.GetCreditCardDetails;
 using Osiris.Application.Features.CreditCardStatementPayments.Commands.RegisterCreditCardStatementPayment;
 using Osiris.Application.Features.CreditCardStatements.DTOs;
+using Osiris.Application.Features.CreditCardStatements.Queries.ExportCreditCardStatementPdf;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCreditCardStatementDetails;
 using Osiris.Application.Features.CreditCardStatements.Queries.ListCreditCardStatements;
 using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
@@ -56,6 +57,18 @@ public sealed class CreditCardStatementsController : AppController
         }
 
         return View(statement);
+    }
+
+    [HttpGet("{id:guid}/pdf")]
+    public async Task<IActionResult> ExportPdf(Guid cardId, Guid id, CancellationToken cancellationToken)
+    {
+        var file = await _mediator.Send(new ExportCreditCardStatementPdfQuery(cardId, id), cancellationToken);
+        if (file is null)
+        {
+            return NotFound();
+        }
+
+        return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpGet("{id:guid}/pay")]

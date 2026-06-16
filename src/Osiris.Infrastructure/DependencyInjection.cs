@@ -7,6 +7,7 @@ using Osiris.Infrastructure.Common;
 using Osiris.Infrastructure.Email;
 using Osiris.Infrastructure.Identity;
 using Osiris.Infrastructure.Persistence;
+using Osiris.Infrastructure.Reporting;
 
 namespace Osiris.Infrastructure;
 
@@ -16,6 +17,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // QuestPDF Community license: free for individuals and organizations under USD 1M revenue.
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
@@ -61,6 +65,8 @@ public static class DependencyInjection
         services.AddScoped<IBillRepository, BillRepository>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
+        services.AddSingleton<IFinancialAccountStatementPdfRenderer, FinancialAccountStatementPdfRenderer>();
+        services.AddSingleton<ICreditCardStatementPdfRenderer, CreditCardStatementPdfRenderer>();
 
         return services;
     }

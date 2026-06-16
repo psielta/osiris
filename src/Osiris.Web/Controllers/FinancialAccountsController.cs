@@ -9,6 +9,7 @@ using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManua
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
+using Osiris.Application.Features.FinancialAccounts.Queries.ExportFinancialAccountStatementPdf;
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountDetails;
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountForEdit;
 using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
@@ -142,6 +143,18 @@ public sealed class FinancialAccountsController : AppController
         }
 
         return View(model);
+    }
+
+    [HttpGet("{id:guid}/pdf")]
+    public async Task<IActionResult> ExportPdf(Guid id, CancellationToken cancellationToken)
+    {
+        var file = await _mediator.Send(new ExportFinancialAccountStatementPdfQuery(id), cancellationToken);
+        if (file is null)
+        {
+            return NotFound();
+        }
+
+        return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpPost("{id:guid}/movements")]

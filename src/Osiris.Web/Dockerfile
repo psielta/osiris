@@ -41,6 +41,12 @@ ENTRYPOINT ["dotnet-ef", "database", "update", "--project", "src/Osiris.Infrastr
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
+
+# QuestPDF renders PDFs through SkiaSharp, which needs fontconfig present on Linux.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libfontconfig1 \
+ && rm -rf /var/lib/apt/lists/*
+
 ENV ASPNETCORE_URLS=http://0.0.0.0:13453
 EXPOSE 13453
 
