@@ -1,16 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Osiris">
-  <style>
-    .mark { fill: none; stroke: #020617; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
-    .pupil { fill: #020617; }
-    @media (prefers-color-scheme: dark) {
-      .mark { stroke: #f59e0b; }
-      .pupil { fill: #f59e0b; }
-    }
-  </style>
-  <path class="mark" d="M9 21 C19 12 36 10 49 17" />
-  <path class="mark" d="M7 30 C17 19 43 19 57 29" />
-  <path class="mark" d="M7 30 C16 40 41 41 57 29" />
-  <circle class="pupil" cx="31" cy="29" r="6" />
-  <path class="mark" d="M17 37 C15 46 15 55 22 55 C27 55 27 48.5 23 48.5 C20 48.5 20 52 22.5 52" />
-  <path class="mark" d="M43 39 L55 54" />
+  <rect width="64" height="64" rx="12" fill="#020617" />
+  <g fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 21 C19 12 36 10 49 17" />
+    <path d="M7 30 C17 19 43 19 57 29" />
+    <path d="M7 30 C16 40 41 41 57 29" />
+    <path d="M17 37 C15 46 15 55 22 55 C27 55 27 48.5 23 48.5 C20 48.5 20 52 22.5 52" />
+    <path d="M43 39 L55 54" />
+  </g>
+  <circle cx="31" cy="29" r="6.5" fill="#f59e0b" />
 </svg>
