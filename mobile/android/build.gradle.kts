@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+}
+
+// Release signing is driven by a gitignored keystore.properties at the mobile/ root (see DEPLOY.md).
+// When it is absent (CI, fresh clone) the release build is simply left unsigned.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -21,6 +32,17 @@ android {
         buildConfig = true
     }
 
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             // Defaults to the emulator's host loopback; override for a prod-pointing test build with
@@ -31,6 +53,9 @@ android {
         getByName("release") {
             isMinifyEnabled = false
             buildConfigField("String", "BASE_URL", "\"https://osiris-api.mateussalgueiro.com.br/\"")
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
