@@ -17,6 +17,18 @@ object Routes {
     const val MovementFormPattern = "movement-form/{accountId}"
     const val AccountIdArg = "accountId"
 
+    const val CardsList = "cards"
+    const val CardForm = "card-form"
+    const val CardFormPattern = "card-form?cardId={cardId}"
+    const val CardDetailsPattern = "card-details/{cardId}"
+    const val PurchaseFormPattern = "purchase-form/{cardId}"
+    const val PurchaseDetailsPattern = "purchase-details/{cardId}/{purchaseId}"
+    const val StatementDetailsPattern = "statement-details/{cardId}/{statementId}"
+    const val PaymentFormPattern = "payment-form/{cardId}/{statementId}"
+    const val CardIdArg = "cardId"
+    const val PurchaseIdArg = "purchaseId"
+    const val StatementIdArg = "statementId"
+
     fun categoryForm(categoryId: String? = null): String =
         if (categoryId == null) CategoryForm else "category-form?categoryId=$categoryId"
 
@@ -26,4 +38,17 @@ object Routes {
     fun accountStatement(accountId: String): String = "account-statement/$accountId"
 
     fun movementForm(accountId: String): String = "movement-form/$accountId"
+
+    fun cardForm(cardId: String? = null): String =
+        if (cardId == null) CardForm else "card-form?cardId=$cardId"
+
+    fun cardDetails(cardId: String): String = "card-details/$cardId"
+
+    fun purchaseForm(cardId: String): String = "purchase-form/$cardId"
+
+    fun purchaseDetails(cardId: String, purchaseId: String): String = "purchase-details/$cardId/$purchaseId"
+
+    fun statementDetails(cardId: String, statementId: String): String = "statement-details/$cardId/$statementId"
+
+    fun paymentForm(cardId: String, statementId: String): String = "payment-form/$cardId/$statementId"
 }

@@ -32,6 +32,7 @@ fun HomeScreen(
     onSignedOut: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateAccounts: () -> Unit,
+    onNavigateCards: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -84,6 +85,13 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.accounts_title))
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onNavigateCards,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.cards_title))
             }
             Spacer(Modifier.height(12.dp))
             OutlinedButton(

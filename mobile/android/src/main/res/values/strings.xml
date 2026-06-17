@@ -98,4 +98,71 @@
     <string name="movement_type_transfer_in">Transferência recebida</string>
     <string name="movement_type_transfer_out">Transferência enviada</string>
     <string name="movement_type_adjustment">Ajuste</string>
+    <!-- Credit cards -->
+    <string name="cards_title">Cartoes</string>
+    <string name="card_new">Novo cartao</string>
+    <string name="card_edit">Editar cartao</string>
+    <string name="card_name_label">Nome</string>
+    <string name="card_limit_label">Limite</string>
+    <string name="card_closing_day_label">Dia de fechamento</string>
+    <string name="card_due_day_label">Dia de vencimento</string>
+    <string name="card_payment_account_label">Conta de pagamento</string>
+    <string name="card_no_payment_account">Sem conta padrao</string>
+    <string name="card_save">Salvar</string>
+    <string name="card_archive">Arquivar</string>
+    <string name="card_edit_action">Editar</string>
+    <string name="card_active_section">Ativos</string>
+    <string name="card_archived_section">Arquivados</string>
+    <string name="card_archive_confirm">Arquivar \"%1$s\"?</string>
+    <string name="cards_empty">Nenhum cartao ainda.</string>
+    <string name="card_used_limit">Limite usado</string>
+    <string name="card_available_limit">Disponivel</string>
+    <string name="card_future_installments">Parcelas futuras</string>
+    <string name="card_payment_account">Conta padrao</string>
+    <string name="card_tab_purchases">Compras</string>
+    <string name="card_tab_statements">Faturas</string>
+
+    <!-- Purchases -->
+    <string name="purchase_new">Nova compra</string>
+    <string name="purchase_details">Compra</string>
+    <string name="purchase_amount_label">Valor total</string>
+    <string name="purchase_date_label">Data da compra</string>
+    <string name="purchase_description_label">Descricao</string>
+    <string name="purchase_category_label">Categoria</string>
+    <string name="purchase_installments_label">Parcelas</string>
+    <string name="purchase_notes_label">Observacoes</string>
+    <string name="purchase_save">Registrar</string>
+    <string name="purchase_delete">Excluir compra</string>
+    <string name="purchase_delete_confirm">Excluir esta compra e suas parcelas?</string>
+    <string name="purchases_empty">Nenhuma compra ainda.</string>
+    <string name="purchase_preview">Previa das parcelas</string>
+    <string name="purchase_installment_row">%1$d/%2$d - %3$s</string>
+
+    <!-- Statements -->
+    <string name="statements_empty">Nenhuma fatura ainda.</string>
+    <string name="statement_details_card">Fatura</string>
+    <string name="statement_total">Total</string>
+    <string name="statement_paid">Pago</string>
+    <string name="statement_open_balance">Em aberto</string>
+    <string name="statement_closing_date">Fechamento</string>
+    <string name="statement_due_date">Vencimento</string>
+    <string name="statement_status_open">Aberta</string>
+    <string name="statement_status_closed">Fechada</string>
+    <string name="statement_status_paid">Paga</string>
+    <string name="statement_status_partial">Parcial</string>
+    <string name="statement_status_overdue">Vencida</string>
+    <string name="statement_pay">Pagar</string>
+    <string name="statement_pdf">PDF</string>
+    <string name="statement_installments">Parcelas</string>
+    <string name="statement_payments">Pagamentos</string>
+    <string name="statement_no_payments">Nenhum pagamento ainda.</string>
+
+    <!-- Statement payment -->
+    <string name="payment_new">Pagar fatura</string>
+    <string name="payment_amount_label">Valor do pagamento</string>
+    <string name="payment_date_label">Data do pagamento</string>
+    <string name="payment_account_label">Conta financeira</string>
+    <string name="payment_no_account">Sem movimentar conta</string>
+    <string name="payment_notes_label">Observacoes</string>
+    <string name="payment_save">Registrar pagamento</string>
 </resources>

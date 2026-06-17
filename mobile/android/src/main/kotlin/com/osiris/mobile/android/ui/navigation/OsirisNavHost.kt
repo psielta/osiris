@@ -10,6 +10,13 @@ import com.osiris.mobile.android.feature.accounts.AccountFormScreen
 import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
 import com.osiris.mobile.android.feature.accounts.AccountsListScreen
 import com.osiris.mobile.android.feature.accounts.MovementFormScreen
+import com.osiris.mobile.android.feature.cards.CardDetailsScreen
+import com.osiris.mobile.android.feature.cards.CardFormScreen
+import com.osiris.mobile.android.feature.cards.CardsListScreen
+import com.osiris.mobile.android.feature.cards.PaymentFormScreen
+import com.osiris.mobile.android.feature.cards.PurchaseDetailsScreen
+import com.osiris.mobile.android.feature.cards.PurchaseFormScreen
+import com.osiris.mobile.android.feature.cards.StatementDetailsScreen
 import com.osiris.mobile.android.feature.categories.CategoriesListScreen
 import com.osiris.mobile.android.feature.categories.CategoryFormScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
@@ -65,6 +72,7 @@ fun OsirisNavHost() {
                 },
                 onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
                 onNavigateAccounts = { navController.navigate(Routes.AccountsList) },
+                onNavigateCards = { navController.navigate(Routes.CardsList) },
             )
         }
         composable(Routes.CategoriesList) {
@@ -129,6 +137,94 @@ fun OsirisNavHost() {
         ) { backStackEntry ->
             MovementFormScreen(
                 accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.CardsList) {
+            CardsListScreen(
+                onCreate = { navController.navigate(Routes.cardForm()) },
+                onEdit = { id -> navController.navigate(Routes.cardForm(id)) },
+                onOpenDetails = { id -> navController.navigate(Routes.cardDetails(id)) },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.CardFormPattern,
+            arguments = listOf(
+                navArgument(Routes.CardIdArg) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
+            CardFormScreen(
+                cardId = backStackEntry.arguments?.getString(Routes.CardIdArg),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.CardDetailsPattern,
+            arguments = listOf(navArgument(Routes.CardIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty()
+            CardDetailsScreen(
+                cardId = cardId,
+                onNavigateBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(Routes.cardForm(cardId)) },
+                onAddPurchase = { navController.navigate(Routes.purchaseForm(cardId)) },
+                onOpenPurchase = { purchaseId -> navController.navigate(Routes.purchaseDetails(cardId, purchaseId)) },
+                onOpenStatement = { statementId -> navController.navigate(Routes.statementDetails(cardId, statementId)) },
+            )
+        }
+        composable(
+            route = Routes.PurchaseFormPattern,
+            arguments = listOf(navArgument(Routes.CardIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            PurchaseFormScreen(
+                cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty(),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.PurchaseDetailsPattern,
+            arguments = listOf(
+                navArgument(Routes.CardIdArg) { type = NavType.StringType },
+                navArgument(Routes.PurchaseIdArg) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            PurchaseDetailsScreen(
+                cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty(),
+                purchaseId = backStackEntry.arguments?.getString(Routes.PurchaseIdArg).orEmpty(),
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.StatementDetailsPattern,
+            arguments = listOf(
+                navArgument(Routes.CardIdArg) { type = NavType.StringType },
+                navArgument(Routes.StatementIdArg) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty()
+            val statementId = backStackEntry.arguments?.getString(Routes.StatementIdArg).orEmpty()
+            StatementDetailsScreen(
+                cardId = cardId,
+                statementId = statementId,
+                onNavigateBack = { navController.popBackStack() },
+                onPay = { navController.navigate(Routes.paymentForm(cardId, statementId)) },
+            )
+        }
+        composable(
+            route = Routes.PaymentFormPattern,
+            arguments = listOf(
+                navArgument(Routes.CardIdArg) { type = NavType.StringType },
+                navArgument(Routes.StatementIdArg) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            PaymentFormScreen(
+                cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty(),
+                statementId = backStackEntry.arguments?.getString(Routes.StatementIdArg).orEmpty(),
                 onDone = { navController.popBackStack() },
             )
         }
