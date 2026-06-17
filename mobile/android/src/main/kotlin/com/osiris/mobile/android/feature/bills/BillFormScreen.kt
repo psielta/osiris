@@ -1,4 +1,4 @@
-package com.osiris.mobile.android.feature.cards
+package com.osiris.mobile.android.feature.bills
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,20 +35,19 @@ import com.osiris.mobile.android.R
 import com.osiris.mobile.android.ui.components.OsirisDateField
 import com.osiris.mobile.android.ui.components.OsirisDropdownField
 import com.osiris.mobile.android.ui.components.OsirisTextField
-import com.osiris.mobile.core.format.Money
+import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.Category
-import com.osiris.mobile.domain.model.PurchasePreview
-import com.osiris.mobile.presentation.cards.PurchaseFormEvent
-import com.osiris.mobile.presentation.cards.PurchaseFormViewModel
+import com.osiris.mobile.presentation.bills.BillFormEvent
+import com.osiris.mobile.presentation.bills.BillFormViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PurchaseFormScreen(
-    cardId: String,
+fun BillFormScreen(
+    billId: String?,
     onDone: () -> Unit,
-    viewModel: PurchaseFormViewModel = koinViewModel { parametersOf(cardId) },
+    viewModel: BillFormViewModel = koinViewModel { parametersOf(billId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -57,20 +55,23 @@ fun PurchaseFormScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                PurchaseFormEvent.NavigateBack -> onDone()
-                is PurchaseFormEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+                BillFormEvent.NavigateBack -> onDone()
+                is BillFormEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
             }
         }
     }
 
     val selectedCategory = state.categories.firstOrNull { it.id == state.categoryId }
+    val selectedAccount = state.accounts.firstOrNull { it.id == state.paymentAccountId }
     val categoryOptions = remember(state.categories) { listOf<Category?>(null) + state.categories }
-    val selectCategoryLabel = stringResource(R.string.purchase_category_label)
+    val accountOptions = remember(state.accounts) { listOf<Account?>(null) + state.accounts }
+    val categoryPlaceholder = stringResource(R.string.bill_category_label)
+    val noAccountLabel = stringResource(R.string.payment_no_account)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.purchase_new)) },
+                title = { Text(stringResource(if (state.isEdit) R.string.bill_edit else R.string.bill_new)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -80,6 +81,13 @@ fun PurchaseFormScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        if (state.isLoading) {
+            androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().padding(padding), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -88,31 +96,35 @@ fun PurchaseFormScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             OsirisTextField(
+                value = state.description,
+                onValueChange = viewModel::onDescriptionChange,
+                label = stringResource(R.string.bill_description_label),
+                error = state.descriptionError,
+            )
+            Spacer(Modifier.height(20.dp))
+            OsirisTextField(
                 value = state.amount,
                 onValueChange = viewModel::onAmountChange,
-                label = stringResource(R.string.purchase_amount_label),
+                label = stringResource(R.string.bill_amount_label),
                 error = state.amountError,
                 keyboardType = KeyboardType.Decimal,
             )
             Spacer(Modifier.height(20.dp))
             OsirisDateField(
-                label = stringResource(R.string.purchase_date_label),
-                value = state.purchaseDate,
-                onValueChange = viewModel::onPurchaseDateChange,
+                label = stringResource(R.string.bill_due_date_label),
+                value = state.dueDate,
+                onValueChange = viewModel::onDueDateChange,
             )
-            Spacer(Modifier.height(20.dp))
-            OsirisTextField(
-                value = state.description,
-                onValueChange = viewModel::onDescriptionChange,
-                label = stringResource(R.string.purchase_description_label),
-                error = state.descriptionError,
-            )
+            if (state.dueDateError != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(state.dueDateError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
             Spacer(Modifier.height(20.dp))
             OsirisDropdownField(
-                label = stringResource(R.string.purchase_category_label),
+                label = stringResource(R.string.bill_category_label),
                 selected = selectedCategory,
                 options = categoryOptions,
-                optionLabel = { it?.name ?: selectCategoryLabel },
+                optionLabel = { it?.name ?: categoryPlaceholder },
                 onSelect = { viewModel.onCategoryChange(it?.id) },
             )
             if (state.categoryError != null) {
@@ -120,26 +132,20 @@ fun PurchaseFormScreen(
                 Text(state.categoryError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
             Spacer(Modifier.height(20.dp))
-            OsirisTextField(
-                value = state.installments,
-                onValueChange = viewModel::onInstallmentsChange,
-                label = stringResource(R.string.purchase_installments_label),
-                error = state.installmentsError,
-                keyboardType = KeyboardType.Number,
+            OsirisDropdownField(
+                label = stringResource(R.string.bill_payment_account_label),
+                selected = selectedAccount,
+                options = accountOptions,
+                optionLabel = { it?.name ?: noAccountLabel },
+                onSelect = { viewModel.onPaymentAccountChange(it?.id) },
             )
             Spacer(Modifier.height(20.dp))
             OsirisTextField(
                 value = state.notes,
                 onValueChange = viewModel::onNotesChange,
-                label = stringResource(R.string.purchase_notes_label),
+                label = stringResource(R.string.bill_notes_label),
                 error = state.notesError,
             )
-            Spacer(Modifier.height(20.dp))
-            if (state.isPreviewLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
-            } else {
-                state.preview?.let { PurchasePreviewCard(it) }
-            }
             Spacer(Modifier.height(32.dp))
             Button(
                 onClick = viewModel::submit,
@@ -153,43 +159,9 @@ fun PurchaseFormScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Text(stringResource(R.string.purchase_save))
+                    Text(stringResource(R.string.bill_save))
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PurchasePreviewCard(preview: PurchasePreview) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text(stringResource(R.string.purchase_preview), style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.height(8.dp))
-            if (preview.highLimitUsage) {
-                Text(
-                    text = stringResource(R.string.purchase_limit_warning),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
-                Spacer(Modifier.height(8.dp))
-            }
-            preview.installments.forEach { installment ->
-                Text(
-                    text = "${installment.number}/${preview.installments.size} - ${Money.brl(installment.amount)} - ${statementReference(installment.referenceMonth, installment.referenceYear)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "${stringResource(R.string.card_used_limit)}: ${Money.brl(preview.projectedUsedLimit)}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = "${stringResource(R.string.purchase_future_committed)}: ${Money.brl(preview.projectedFutureInstallmentsTotal)}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
         }
     }
 }

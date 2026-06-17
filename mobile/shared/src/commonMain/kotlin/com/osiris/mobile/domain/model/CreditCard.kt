@@ -49,6 +49,17 @@ data class CreditCardPurchase(
     val installments: Int,
 )
 
+data class CreditCardPurchaseOverview(
+    val id: String,
+    val creditCardId: String,
+    val creditCardName: String,
+    val description: String,
+    val categoryName: String?,
+    val totalAmount: Double,
+    val purchaseDate: String,
+    val installments: Int,
+)
+
 data class CreditCardPurchaseDetails(
     val id: String,
     val creditCardId: String,
@@ -76,6 +87,20 @@ data class CreditCardPurchaseInstallment(
 data class CreditCardStatement(
     val id: String,
     val creditCardId: String,
+    val referenceMonth: Int,
+    val referenceYear: Int,
+    val closingDate: String,
+    val dueDate: String,
+    val status: StatementStatus,
+    val totalAmount: Double,
+    val paidAmount: Double,
+    val openBalance: Double,
+)
+
+data class CreditCardStatementOverview(
+    val id: String,
+    val creditCardId: String,
+    val creditCardName: String,
     val referenceMonth: Int,
     val referenceYear: Int,
     val closingDate: String,

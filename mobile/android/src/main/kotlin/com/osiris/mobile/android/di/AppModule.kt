@@ -8,6 +8,11 @@ import com.osiris.mobile.presentation.accounts.AccountFormViewModel
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import com.osiris.mobile.presentation.accounts.AccountsListViewModel
 import com.osiris.mobile.presentation.accounts.MovementFormViewModel
+import com.osiris.mobile.presentation.bills.BillDetailsViewModel
+import com.osiris.mobile.presentation.bills.BillFormViewModel
+import com.osiris.mobile.presentation.bills.BillsListViewModel
+import com.osiris.mobile.presentation.cards.AllPurchasesViewModel
+import com.osiris.mobile.presentation.cards.AllStatementsViewModel
 import com.osiris.mobile.presentation.cards.CardDetailsViewModel
 import com.osiris.mobile.presentation.cards.CardFormViewModel
 import com.osiris.mobile.presentation.cards.CardsListViewModel
@@ -17,6 +22,7 @@ import com.osiris.mobile.presentation.cards.PurchaseFormViewModel
 import com.osiris.mobile.presentation.cards.StatementDetailsViewModel
 import com.osiris.mobile.presentation.categories.CategoriesListViewModel
 import com.osiris.mobile.presentation.categories.CategoryFormViewModel
+import com.osiris.mobile.presentation.dashboard.DashboardViewModel
 import com.osiris.mobile.presentation.home.HomeViewModel
 import com.osiris.mobile.presentation.login.LoginViewModel
 import com.osiris.mobile.presentation.register.RegisterViewModel
@@ -47,4 +53,10 @@ val appModule = module {
     viewModel { parameters -> PurchaseDetailsViewModel(get(), parameters[0], parameters[1]) }
     viewModel { parameters -> StatementDetailsViewModel(get(), parameters[0], parameters[1]) }
     viewModel { parameters -> PaymentFormViewModel(get(), get(), parameters[0], parameters[1]) }
+    viewModelOf(::DashboardViewModel)
+    viewModelOf(::BillsListViewModel)
+    viewModel { parameters -> BillFormViewModel(get(), get(), get(), parameters.getOrNull<String>()) }
+    viewModel { parameters -> BillDetailsViewModel(get(), get(), parameters.get<String>()) }
+    viewModelOf(::AllPurchasesViewModel)
+    viewModelOf(::AllStatementsViewModel)
 }

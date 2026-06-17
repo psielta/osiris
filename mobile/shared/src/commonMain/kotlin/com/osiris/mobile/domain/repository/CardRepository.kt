@@ -6,8 +6,10 @@ import com.osiris.mobile.domain.model.CreditCardDetails
 import com.osiris.mobile.domain.model.CreditCardOverview
 import com.osiris.mobile.domain.model.CreditCardPurchase
 import com.osiris.mobile.domain.model.CreditCardPurchaseDetails
+import com.osiris.mobile.domain.model.CreditCardPurchaseOverview
 import com.osiris.mobile.domain.model.CreditCardStatement
 import com.osiris.mobile.domain.model.CreditCardStatementDetails
+import com.osiris.mobile.domain.model.CreditCardStatementOverview
 import com.osiris.mobile.domain.model.PurchasePreview
 import com.osiris.mobile.domain.model.StatementPdf
 
@@ -32,6 +34,7 @@ interface CardRepository {
     suspend fun archiveCard(id: String): OsirisResult<Unit>
     suspend fun overview(cardId: String): OsirisResult<CreditCardOverview>
     suspend fun listPurchases(cardId: String): OsirisResult<List<CreditCardPurchase>>
+    suspend fun listAllPurchases(): OsirisResult<List<CreditCardPurchaseOverview>>
     suspend fun getPurchase(cardId: String, purchaseId: String): OsirisResult<CreditCardPurchaseDetails>
     suspend fun previewPurchase(
         cardId: String,
@@ -50,6 +53,7 @@ interface CardRepository {
     ): OsirisResult<Unit>
     suspend fun deletePurchase(cardId: String, purchaseId: String): OsirisResult<Unit>
     suspend fun listStatements(cardId: String): OsirisResult<List<CreditCardStatement>>
+    suspend fun listAllStatements(): OsirisResult<List<CreditCardStatementOverview>>
     suspend fun currentStatement(cardId: String): OsirisResult<CreditCardStatement?>
     suspend fun getStatement(cardId: String, statementId: String): OsirisResult<CreditCardStatementDetails>
     suspend fun payStatement(

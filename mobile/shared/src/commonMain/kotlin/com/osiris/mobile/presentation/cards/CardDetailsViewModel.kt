@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 data class CardDetailsUiState(
     val card: CreditCardDetails? = null,
     val overview: CreditCardOverview? = null,
+    val currentStatement: CreditCardStatement? = null,
     val purchases: List<CreditCardPurchase> = emptyList(),
     val statements: List<CreditCardStatement> = emptyList(),
     val isLoading: Boolean = true,
@@ -45,12 +46,14 @@ class CardDetailsViewModel(
 
                 is OsirisResult.Success -> {
                     val overview = (cardRepository.overview(cardId) as? OsirisResult.Success)?.value
+                    val currentStatement = (cardRepository.currentStatement(cardId) as? OsirisResult.Success)?.value
                     val purchases = (cardRepository.listPurchases(cardId) as? OsirisResult.Success)?.value.orEmpty()
                     val statements = (cardRepository.listStatements(cardId) as? OsirisResult.Success)?.value.orEmpty()
                     _state.update {
                         it.copy(
                             card = cardResult.value,
                             overview = overview,
+                            currentStatement = currentStatement,
                             purchases = purchases,
                             statements = statements,
                             isLoading = false,

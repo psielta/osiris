@@ -9,12 +9,14 @@ import com.osiris.mobile.data.dto.CreatePurchaseRequest
 import com.osiris.mobile.data.dto.PurchaseDetailsDto
 import com.osiris.mobile.data.dto.PurchaseInstallmentDto
 import com.osiris.mobile.data.dto.PurchaseListItemDto
+import com.osiris.mobile.data.dto.PurchaseOverviewDto
 import com.osiris.mobile.data.dto.PurchasePreviewDto
 import com.osiris.mobile.data.dto.PurchasePreviewInstallmentDto
 import com.osiris.mobile.data.dto.RegisterStatementPaymentRequest
 import com.osiris.mobile.data.dto.StatementDetailsDto
 import com.osiris.mobile.data.dto.StatementInstallmentDto
 import com.osiris.mobile.data.dto.StatementListItemDto
+import com.osiris.mobile.data.dto.StatementOverviewDto
 import com.osiris.mobile.data.dto.StatementPaymentDto
 import com.osiris.mobile.data.dto.UpdateCardRequest
 import com.osiris.mobile.data.network.osirisCatching
@@ -25,9 +27,11 @@ import com.osiris.mobile.domain.model.CreditCardOverview
 import com.osiris.mobile.domain.model.CreditCardPurchase
 import com.osiris.mobile.domain.model.CreditCardPurchaseDetails
 import com.osiris.mobile.domain.model.CreditCardPurchaseInstallment
+import com.osiris.mobile.domain.model.CreditCardPurchaseOverview
 import com.osiris.mobile.domain.model.CreditCardStatement
 import com.osiris.mobile.domain.model.CreditCardStatementDetails
 import com.osiris.mobile.domain.model.CreditCardStatementInstallment
+import com.osiris.mobile.domain.model.CreditCardStatementOverview
 import com.osiris.mobile.domain.model.CreditCardStatementPayment
 import com.osiris.mobile.domain.model.PurchasePreview
 import com.osiris.mobile.domain.model.PurchasePreviewInstallment
@@ -79,6 +83,10 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         api.listPurchases(cardId).map { it.toDomain() }
     }
 
+    override suspend fun listAllPurchases(): OsirisResult<List<CreditCardPurchaseOverview>> = osirisCatching {
+        api.listAllPurchases().map { it.toDomain() }
+    }
+
     override suspend fun getPurchase(cardId: String, purchaseId: String): OsirisResult<CreditCardPurchaseDetails> =
         osirisCatching {
             api.getPurchase(cardId, purchaseId).toDomain()
@@ -115,6 +123,10 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
 
     override suspend fun listStatements(cardId: String): OsirisResult<List<CreditCardStatement>> = osirisCatching {
         api.listStatements(cardId).map { it.toDomain() }
+    }
+
+    override suspend fun listAllStatements(): OsirisResult<List<CreditCardStatementOverview>> = osirisCatching {
+        api.listAllStatements().map { it.toDomain() }
     }
 
     override suspend fun currentStatement(cardId: String): OsirisResult<CreditCardStatement?> = osirisCatching {
@@ -157,6 +169,18 @@ private fun CardOverviewDto.toDomain() =
 private fun PurchaseListItemDto.toDomain() =
     CreditCardPurchase(id, description, categoryName, totalAmount, purchaseDate, installments)
 
+private fun PurchaseOverviewDto.toDomain() =
+    CreditCardPurchaseOverview(
+        id,
+        creditCardId,
+        creditCardName,
+        description,
+        categoryName,
+        totalAmount,
+        purchaseDate,
+        installments,
+    )
+
 private fun PurchaseInstallmentDto.toDomain() =
     CreditCardPurchaseInstallment(
         id,
@@ -187,6 +211,21 @@ private fun StatementListItemDto.toDomain() =
     CreditCardStatement(
         id,
         creditCardId,
+        referenceMonth,
+        referenceYear,
+        closingDate,
+        dueDate,
+        StatementStatus.fromApi(status),
+        totalAmount,
+        paidAmount,
+        openBalance,
+    )
+
+private fun StatementOverviewDto.toDomain() =
+    CreditCardStatementOverview(
+        id,
+        creditCardId,
+        creditCardName,
         referenceMonth,
         referenceYear,
         closingDate,

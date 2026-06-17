@@ -10,6 +10,11 @@ import com.osiris.mobile.android.feature.accounts.AccountFormScreen
 import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
 import com.osiris.mobile.android.feature.accounts.AccountsListScreen
 import com.osiris.mobile.android.feature.accounts.MovementFormScreen
+import com.osiris.mobile.android.feature.bills.BillDetailsScreen
+import com.osiris.mobile.android.feature.bills.BillFormScreen
+import com.osiris.mobile.android.feature.bills.BillsListScreen
+import com.osiris.mobile.android.feature.cards.AllPurchasesScreen
+import com.osiris.mobile.android.feature.cards.AllStatementsScreen
 import com.osiris.mobile.android.feature.cards.CardDetailsScreen
 import com.osiris.mobile.android.feature.cards.CardFormScreen
 import com.osiris.mobile.android.feature.cards.CardsListScreen
@@ -19,6 +24,7 @@ import com.osiris.mobile.android.feature.cards.PurchaseFormScreen
 import com.osiris.mobile.android.feature.cards.StatementDetailsScreen
 import com.osiris.mobile.android.feature.categories.CategoriesListScreen
 import com.osiris.mobile.android.feature.categories.CategoryFormScreen
+import com.osiris.mobile.android.feature.dashboard.DashboardScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
 import com.osiris.mobile.android.feature.login.LoginScreen
 import com.osiris.mobile.android.feature.register.RegisterScreen
@@ -73,7 +79,14 @@ fun OsirisNavHost() {
                 onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
                 onNavigateAccounts = { navController.navigate(Routes.AccountsList) },
                 onNavigateCards = { navController.navigate(Routes.CardsList) },
+                onNavigateDashboard = { navController.navigate(Routes.Dashboard) },
+                onNavigateStatements = { navController.navigate(Routes.AllStatements) },
+                onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
+                onNavigateBills = { navController.navigate(Routes.BillsList) },
             )
+        }
+        composable(Routes.Dashboard) {
+            DashboardScreen(onNavigateBack = { navController.popBackStack() })
         }
         composable(Routes.CategoriesList) {
             CategoriesListScreen(
@@ -146,6 +159,51 @@ fun OsirisNavHost() {
                 onEdit = { id -> navController.navigate(Routes.cardForm(id)) },
                 onOpenDetails = { id -> navController.navigate(Routes.cardDetails(id)) },
                 onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.AllPurchases) {
+            AllPurchasesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onOpenPurchase = { cardId, purchaseId -> navController.navigate(Routes.purchaseDetails(cardId, purchaseId)) },
+            )
+        }
+        composable(Routes.AllStatements) {
+            AllStatementsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onOpenStatement = { cardId, statementId -> navController.navigate(Routes.statementDetails(cardId, statementId)) },
+            )
+        }
+        composable(Routes.BillsList) {
+            BillsListScreen(
+                onCreate = { navController.navigate(Routes.billForm()) },
+                onOpenDetails = { id -> navController.navigate(Routes.billDetails(id)) },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.BillFormPattern,
+            arguments = listOf(
+                navArgument(Routes.BillIdArg) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
+            BillFormScreen(
+                billId = backStackEntry.arguments?.getString(Routes.BillIdArg),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.BillDetailsPattern,
+            arguments = listOf(navArgument(Routes.BillIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val billId = backStackEntry.arguments?.getString(Routes.BillIdArg).orEmpty()
+            BillDetailsScreen(
+                billId = billId,
+                onNavigateBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(Routes.billForm(billId)) },
             )
         }
         composable(

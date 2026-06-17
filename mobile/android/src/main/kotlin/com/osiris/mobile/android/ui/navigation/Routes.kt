@@ -5,6 +5,7 @@ object Routes {
     const val Login = "login"
     const val Register = "register"
     const val Home = "home"
+    const val Dashboard = "dashboard"
     const val CategoriesList = "categories"
     const val CategoryForm = "category-form"
     const val CategoryFormPattern = "category-form?categoryId={categoryId}"
@@ -25,9 +26,16 @@ object Routes {
     const val PurchaseDetailsPattern = "purchase-details/{cardId}/{purchaseId}"
     const val StatementDetailsPattern = "statement-details/{cardId}/{statementId}"
     const val PaymentFormPattern = "payment-form/{cardId}/{statementId}"
+    const val AllPurchases = "all-purchases"
+    const val AllStatements = "all-statements"
+    const val BillsList = "bills"
+    const val BillForm = "bill-form"
+    const val BillFormPattern = "bill-form?billId={billId}"
+    const val BillDetailsPattern = "bill-details/{billId}"
     const val CardIdArg = "cardId"
     const val PurchaseIdArg = "purchaseId"
     const val StatementIdArg = "statementId"
+    const val BillIdArg = "billId"
 
     fun categoryForm(categoryId: String? = null): String =
         if (categoryId == null) CategoryForm else "category-form?categoryId=$categoryId"
@@ -51,4 +59,9 @@ object Routes {
     fun statementDetails(cardId: String, statementId: String): String = "statement-details/$cardId/$statementId"
 
     fun paymentForm(cardId: String, statementId: String): String = "payment-form/$cardId/$statementId"
+
+    fun billForm(billId: String? = null): String =
+        if (billId == null) BillForm else "bill-form?billId=$billId"
+
+    fun billDetails(billId: String): String = "bill-details/$billId"
 }

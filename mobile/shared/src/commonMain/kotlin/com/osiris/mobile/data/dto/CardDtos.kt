@@ -44,6 +44,18 @@ data class PurchaseListItemDto(
 )
 
 @Serializable
+data class PurchaseOverviewDto(
+    val id: String,
+    val creditCardId: String,
+    val creditCardName: String,
+    val description: String,
+    val categoryName: String? = null,
+    val totalAmount: Double,
+    val purchaseDate: String,
+    val installments: Int,
+)
+
+@Serializable
 data class PurchaseInstallmentDto(
     val id: String,
     val installmentNumber: Int,
@@ -73,6 +85,21 @@ data class PurchaseDetailsDto(
 data class StatementListItemDto(
     val id: String,
     val creditCardId: String,
+    val referenceMonth: Int,
+    val referenceYear: Int,
+    val closingDate: String,
+    val dueDate: String,
+    val status: Int,
+    val totalAmount: Double,
+    val paidAmount: Double,
+    val openBalance: Double,
+)
+
+@Serializable
+data class StatementOverviewDto(
+    val id: String,
+    val creditCardId: String,
+    val creditCardName: String,
     val referenceMonth: Int,
     val referenceYear: Int,
     val closingDate: String,

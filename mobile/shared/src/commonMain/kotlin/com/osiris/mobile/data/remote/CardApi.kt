@@ -9,10 +9,12 @@ import com.osiris.mobile.data.dto.CreatePurchaseRequest
 import com.osiris.mobile.data.dto.CreatedIdResponse
 import com.osiris.mobile.data.dto.PurchaseDetailsDto
 import com.osiris.mobile.data.dto.PurchaseListItemDto
+import com.osiris.mobile.data.dto.PurchaseOverviewDto
 import com.osiris.mobile.data.dto.PurchasePreviewDto
 import com.osiris.mobile.data.dto.RegisterStatementPaymentRequest
 import com.osiris.mobile.data.dto.StatementDetailsDto
 import com.osiris.mobile.data.dto.StatementListItemDto
+import com.osiris.mobile.data.dto.StatementOverviewDto
 import com.osiris.mobile.data.dto.UpdateCardRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -62,6 +64,9 @@ class CardApi(
     suspend fun listPurchases(cardId: String): List<PurchaseListItemDto> =
         authClient.get("$base/$cardId/purchases").body()
 
+    suspend fun listAllPurchases(): List<PurchaseOverviewDto> =
+        authClient.get("$base/purchases").body()
+
     suspend fun getPurchase(cardId: String, purchaseId: String): PurchaseDetailsDto =
         authClient.get("$base/$cardId/purchases/$purchaseId").body()
 
@@ -89,6 +94,9 @@ class CardApi(
 
     suspend fun listStatements(cardId: String): List<StatementListItemDto> =
         authClient.get("$base/$cardId/statements").body()
+
+    suspend fun listAllStatements(): List<StatementOverviewDto> =
+        authClient.get("$base/statements").body()
 
     suspend fun currentStatement(cardId: String): StatementListItemDto? =
         authClient.get("$base/$cardId/statements/current").body()

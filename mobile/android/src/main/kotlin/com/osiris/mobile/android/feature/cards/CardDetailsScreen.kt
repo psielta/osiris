@@ -169,6 +169,31 @@ private fun Summary(state: com.osiris.mobile.presentation.cards.CardDetailsUiSta
             SummaryCard(stringResource(R.string.card_future_installments), state.overview?.futureInstallmentsTotal ?: 0.0, Modifier.weight(1f))
         }
         Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            SummaryCard(
+                stringResource(R.string.card_current_statement),
+                state.currentStatement?.openBalance ?: 0.0,
+                Modifier.weight(1f),
+            )
+            SummaryCard(
+                stringResource(R.string.card_next_statement),
+                state.overview?.nextStatement?.openBalance ?: 0.0,
+                Modifier.weight(1f),
+            )
+        }
+        val usagePercentage = state.overview?.usagePercentage ?: 0.0
+        if (usagePercentage >= 80.0) {
+            Spacer(Modifier.height(12.dp))
+            Card(Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.card_limit_warning),
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
         Text(
             text = "${stringResource(R.string.card_payment_account)}: ${card.paymentAccountName ?: stringResource(R.string.card_no_payment_account)}",
             style = MaterialTheme.typography.bodyMedium,

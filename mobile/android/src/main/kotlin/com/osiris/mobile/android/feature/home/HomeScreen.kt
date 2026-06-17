@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +32,13 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     onSignedOut: () -> Unit,
+    onNavigateDashboard: () -> Unit,
     onNavigateCategories: () -> Unit,
     onNavigateAccounts: () -> Unit,
     onNavigateCards: () -> Unit,
+    onNavigateStatements: () -> Unit,
+    onNavigatePurchases: () -> Unit,
+    onNavigateBills: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -49,10 +55,11 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(56.dp))
+            Spacer(Modifier.height(32.dp))
             OsirisLogo(size = 64.dp)
             Spacer(Modifier.height(24.dp))
 
@@ -81,6 +88,13 @@ fun HomeScreen(
 
             Spacer(Modifier.height(32.dp))
             OutlinedButton(
+                onClick = onNavigateDashboard,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.dashboard_title))
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
                 onClick = onNavigateAccounts,
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -92,6 +106,27 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.cards_title))
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onNavigateStatements,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.statements_title))
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onNavigatePurchases,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.purchases_title))
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onNavigateBills,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.bills_title))
             }
             Spacer(Modifier.height(12.dp))
             OutlinedButton(

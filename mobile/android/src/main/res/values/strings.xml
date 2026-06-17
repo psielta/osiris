@@ -121,8 +121,12 @@
     <string name="card_payment_account">Conta padrao</string>
     <string name="card_tab_purchases">Compras</string>
     <string name="card_tab_statements">Faturas</string>
+    <string name="card_current_statement">Fatura atual</string>
+    <string name="card_next_statement">Proxima fatura</string>
+    <string name="card_limit_warning">Este cartao ja esta usando uma parte alta do limite.</string>
 
     <!-- Purchases -->
+    <string name="purchases_title">Compras no cartao</string>
     <string name="purchase_new">Nova compra</string>
     <string name="purchase_details">Compra</string>
     <string name="purchase_amount_label">Valor total</string>
@@ -137,8 +141,11 @@
     <string name="purchases_empty">Nenhuma compra ainda.</string>
     <string name="purchase_preview">Previa das parcelas</string>
     <string name="purchase_installment_row">%1$d/%2$d - %3$s</string>
+    <string name="purchase_limit_warning">Esta compra deixa o cartao perto do limite.</string>
+    <string name="purchase_future_committed">Total futuro comprometido</string>
 
     <!-- Statements -->
+    <string name="statements_title">Faturas</string>
     <string name="statements_empty">Nenhuma fatura ainda.</string>
     <string name="statement_details_card">Fatura</string>
     <string name="statement_total">Total</string>
@@ -151,6 +158,7 @@
     <string name="statement_status_paid">Paga</string>
     <string name="statement_status_partial">Parcial</string>
     <string name="statement_status_overdue">Vencida</string>
+    <string name="statement_due_soon">vence em breve</string>
     <string name="statement_pay">Pagar</string>
     <string name="statement_pdf">PDF</string>
     <string name="statement_installments">Parcelas</string>
@@ -165,4 +173,50 @@
     <string name="payment_no_account">Sem movimentar conta</string>
     <string name="payment_notes_label">Observacoes</string>
     <string name="payment_save">Registrar pagamento</string>
+
+    <!-- Bills -->
+    <string name="bills_title">Bills</string>
+    <string name="bill_new">Nova Bill</string>
+    <string name="bill_edit">Editar Bill</string>
+    <string name="bill_details">Bill</string>
+    <string name="bill_description_label">Descricao</string>
+    <string name="bill_amount_label">Valor</string>
+    <string name="bill_due_date_label">Vencimento</string>
+    <string name="bill_category_label">Categoria</string>
+    <string name="bill_payment_account_label">Conta de pagamento</string>
+    <string name="bill_notes_label">Observacoes</string>
+    <string name="bill_save">Salvar</string>
+    <string name="bill_status_label">Status</string>
+    <string name="bill_status_pending">Pendente</string>
+    <string name="bill_status_paid">Paga</string>
+    <string name="bill_status_overdue">Vencida</string>
+    <string name="bill_mark_pending">Voltar para pendente</string>
+    <string name="bill_pay">Pagamento</string>
+    <string name="bill_mark_paid">Marcar como paga</string>
+    <string name="bill_delete">Excluir Bill</string>
+    <string name="bill_delete_confirm">Excluir esta Bill?</string>
+    <string name="bills_empty">Nenhuma Bill ainda.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_onboarding_title">Comece pelo basico</string>
+    <string name="dashboard_onboarding_body">Cadastre categorias, contas, cartoes e seus primeiros gastos para destravar a leitura financeira.</string>
+    <string name="dashboard_income">Receitas do mes</string>
+    <string name="dashboard_spending">Gastos do mes</string>
+    <string name="dashboard_projected_cash">Saldo previsto</string>
+    <string name="dashboard_accounts_balance">Saldo em contas</string>
+    <string name="dashboard_open_statements">Faturas em aberto</string>
+    <string name="dashboard_open_bills">Bills em aberto</string>
+    <string name="dashboard_statement_payments">Pagamentos de fatura</string>
+    <string name="dashboard_future_installments">Parcelado futuro</string>
+    <string name="dashboard_overdue_statements">Faturas vencidas</string>
+    <string name="dashboard_partial_statements">Faturas parciais</string>
+    <string name="dashboard_bills_due">Bills vencendo</string>
+    <string name="dashboard_statements_due">Faturas vencendo</string>
+    <string name="dashboard_categories">Categorias que mais pesaram</string>
+    <string name="dashboard_no_spending">Nenhum gasto no mes.</string>
+    <string name="dashboard_cards_risk">Cartoes em risco</string>
+    <string name="dashboard_upcoming">Proximas obrigacoes</string>
+    <string name="dashboard_no_obligations">Nenhuma obrigacao proxima.</string>
+    <string name="dashboard_card_purchases">Cartao</string>
 </resources>

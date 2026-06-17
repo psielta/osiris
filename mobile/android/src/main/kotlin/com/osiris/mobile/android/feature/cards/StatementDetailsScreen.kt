@@ -46,10 +46,12 @@ import com.osiris.mobile.android.R
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.CreditCardStatementInstallment
 import com.osiris.mobile.domain.model.CreditCardStatementPayment
+import com.osiris.mobile.domain.model.StatementStatus
 import com.osiris.mobile.presentation.cards.StatementDetailsEvent
 import com.osiris.mobile.presentation.cards.StatementDetailsViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,19 +119,7 @@ fun StatementDetailsScreen(
                     item {
                         Summary(statement.totalAmount, statement.paidAmount, statement.openBalance)
                         Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = "${stringResource(R.string.statement_closing_date)}: ${formatDate(statement.closingDate)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Text(
-                            text = "${stringResource(R.string.statement_due_date)}: ${formatDate(statement.dueDate)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Text(
-                            text = statementStatusLabel(statement.status),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        StatementStatusCard(statement.status, statement.closingDate, statement.dueDate)
                         Spacer(Modifier.height(16.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                             if (statement.openBalance > 0.0) {
@@ -177,6 +167,44 @@ fun StatementDetailsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatementStatusCard(status: StatementStatus, closingDate: String, dueDate: String) {
+    val dueSoon = remember(dueDate, status) {
+        runCatching {
+            val due = LocalDate.parse(dueDate)
+            val today = LocalDate.now()
+            !due.isBefore(today) && !due.isAfter(today.plusDays(7))
+        }.getOrDefault(false) && status != StatementStatus.Paid
+    }
+    val color = when {
+        status == StatementStatus.Overdue -> MaterialTheme.colorScheme.error
+        dueSoon -> MaterialTheme.colorScheme.tertiary
+        status == StatementStatus.PartiallyPaid -> MaterialTheme.colorScheme.tertiary
+        status == StatementStatus.Paid -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val label = if (dueSoon) {
+        "${statementStatusLabel(status)} - ${stringResource(R.string.statement_due_soon)}"
+    } else {
+        statementStatusLabel(status)
+    }
+
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(label, style = MaterialTheme.typography.titleSmall, color = color)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "${stringResource(R.string.statement_closing_date)}: ${formatDate(closingDate)}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = "${stringResource(R.string.statement_due_date)}: ${formatDate(dueDate)}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }
