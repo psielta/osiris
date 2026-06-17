@@ -11,6 +11,7 @@
         || string.Equals(currentController, "CreditCardStatements", StringComparison.OrdinalIgnoreCase);
     var isPurchasesActive = string.Equals(currentController, "Purchases", StringComparison.OrdinalIgnoreCase)
         || string.Equals(currentController, "CreditCardPurchases", StringComparison.OrdinalIgnoreCase);
+    var isReportsActive = string.Equals(currentController, "Reports", StringComparison.OrdinalIgnoreCase);
     var appAssembly = typeof(Osiris.Web.Controllers.DashboardController).Assembly;
     var appVersion = System.Reflection.CustomAttributeExtensions
         .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(appAssembly)?
@@ -52,6 +53,9 @@
         </a>
         <a asp-controller="Bills" asp-action="Index" class="@(isBillsActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isBillsActive ? "page" : null)">
             Contas a pagar
+        </a>
+        <a asp-controller="Reports" asp-action="Index" class="@(isReportsActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isReportsActive ? "page" : null)">
+            Relatórios
         </a>
     </nav>
 

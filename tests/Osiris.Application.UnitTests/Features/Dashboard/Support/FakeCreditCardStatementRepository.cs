@@ -49,12 +49,23 @@ internal sealed class FakeCreditCardStatementRepository : ICreditCardStatementRe
 
     public Task<IReadOnlyCollection<CreditCardStatement>> ListAsync(
         Guid tenantId,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken)
     {
-        var statements = _statements
-            .Where(statement => statement.TenantId == tenantId)
-            .OrderBy(statement => statement.DueDate)
-            .ToArray();
+        var query = _statements.Where(statement => statement.TenantId == tenantId);
+
+        if (from.HasValue)
+        {
+            query = query.Where(statement => statement.DueDate >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(statement => statement.DueDate <= to.Value);
+        }
+
+        var statements = query.OrderBy(statement => statement.DueDate).ToArray();
 
         return Task.FromResult<IReadOnlyCollection<CreditCardStatement>>(statements);
     }

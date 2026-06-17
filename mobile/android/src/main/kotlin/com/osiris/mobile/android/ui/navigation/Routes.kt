@@ -8,6 +8,7 @@ object Routes {
     const val Home = "home"
     const val More = "more"
     const val Dashboard = "dashboard"
+    const val Reports = "reports"
     const val CategoriesList = "categories"
     const val CategoryForm = "category-form"
     const val CategoryFormPattern = "category-form?categoryId={categoryId}"

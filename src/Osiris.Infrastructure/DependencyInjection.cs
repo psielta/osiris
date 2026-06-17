@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
         services.AddSingleton<IFinancialAccountStatementPdfRenderer, FinancialAccountStatementPdfRenderer>();
         services.AddSingleton<ICreditCardStatementPdfRenderer, CreditCardStatementPdfRenderer>();
+        services.AddSingleton<ICashFlowReportPdfRenderer, CashFlowReportPdfRenderer>();
 
         return services;
     }

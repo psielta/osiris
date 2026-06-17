@@ -40,6 +40,7 @@
     <string name="more_categories_subtitle">Organize receitas e despesas</string>
     <string name="more_statements_subtitle">Acompanhe faturas e pagamentos</string>
     <string name="more_purchases_subtitle">Consulte compras no cartao</string>
+    <string name="more_reports_subtitle">Exporte visoes de caixa em PDF</string>
 
     <string name="coming_soon">Em breve.</string>
 
@@ -268,4 +269,12 @@
     <string name="dashboard_cash_bills_open">Contas em aberto no mes</string>
     <string name="dashboard_cash_statements_open">Faturas em aberto no mes</string>
     <string name="dashboard_cash_projected_after_all">Saldo previsto apos pagar tudo</string>
+
+    <!-- Reports -->
+    <string name="reports_title">Relatorios</string>
+    <string name="report_cash_synthetic_title">Visao de caixa sintetica</string>
+    <string name="report_cash_synthetic_body">Resumo do mes com receitas, saidas, obrigacoes em aberto e saldo previsto.</string>
+    <string name="report_cash_analytic_title">Visao de caixa analitica</string>
+    <string name="report_cash_analytic_body">Detalha contas, entradas, saidas, pagamentos, faturas e obrigacoes que explicam o saldo previsto.</string>
+    <string name="report_download_pdf">Baixar PDF</string>
 </resources>

@@ -19,7 +19,8 @@ public sealed class NavigationAndUxFlowTests : IAsyncLifetime
         "/cards",
         "/statements",
         "/purchases",
-        "/bills"
+        "/bills",
+        "/reports"
     };
 
     private readonly OsirisWebApplicationFactory _factory;

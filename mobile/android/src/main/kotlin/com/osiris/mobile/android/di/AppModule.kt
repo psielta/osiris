@@ -27,6 +27,7 @@ import com.osiris.mobile.presentation.home.HomeViewModel
 import com.osiris.mobile.presentation.login.ForgotPasswordViewModel
 import com.osiris.mobile.presentation.login.LoginViewModel
 import com.osiris.mobile.presentation.register.RegisterViewModel
+import com.osiris.mobile.presentation.reports.ReportsViewModel
 import com.osiris.mobile.presentation.splash.SplashViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -61,4 +62,5 @@ val appModule = module {
     viewModel { parameters -> BillDetailsViewModel(get(), get(), parameters.get<String>()) }
     viewModelOf(::AllPurchasesViewModel)
     viewModelOf(::AllStatementsViewModel)
+    viewModelOf(::ReportsViewModel)
 }

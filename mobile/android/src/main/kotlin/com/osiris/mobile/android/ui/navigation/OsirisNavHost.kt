@@ -47,6 +47,7 @@ import com.osiris.mobile.android.feature.home.HomeScreen
 import com.osiris.mobile.android.feature.login.ForgotPasswordScreen
 import com.osiris.mobile.android.feature.login.LoginScreen
 import com.osiris.mobile.android.feature.register.RegisterScreen
+import com.osiris.mobile.android.feature.reports.ReportsScreen
 import com.osiris.mobile.android.feature.splash.SplashScreen
 
 @Composable
@@ -139,11 +140,15 @@ fun OsirisNavHost() {
                     onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
                     onNavigateStatements = { navController.navigate(Routes.AllStatements) },
                     onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
+                    onNavigateReports = { navController.navigate(Routes.Reports) },
                 )
             }
             composable(Routes.Dashboard) {
                 DashboardScreen(onNavigateBack = { navController.popBackStack() }, showBackButton = false)
             }
+        composable(Routes.Reports) {
+            ReportsScreen(onNavigateBack = { navController.popBackStack() })
+        }
         composable(Routes.CategoriesList) {
             CategoriesListScreen(
                 onCreate = { navController.navigate(Routes.categoryForm()) },

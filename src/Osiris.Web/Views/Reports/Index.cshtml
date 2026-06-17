@@ -1,0 +1,82 @@
+@model ReportsIndexViewModel
+
+@{
+    ViewData["Title"] = "Relatórios";
+    Layout = "_AuthenticatedLayout";
+    var monthOptions = BrazilMonths.MonthSelectList(Model.Month);
+    var yearOptions = BrazilMonths.YearSelectList(Model.Year);
+}
+
+<section class="space-y-6">
+    <div>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Relatórios</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Exporte a visão de caixa do mês para entender o saldo previsto após pagar contas e faturas.
+        </p>
+    </div>
+
+    <form method="get" class="space-y-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+        <div class="flex flex-wrap items-end gap-3">
+            <div>
+                <label for="month" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Mês</label>
+                <select id="month" name="month" class="mt-1 block h-11 w-44 rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                    @foreach (var option in monthOptions)
+                    {
+                        <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="year" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Ano</label>
+                <select id="year" name="year" class="mt-1 block h-11 w-32 rounded-md border border-slate-300 dark:border-slate-700 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                    @foreach (var option in yearOptions)
+                    {
+                        <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" formaction="@Url.Action("Index", "Reports")" class="inline-flex h-11 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
+                Atualizar
+            </button>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2">
+            <div class="rounded-lg border border-slate-200 dark:border-slate-800 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                        <i class="ph ph-chart-line-up text-xl" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Visão de caixa sintética</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                            Resumo do mês com receitas, saídas, obrigações em aberto e saldo previsto.
+                        </p>
+                    </div>
+                </div>
+                <button type="submit" formaction="@Url.Action("ExportSyntheticCashFlowPdf", "Reports")" class="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800">
+                    <i class="ph ph-file-pdf" aria-hidden="true"></i>
+                    Baixar PDF
+                </button>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 dark:border-slate-800 p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                        <i class="ph ph-list-checks text-xl" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-950 dark:text-slate-100">Visão de caixa analítica</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                            Detalha contas, entradas, saídas, pagamentos, faturas e obrigações que explicam o saldo previsto.
+                        </p>
+                    </div>
+                </div>
+                <button type="submit" formaction="@Url.Action("ExportAnalyticCashFlowPdf", "Reports")" class="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 dark:bg-amber-500 dark:text-slate-950 dark:hover:bg-amber-400 px-4 text-sm font-medium text-white transition hover:bg-slate-800">
+                    <i class="ph ph-file-pdf" aria-hidden="true"></i>
+                    Baixar PDF
+                </button>
+            </div>
+        </div>
+    </form>
+</section>

@@ -83,12 +83,23 @@ internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepo
 
     public Task<IReadOnlyCollection<CreditCardPurchase>> ListAsync(
         Guid tenantId,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken)
     {
-        var purchases = _purchases
-            .Where(purchase => purchase.TenantId == tenantId)
-            .OrderByDescending(purchase => purchase.PurchaseDate)
-            .ToArray();
+        var query = _purchases.Where(purchase => purchase.TenantId == tenantId);
+
+        if (from.HasValue)
+        {
+            query = query.Where(purchase => purchase.PurchaseDate >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(purchase => purchase.PurchaseDate <= to.Value);
+        }
+
+        var purchases = query.OrderByDescending(purchase => purchase.PurchaseDate).ToArray();
 
         return Task.FromResult<IReadOnlyCollection<CreditCardPurchase>>(purchases);
     }

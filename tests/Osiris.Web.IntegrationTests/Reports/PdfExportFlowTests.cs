@@ -31,6 +31,58 @@ public sealed class PdfExportFlowTests : IAsyncLifetime
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task Reports_Index_ShouldShowCashFlowReports()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var html = await client.GetStringAsync("/reports");
+
+        Assert.Contains("Relat", html);
+        Assert.Contains("Vis", html);
+        Assert.Contains("caixa", html);
+        Assert.Contains("/reports/cash-flow/synthetic/pdf", html);
+        Assert.Contains("/reports/cash-flow/analytic/pdf", html);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Reports_Index_WhenAnonymous_ShouldRedirectToLogin()
+    {
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var response = await client.GetAsync("/reports");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.StartsWith("http://localhost/Account/Login", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task ExportPdf_CashFlowSynthetic_ShouldReturnPdfDocument()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var response = await client.GetAsync("/reports/cash-flow/synthetic/pdf?month=6&year=2026");
+
+        await AssertPdfAttachmentAsync(response);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task ExportPdf_CashFlowAnalytic_ShouldReturnPdfDocument()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+
+        var response = await client.GetAsync("/reports/cash-flow/analytic/pdf?month=6&year=2026");
+
+        await AssertPdfAttachmentAsync(response);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public async Task ExportPdf_AccountStatement_ShouldReturnPdfDocument()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);

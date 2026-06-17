@@ -48,6 +48,7 @@ fun HomeScreen(
     onNavigateCategories: () -> Unit,
     onNavigateStatements: () -> Unit,
     onNavigatePurchases: () -> Unit,
+    onNavigateReports: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -93,6 +94,13 @@ fun HomeScreen(
             )
             Spacer(Modifier.height(8.dp))
 
+            MoreActionRow(
+                title = stringResource(R.string.reports_title),
+                subtitle = stringResource(R.string.more_reports_subtitle),
+                icon = Icons.AutoMirrored.Filled.List,
+                onClick = onNavigateReports,
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             MoreActionRow(
                 title = stringResource(R.string.categories_title),
                 subtitle = stringResource(R.string.more_categories_subtitle),
