@@ -65,6 +65,13 @@
     <string name="back">Voltar</string>
     <string name="actions">Ações</string>
     <string name="cancel">Cancelar</string>
+    <string name="filter_current_month">Mes atual</string>
+    <string name="filter_next_month">Proximo mes</string>
+    <string name="filter_from">De</string>
+    <string name="filter_to">Ate</string>
+    <string name="filter_apply">Filtrar</string>
+    <string name="filter_statement_due_date">Periodo por vencimento</string>
+    <string name="filter_purchase_date">Periodo por data da compra</string>
 
     <!-- Accounts -->
     <string name="accounts_title">Contas</string>
@@ -152,6 +159,7 @@
     <string name="purchase_delete">Excluir compra</string>
     <string name="purchase_delete_confirm">Excluir esta compra e suas parcelas?</string>
     <string name="purchases_empty">Nenhuma compra ainda.</string>
+    <string name="purchases_empty_period">Nenhuma compra no periodo.</string>
     <string name="purchase_preview">Previa das parcelas</string>
     <string name="purchase_installment_row">%1$d/%2$d - %3$s</string>
     <string name="purchase_limit_warning">Esta compra deixa o cartao perto do limite.</string>
@@ -160,6 +168,7 @@
     <!-- Statements -->
     <string name="statements_title">Faturas</string>
     <string name="statements_empty">Nenhuma fatura ainda.</string>
+    <string name="statements_empty_period">Nenhuma fatura no periodo.</string>
     <string name="statement_details_card">Fatura</string>
     <string name="statement_total">Total</string>
     <string name="statement_paid">Pago</string>

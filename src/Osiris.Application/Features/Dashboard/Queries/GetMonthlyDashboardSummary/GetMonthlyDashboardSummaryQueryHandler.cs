@@ -76,7 +76,7 @@ public sealed class GetMonthlyDashboardSummaryQueryHandler
             request.Month,
             cancellationToken);
         var allCards = await _creditCards.ListAsync(tenantId, includeArchived: true, cancellationToken);
-        var statements = await _statements.ListAsync(tenantId, cancellationToken);
+        var statements = await _statements.ListAsync(tenantId, null, null, cancellationToken);
         var totalsById = await _statements.GetTotalsAsync(
             tenantId,
             statements.Select(statement => statement.Id).ToArray(),

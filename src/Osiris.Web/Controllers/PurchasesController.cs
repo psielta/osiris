@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Osiris.Application.Features.CreditCardPurchases.Queries.ListAllCreditCardPurchases;
+using Osiris.Web.Helpers;
+using Osiris.Web.Models;
 
 namespace Osiris.Web.Controllers;
 
@@ -20,9 +22,17 @@ public sealed class PurchasesController : AppController
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(DateOnly? from, DateOnly? to, CancellationToken cancellationToken)
     {
-        var purchases = await _mediator.Send(new ListAllCreditCardPurchasesQuery(), cancellationToken);
-        return View(purchases);
+        var filter = DateRangeFilterViewModel.FromQuery(BrazilDates.Today(), from, to);
+        var purchases = await _mediator.Send(
+            new ListAllCreditCardPurchasesQuery(filter.From, filter.To),
+            cancellationToken);
+
+        return View(new PurchasesIndexViewModel
+        {
+            Filter = filter,
+            Purchases = purchases
+        });
     }
 }

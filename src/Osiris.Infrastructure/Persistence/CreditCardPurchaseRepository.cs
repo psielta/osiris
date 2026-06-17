@@ -73,10 +73,24 @@ public sealed class CreditCardPurchaseRepository : ICreditCardPurchaseRepository
 
     public async Task<IReadOnlyCollection<CreditCardPurchase>> ListAsync(
         Guid tenantId,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken)
     {
-        return await _dbContext.CreditCardPurchases
-            .Where(purchase => purchase.TenantId == tenantId)
+        var query = _dbContext.CreditCardPurchases
+            .Where(purchase => purchase.TenantId == tenantId);
+
+        if (from.HasValue)
+        {
+            query = query.Where(purchase => purchase.PurchaseDate >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(purchase => purchase.PurchaseDate <= to.Value);
+        }
+
+        return await query
             .OrderByDescending(purchase => purchase.PurchaseDate)
             .ThenByDescending(purchase => purchase.CreatedAtUtc)
             .ToArrayAsync(cancellationToken);

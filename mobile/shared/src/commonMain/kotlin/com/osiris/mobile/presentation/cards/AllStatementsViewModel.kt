@@ -13,8 +13,10 @@ import kotlinx.coroutines.launch
 
 data class AllStatementsUiState(
     val statements: List<CreditCardStatementOverview> = emptyList(),
+    val range: DateRangeFilterUiState = currentMonthRange(),
     val isLoading: Boolean = true,
     val error: String? = null,
+    val filterError: String? = null,
 )
 
 class AllStatementsViewModel(
@@ -29,9 +31,10 @@ class AllStatementsViewModel(
     }
 
     fun load() {
+        val range = _state.value.range
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            when (val result = cardRepository.listAllStatements()) {
+            when (val result = cardRepository.listAllStatements(range.from, range.to)) {
                 is OsirisResult.Success -> _state.update {
                     it.copy(statements = result.value, isLoading = false)
                 }
@@ -41,5 +44,32 @@ class AllStatementsViewModel(
                 }
             }
         }
+    }
+
+    fun selectCurrentMonth() = selectRange(currentMonthRange())
+
+    fun selectNextMonth() = selectRange(nextMonthRange())
+
+    fun onCustomFromChange(value: String) {
+        _state.update { it.copy(range = it.range.copy(customFrom = value), filterError = null) }
+    }
+
+    fun onCustomToChange(value: String) {
+        _state.update { it.copy(range = it.range.copy(customTo = value), filterError = null) }
+    }
+
+    fun applyCustomRange() {
+        val range = _state.value.range
+        if (!isValidDateRange(range.customFrom, range.customTo)) {
+            _state.update { it.copy(filterError = "Informe um periodo valido.") }
+            return
+        }
+
+        selectRange(range.copy(from = range.customFrom, to = range.customTo))
+    }
+
+    private fun selectRange(range: DateRangeFilterUiState) {
+        _state.update { it.copy(range = range, filterError = null) }
+        load()
     }
 }

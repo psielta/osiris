@@ -52,10 +52,24 @@ public sealed class CreditCardStatementRepository : ICreditCardStatementReposito
 
     public async Task<IReadOnlyCollection<CreditCardStatement>> ListAsync(
         Guid tenantId,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken)
     {
-        return await _dbContext.CreditCardStatements
-            .Where(statement => statement.TenantId == tenantId)
+        var query = _dbContext.CreditCardStatements
+            .Where(statement => statement.TenantId == tenantId);
+
+        if (from.HasValue)
+        {
+            query = query.Where(statement => statement.DueDate >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            query = query.Where(statement => statement.DueDate <= to.Value);
+        }
+
+        return await query
             .OrderBy(statement => statement.DueDate)
             .ToArrayAsync(cancellationToken);
     }

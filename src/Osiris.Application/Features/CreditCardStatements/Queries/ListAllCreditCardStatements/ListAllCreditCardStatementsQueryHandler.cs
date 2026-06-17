@@ -31,7 +31,7 @@ public sealed class ListAllCreditCardStatementsQueryHandler
         CancellationToken cancellationToken)
     {
         var tenantId = _currentUser.TenantId;
-        var statements = await _statements.ListAsync(tenantId, cancellationToken);
+        var statements = await _statements.ListAsync(tenantId, request.From, request.To, cancellationToken);
         var totalsById = await _statements.GetTotalsAsync(
             tenantId,
             statements.Select(statement => statement.Id).ToArray(),

@@ -64,8 +64,11 @@ class CardApi(
     suspend fun listPurchases(cardId: String): List<PurchaseListItemDto> =
         authClient.get("$base/$cardId/purchases").body()
 
-    suspend fun listAllPurchases(): List<PurchaseOverviewDto> =
-        authClient.get("$base/purchases").body()
+    suspend fun listAllPurchases(from: String, to: String): List<PurchaseOverviewDto> =
+        authClient.get("$base/purchases") {
+            parameter("from", from)
+            parameter("to", to)
+        }.body()
 
     suspend fun getPurchase(cardId: String, purchaseId: String): PurchaseDetailsDto =
         authClient.get("$base/$cardId/purchases/$purchaseId").body()
@@ -95,8 +98,11 @@ class CardApi(
     suspend fun listStatements(cardId: String): List<StatementListItemDto> =
         authClient.get("$base/$cardId/statements").body()
 
-    suspend fun listAllStatements(): List<StatementOverviewDto> =
-        authClient.get("$base/statements").body()
+    suspend fun listAllStatements(from: String, to: String): List<StatementOverviewDto> =
+        authClient.get("$base/statements") {
+            parameter("from", from)
+            parameter("to", to)
+        }.body()
 
     suspend fun currentStatement(cardId: String): StatementListItemDto? =
         authClient.get("$base/$cardId/statements/current").body()

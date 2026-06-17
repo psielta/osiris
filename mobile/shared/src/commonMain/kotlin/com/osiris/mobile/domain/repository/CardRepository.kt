@@ -34,7 +34,7 @@ interface CardRepository {
     suspend fun archiveCard(id: String): OsirisResult<Unit>
     suspend fun overview(cardId: String): OsirisResult<CreditCardOverview>
     suspend fun listPurchases(cardId: String): OsirisResult<List<CreditCardPurchase>>
-    suspend fun listAllPurchases(): OsirisResult<List<CreditCardPurchaseOverview>>
+    suspend fun listAllPurchases(from: String, to: String): OsirisResult<List<CreditCardPurchaseOverview>>
     suspend fun getPurchase(cardId: String, purchaseId: String): OsirisResult<CreditCardPurchaseDetails>
     suspend fun previewPurchase(
         cardId: String,
@@ -53,7 +53,7 @@ interface CardRepository {
     ): OsirisResult<Unit>
     suspend fun deletePurchase(cardId: String, purchaseId: String): OsirisResult<Unit>
     suspend fun listStatements(cardId: String): OsirisResult<List<CreditCardStatement>>
-    suspend fun listAllStatements(): OsirisResult<List<CreditCardStatementOverview>>
+    suspend fun listAllStatements(from: String, to: String): OsirisResult<List<CreditCardStatementOverview>>
     suspend fun currentStatement(cardId: String): OsirisResult<CreditCardStatement?>
     suspend fun getStatement(cardId: String, statementId: String): OsirisResult<CreditCardStatementDetails>
     suspend fun payStatement(

@@ -117,12 +117,26 @@ public sealed class NavigationAndUxFlowTests : IAsyncLifetime
         await SeedCardWithPurchaseAsync(client, "Compra do hub", "120.00");
 
         var statementsHtml = await client.GetStringAsync("/statements");
+        Assert.Contains("Período por vencimento", statementsHtml);
+        Assert.Contains("Mês atual", statementsHtml);
+        Assert.Contains("Próximo mês", statementsHtml);
         Assert.Contains("Cartao Teste", statementsHtml);
         Assert.Contains("120,00", statementsHtml);
 
         var purchasesHtml = await client.GetStringAsync("/purchases");
+        Assert.Contains("Período por data da compra", purchasesHtml);
+        Assert.Contains("Mês atual", purchasesHtml);
+        Assert.Contains("Próximo mês", purchasesHtml);
         Assert.Contains("Compra do hub", purchasesHtml);
         Assert.Contains("Cartao Teste", purchasesHtml);
+
+        var emptyStatementsHtml = await client.GetStringAsync("/statements?from=2099-01-01&to=2099-01-31");
+        Assert.Contains("Nenhuma fatura ainda", emptyStatementsHtml);
+        Assert.DoesNotContain("120,00", emptyStatementsHtml);
+
+        var emptyPurchasesHtml = await client.GetStringAsync("/purchases?from=2099-01-01&to=2099-01-31");
+        Assert.Contains("Nenhuma compra registrada", emptyPurchasesHtml);
+        Assert.DoesNotContain("Compra do hub", emptyPurchasesHtml);
     }
 
     [Fact]
@@ -195,7 +209,7 @@ public sealed class NavigationAndUxFlowTests : IAsyncLifetime
                 ["Name"] = "Cartao Teste",
                 ["Limit"] = "5000.00",
                 ["ClosingDay"] = "25",
-                ["DueDay"] = "5",
+                ["DueDay"] = "28",
                 ["__RequestVerificationToken"] = token
             }));
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
@@ -226,7 +240,7 @@ public sealed class NavigationAndUxFlowTests : IAsyncLifetime
             {
                 ["Description"] = description,
                 ["TotalAmount"] = totalAmount,
-                ["PurchaseDate"] = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"),
+                ["PurchaseDate"] = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).ToString("yyyy-MM-dd"),
                 ["Installments"] = "1",
                 ["CategoryId"] = categoryId.ToString(),
                 ["__RequestVerificationToken"] = purchaseToken

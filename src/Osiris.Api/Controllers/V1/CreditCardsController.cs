@@ -99,16 +99,32 @@ public sealed class CreditCardsController : ApiControllerBase
     }
 
     [HttpGet("purchases")]
-    public async Task<IActionResult> ListAllPurchases(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListAllPurchases(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        CancellationToken cancellationToken)
     {
-        var purchases = await _mediator.Send(new ListAllCreditCardPurchasesQuery(), cancellationToken);
+        if (!ValidateDateRange(from, to))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var purchases = await _mediator.Send(new ListAllCreditCardPurchasesQuery(from, to), cancellationToken);
         return Ok(purchases);
     }
 
     [HttpGet("statements")]
-    public async Task<IActionResult> ListAllStatements(CancellationToken cancellationToken)
+    public async Task<IActionResult> ListAllStatements(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        CancellationToken cancellationToken)
     {
-        var statements = await _mediator.Send(new ListAllCreditCardStatementsQuery(), cancellationToken);
+        if (!ValidateDateRange(from, to))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var statements = await _mediator.Send(new ListAllCreditCardStatementsQuery(from, to), cancellationToken);
         return Ok(statements);
     }
 
@@ -253,6 +269,23 @@ public sealed class CreditCardsController : ApiControllerBase
     private async Task<bool> CardExistsAsync(Guid cardId, CancellationToken cancellationToken)
     {
         return await _mediator.Send(new GetCreditCardDetailsQuery(cardId), cancellationToken) is not null;
+    }
+
+    private bool ValidateDateRange(DateOnly? from, DateOnly? to)
+    {
+        if (from.HasValue != to.HasValue)
+        {
+            ModelState.AddModelError("from", "Informe o inicio e o fim do periodo.");
+            return false;
+        }
+
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+        {
+            ModelState.AddModelError("from", "A data inicial deve ser menor ou igual a data final.");
+            return false;
+        }
+
+        return true;
     }
 
     private async Task<Osiris.Application.Features.CreditCardStatements.DTOs.CreditCardStatementDetailsDto?>

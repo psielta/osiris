@@ -58,9 +58,32 @@ public sealed record PurchaseDetailsResponse(
     string? Notes,
     IReadOnlyList<PurchaseInstallmentResponse> InstallmentItems);
 
+public sealed record PurchaseOverviewResponse(
+    Guid Id,
+    Guid CreditCardId,
+    string CreditCardName,
+    string Description,
+    string? CategoryName,
+    decimal TotalAmount,
+    DateOnly PurchaseDate,
+    int Installments);
+
 public sealed record StatementItemResponse(
     Guid Id,
     Guid CreditCardId,
+    int ReferenceMonth,
+    int ReferenceYear,
+    DateOnly ClosingDate,
+    DateOnly DueDate,
+    int Status,
+    decimal TotalAmount,
+    decimal PaidAmount,
+    decimal OpenBalance);
+
+public sealed record StatementOverviewResponse(
+    Guid Id,
+    Guid CreditCardId,
+    string CreditCardName,
     int ReferenceMonth,
     int ReferenceYear,
     DateOnly ClosingDate,
@@ -254,6 +277,48 @@ public sealed class CreditCardsFlowTests : IAsyncLifetime
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         Assert.Equal(4, await dbContext.CreditCardStatements.CountAsync());
         Assert.Equal(5, await dbContext.CreditCardInstallments.CountAsync());
+    }
+
+    [Fact]
+    public async Task Aggregated_purchases_and_statements_support_date_filters()
+    {
+        var client = await AuthenticatedClientAsync();
+        var cardId = await CreateCardAsync(client, "Nubank", closingDay: 25, dueDay: 28);
+        var categoryId = await CreateExpenseCategoryAsync(client, "Mercado");
+
+        await CreatePurchaseAsync(client, cardId, categoryId, "Compra junho", 80m, "2026-06-10", 1);
+        await CreatePurchaseAsync(client, cardId, categoryId, "Compra agosto", 120m, "2026-08-10", 1);
+
+        var allPurchases = await ListAllPurchasesAsync(client);
+        Assert.Contains(allPurchases, purchase => purchase.Description == "Compra junho");
+        Assert.Contains(allPurchases, purchase => purchase.Description == "Compra agosto");
+
+        var junePurchases = await ListAllPurchasesAsync(client, "2026-06-01", "2026-06-30");
+        var junePurchase = Assert.Single(junePurchases);
+        Assert.Equal("Compra junho", junePurchase.Description);
+
+        var juneStatements = await ListAllStatementsAsync(client, "2026-06-01", "2026-06-30");
+        var juneStatement = Assert.Single(juneStatements);
+        Assert.Equal(6, juneStatement.ReferenceMonth);
+        Assert.Equal(80m, juneStatement.TotalAmount);
+
+        var augustStatements = await ListAllStatementsAsync(client, "2026-08-01", "2026-08-31");
+        var augustStatement = Assert.Single(augustStatements);
+        Assert.Equal(8, augustStatement.ReferenceMonth);
+        Assert.Equal(120m, augustStatement.TotalAmount);
+    }
+
+    [Fact]
+    public async Task Aggregated_purchases_and_statements_reject_invalid_date_filters()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            (await client.GetAsync("/api/v1/cards/purchases?from=2026-06-01")).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            (await client.GetAsync("/api/v1/cards/statements?from=2026-07-01&to=2026-06-01")).StatusCode);
     }
 
     [Fact]
@@ -458,4 +523,23 @@ public sealed class CreditCardsFlowTests : IAsyncLifetime
 
     private static async Task<List<StatementItemResponse>> ListStatementsAsync(HttpClient client, Guid cardId) =>
         (await client.GetFromJsonAsync<List<StatementItemResponse>>($"/api/v1/cards/{cardId}/statements"))!;
+
+    private static async Task<List<PurchaseOverviewResponse>> ListAllPurchasesAsync(
+        HttpClient client,
+        string? from = null,
+        string? to = null) =>
+        (await client.GetFromJsonAsync<List<PurchaseOverviewResponse>>(
+            AppendRangeQuery("/api/v1/cards/purchases", from, to)))!;
+
+    private static async Task<List<StatementOverviewResponse>> ListAllStatementsAsync(
+        HttpClient client,
+        string? from = null,
+        string? to = null) =>
+        (await client.GetFromJsonAsync<List<StatementOverviewResponse>>(
+            AppendRangeQuery("/api/v1/cards/statements", from, to)))!;
+
+    private static string AppendRangeQuery(string path, string? from, string? to) =>
+        from is null || to is null
+            ? path
+            : $"{path}?from={from}&to={to}";
 }

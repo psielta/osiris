@@ -29,7 +29,7 @@ public sealed class ListAllCreditCardPurchasesQueryHandler
         CancellationToken cancellationToken)
     {
         var tenantId = _currentUser.TenantId;
-        var purchases = await _purchases.ListAsync(tenantId, cancellationToken);
+        var purchases = await _purchases.ListAsync(tenantId, request.From, request.To, cancellationToken);
         var cards = await _creditCards.ListAsync(tenantId, includeArchived: true, cancellationToken);
         var categories = await _categories.ListAsync(tenantId, includeArchived: true, cancellationToken);
 

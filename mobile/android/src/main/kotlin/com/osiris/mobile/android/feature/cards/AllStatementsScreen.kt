@@ -1,6 +1,7 @@
 package com.osiris.mobile.android.feature.cards
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -76,17 +77,36 @@ fun AllStatementsScreen(
                 }
             }
 
-            state.statements.isEmpty() -> Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                Text(stringResource(R.string.statements_empty), color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            }
-
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(state.statements, key = { it.id }) { statement ->
-                    StatementRow(statement, onClick = { onOpenStatement(statement.creditCardId, statement.id) })
-                    Spacer(Modifier.height(12.dp))
+                item {
+                    DateRangeFilterControls(
+                        title = stringResource(R.string.filter_statement_due_date),
+                        range = state.range,
+                        filterError = state.filterError,
+                        onCurrentMonth = viewModel::selectCurrentMonth,
+                        onNextMonth = viewModel::selectNextMonth,
+                        onFromChange = viewModel::onCustomFromChange,
+                        onToChange = viewModel::onCustomToChange,
+                        onApply = viewModel::applyCustomRange,
+                    )
+                }
+                if (state.statements.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.statements_empty_period),
+                            modifier = Modifier.fillMaxWidth().padding(24.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    items(state.statements, key = { it.id }) { statement ->
+                        StatementRow(statement, onClick = { onOpenStatement(statement.creditCardId, statement.id) })
+                    }
                 }
             }
         }

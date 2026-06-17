@@ -83,8 +83,11 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         api.listPurchases(cardId).map { it.toDomain() }
     }
 
-    override suspend fun listAllPurchases(): OsirisResult<List<CreditCardPurchaseOverview>> = osirisCatching {
-        api.listAllPurchases().map { it.toDomain() }
+    override suspend fun listAllPurchases(
+        from: String,
+        to: String,
+    ): OsirisResult<List<CreditCardPurchaseOverview>> = osirisCatching {
+        api.listAllPurchases(from, to).map { it.toDomain() }
     }
 
     override suspend fun getPurchase(cardId: String, purchaseId: String): OsirisResult<CreditCardPurchaseDetails> =
@@ -125,8 +128,11 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         api.listStatements(cardId).map { it.toDomain() }
     }
 
-    override suspend fun listAllStatements(): OsirisResult<List<CreditCardStatementOverview>> = osirisCatching {
-        api.listAllStatements().map { it.toDomain() }
+    override suspend fun listAllStatements(
+        from: String,
+        to: String,
+    ): OsirisResult<List<CreditCardStatementOverview>> = osirisCatching {
+        api.listAllStatements(from, to).map { it.toDomain() }
     }
 
     override suspend fun currentStatement(cardId: String): OsirisResult<CreditCardStatement?> = osirisCatching {
