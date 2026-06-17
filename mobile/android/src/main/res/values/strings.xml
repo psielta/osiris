@@ -187,11 +187,12 @@
     <string name="payment_notes_label">Observacoes</string>
     <string name="payment_save">Registrar pagamento</string>
 
-    <!-- Bills -->
-    <string name="bills_title">Bills</string>
-    <string name="bill_new">Nova Bill</string>
-    <string name="bill_edit">Editar Bill</string>
-    <string name="bill_details">Bill</string>
+    <!-- Contas a pagar -->
+    <string name="bills_title">Contas a pagar</string>
+    <string name="bills_tab_title">A pagar</string>
+    <string name="bill_new">Nova conta a pagar</string>
+    <string name="bill_edit">Editar conta a pagar</string>
+    <string name="bill_details">Conta a pagar</string>
     <string name="bill_description_label">Descricao</string>
     <string name="bill_amount_label">Valor</string>
     <string name="bill_due_date_label">Vencimento</string>
@@ -206,30 +207,56 @@
     <string name="bill_mark_pending">Voltar para pendente</string>
     <string name="bill_pay">Pagamento</string>
     <string name="bill_mark_paid">Marcar como paga</string>
-    <string name="bill_delete">Excluir Bill</string>
-    <string name="bill_delete_confirm">Excluir esta Bill?</string>
-    <string name="bills_empty">Nenhuma Bill ainda.</string>
+    <string name="bill_delete">Excluir conta a pagar</string>
+    <string name="bill_delete_confirm">Excluir esta conta a pagar?</string>
+    <string name="bills_empty">Nenhuma conta a pagar ainda.</string>
 
     <!-- Dashboard -->
     <string name="dashboard_title">Dashboard</string>
     <string name="dashboard_onboarding_title">Comece pelo basico</string>
     <string name="dashboard_onboarding_body">Cadastre categorias, contas, cartoes e seus primeiros gastos para destravar a leitura financeira.</string>
+    <string name="dashboard_onboarding_financial_account">Criar uma conta financeira</string>
+    <string name="dashboard_onboarding_credit_card">Cadastrar cartao de credito</string>
+    <string name="dashboard_onboarding_categories">Conferir categorias</string>
+    <string name="dashboard_onboarding_first_spending">Registrar primeira compra ou conta a pagar</string>
+    <string name="dashboard_onboarding_done">Pronto</string>
+    <string name="dashboard_onboarding_pending">Pendente</string>
     <string name="dashboard_income">Receitas do mes</string>
     <string name="dashboard_spending">Gastos do mes</string>
     <string name="dashboard_projected_cash">Saldo previsto</string>
     <string name="dashboard_accounts_balance">Saldo em contas</string>
     <string name="dashboard_open_statements">Faturas em aberto</string>
-    <string name="dashboard_open_bills">Bills em aberto</string>
+    <string name="dashboard_overview">Visao geral</string>
+    <string name="dashboard_spending_view">Visao de gastos</string>
+    <string name="dashboard_cash_view">Visao de caixa</string>
+    <string name="dashboard_due_month">Vencimentos do mes</string>
+    <string name="dashboard_open_bills">Contas a pagar em aberto</string>
     <string name="dashboard_statement_payments">Pagamentos de fatura</string>
     <string name="dashboard_future_installments">Parcelado futuro</string>
     <string name="dashboard_overdue_statements">Faturas vencidas</string>
     <string name="dashboard_partial_statements">Faturas parciais</string>
-    <string name="dashboard_bills_due">Bills vencendo</string>
+    <string name="dashboard_bills_due">Contas vencendo</string>
     <string name="dashboard_statements_due">Faturas vencendo</string>
+    <string name="dashboard_bills_due_detail">%1$d conta(s), %2$s em aberto</string>
+    <string name="dashboard_statements_due_detail">%1$d fatura(s), %2$s em aberto</string>
+    <string name="dashboard_overdue_detail">%1$s em atraso</string>
+    <string name="dashboard_partial_detail">Pagamentos em andamento</string>
     <string name="dashboard_categories">Categorias que mais pesaram</string>
+    <string name="dashboard_spending_chart">Distribuicao dos gastos</string>
+    <string name="dashboard_spending_chart_total">Total do mes</string>
+    <string name="dashboard_spending_other">Outros</string>
     <string name="dashboard_no_spending">Nenhum gasto no mes.</string>
     <string name="dashboard_cards_risk">Cartoes em risco</string>
     <string name="dashboard_upcoming">Proximas obrigacoes</string>
     <string name="dashboard_no_obligations">Nenhuma obrigacao proxima.</string>
     <string name="dashboard_card_purchases">Cartao</string>
+    <string name="dashboard_bills_spending">Contas a pagar</string>
+    <string name="dashboard_direct_expenses">Diretas</string>
+    <string name="dashboard_cash_income_received">Receitas recebidas</string>
+    <string name="dashboard_cash_bills_paid">Contas pagas no mes</string>
+    <string name="dashboard_cash_statement_payments">Pagamentos de fatura</string>
+    <string name="dashboard_cash_direct_expenses">Despesas diretas nas contas</string>
+    <string name="dashboard_cash_bills_open">Contas em aberto no mes</string>
+    <string name="dashboard_cash_statements_open">Faturas em aberto no mes</string>
+    <string name="dashboard_cash_projected_after_all">Saldo previsto apos pagar tudo</string>
 </resources>

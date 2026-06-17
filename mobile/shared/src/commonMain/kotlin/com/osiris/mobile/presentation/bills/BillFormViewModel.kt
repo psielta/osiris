@@ -90,7 +90,7 @@ class BillFormViewModel(
             }
 
             if (billId != null && bill == null) {
-                _events.send(BillFormEvent.ShowMessage("Bill nao encontrada."))
+                _events.send(BillFormEvent.ShowMessage("Conta a pagar nao encontrada."))
                 _events.send(BillFormEvent.NavigateBack)
             }
         }

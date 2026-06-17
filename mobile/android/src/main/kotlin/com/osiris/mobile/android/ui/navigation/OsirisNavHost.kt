@@ -57,7 +57,7 @@ fun OsirisNavHost() {
             MainTab(Routes.Dashboard, R.string.dashboard_title, Icons.Filled.Home),
             MainTab(Routes.AccountsList, R.string.accounts_title, Icons.AutoMirrored.Filled.List),
             MainTab(Routes.CardsList, R.string.cards_title, Icons.Filled.ShoppingCart),
-            MainTab(Routes.BillsList, R.string.bills_title, Icons.Filled.Check),
+            MainTab(Routes.BillsList, R.string.bills_tab_title, Icons.Filled.Check),
             MainTab(Routes.More, R.string.more_title, Icons.Filled.MoreVert),
         )
     }
