@@ -15,6 +15,9 @@ data class RegisterRequest(
 )
 
 @Serializable
+data class ForgotPasswordRequest(val email: String)
+
+@Serializable
 data class RefreshRequest(val refreshToken: String)
 
 @Serializable

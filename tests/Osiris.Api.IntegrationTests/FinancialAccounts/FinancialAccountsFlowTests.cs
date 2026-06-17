@@ -136,6 +136,7 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/accounts/{unknown}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/accounts/{unknown}/statement")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/accounts/{unknown}/pdf")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound,
             (await client.PutAsJsonAsync($"/api/v1/accounts/{unknown}", new { name = "X", type = Checking })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync($"/api/v1/accounts/{unknown}/archive", content: null)).StatusCode);
@@ -152,11 +153,26 @@ public sealed class FinancialAccountsFlowTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.NotFound, (await clientB.GetAsync($"/api/v1/accounts/{id}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await clientB.GetAsync($"/api/v1/accounts/{id}/statement")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await clientB.GetAsync($"/api/v1/accounts/{id}/pdf")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound,
             (await clientB.PutAsJsonAsync($"/api/v1/accounts/{id}", new { name = "Invadida", type = Checking })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await clientB.PostAsync($"/api/v1/accounts/{id}/archive", content: null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await PostMovementAsync(clientB, id, Income, 10m)).StatusCode);
         Assert.DoesNotContain(await ListAsync(clientB), a => a.Id == id);
+    }
+
+    [Fact]
+    public async Task Statement_pdf_returns_file_for_own_account()
+    {
+        var client = await AuthenticatedClientAsync();
+        var id = await CreateAccountAsync(client, "Caixa", Checking, 200m);
+        Assert.Equal(HttpStatusCode.Created, (await PostMovementAsync(client, id, Income, 50m, "Deposito")).StatusCode);
+
+        var response = await client.GetAsync($"/api/v1/accounts/{id}/pdf");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+        Assert.True((await response.Content.ReadAsByteArrayAsync()).Length > 100);
     }
 
     [Fact]

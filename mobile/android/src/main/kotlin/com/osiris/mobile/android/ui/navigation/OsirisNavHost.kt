@@ -26,6 +26,7 @@ import com.osiris.mobile.android.feature.categories.CategoriesListScreen
 import com.osiris.mobile.android.feature.categories.CategoryFormScreen
 import com.osiris.mobile.android.feature.dashboard.DashboardScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
+import com.osiris.mobile.android.feature.login.ForgotPasswordScreen
 import com.osiris.mobile.android.feature.login.LoginScreen
 import com.osiris.mobile.android.feature.register.RegisterScreen
 import com.osiris.mobile.android.feature.splash.SplashScreen
@@ -57,7 +58,11 @@ fun OsirisNavHost() {
                     }
                 },
                 onNavigateRegister = { navController.navigate(Routes.Register) },
+                onNavigateForgotPassword = { navController.navigate(Routes.ForgotPassword) },
             )
+        }
+        composable(Routes.ForgotPassword) {
+            ForgotPasswordScreen(onNavigateBack = { navController.popBackStack() })
         }
         composable(Routes.Register) {
             RegisterScreen(

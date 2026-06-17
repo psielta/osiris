@@ -1,6 +1,7 @@
 package com.osiris.mobile.data.repository
 
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.dto.ForgotPasswordRequest
 import com.osiris.mobile.data.dto.LoginRequest
 import com.osiris.mobile.data.dto.LogoutRequest
 import com.osiris.mobile.data.dto.RegisterRequest
@@ -37,6 +38,14 @@ class AuthRepositoryImpl(
         session.onAuthenticated(TokenBundle(tokens.accessToken, tokens.refreshToken), user)
         user
     }
+
+    override suspend fun forgotPassword(email: String): OsirisResult<Unit> =
+        try {
+            api.forgotPassword(ForgotPasswordRequest(email))
+            OsirisResult.Success(Unit)
+        } catch (throwable: Throwable) {
+            OsirisResult.Failure(NetworkErrorMapper.map(throwable))
+        }
 
     override suspend fun currentUser(): OsirisResult<AuthUser> = runAuth {
         val profile = api.me()

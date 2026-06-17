@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Osiris.Api.Contracts;
 using Osiris.Application.Features.Authentication.Commands.AuthenticateUser;
+using Osiris.Application.Features.Authentication.Commands.ForgotPassword;
 using Osiris.Application.Features.Authentication.Commands.RefreshToken;
 using Osiris.Application.Features.Authentication.Commands.RegisterUserApi;
 using Osiris.Application.Features.Authentication.Commands.RevokeRefreshToken;
@@ -47,6 +48,14 @@ public sealed class AuthController : ApiControllerBase
             cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ForgotPasswordCommand(request.Email), cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result);
     }
 
     [HttpPost("refresh")]

@@ -140,6 +140,38 @@ public sealed class ApiAuthenticationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ForgotPassword_ShouldReturnNoContent_ForKnownAndUnknownEmail()
+    {
+        var client = CreateClient();
+        await ApiTestHelpers.RegisterAsync(client, email: "recover@osiris.test");
+
+        var known = await client.PostAsJsonAsync("/api/v1/auth/forgot-password", new
+        {
+            email = "recover@osiris.test"
+        });
+        var unknown = await client.PostAsJsonAsync("/api/v1/auth/forgot-password", new
+        {
+            email = "unknown@osiris.test"
+        });
+
+        Assert.Equal(HttpStatusCode.NoContent, known.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, unknown.StatusCode);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WithInvalidEmail_ShouldReturn400()
+    {
+        var client = CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/forgot-password", new
+        {
+            email = "not-an-email"
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Me_WithoutToken_ShouldReturn401_NotRedirect()
     {
         var client = CreateClient();

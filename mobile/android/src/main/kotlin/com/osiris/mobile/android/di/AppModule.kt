@@ -24,6 +24,7 @@ import com.osiris.mobile.presentation.categories.CategoriesListViewModel
 import com.osiris.mobile.presentation.categories.CategoryFormViewModel
 import com.osiris.mobile.presentation.dashboard.DashboardViewModel
 import com.osiris.mobile.presentation.home.HomeViewModel
+import com.osiris.mobile.presentation.login.ForgotPasswordViewModel
 import com.osiris.mobile.presentation.login.LoginViewModel
 import com.osiris.mobile.presentation.register.RegisterViewModel
 import com.osiris.mobile.presentation.splash.SplashViewModel
@@ -37,6 +38,7 @@ val appModule = module {
     single<TokenStore> { DataStoreTokenStore(androidContext()) }
 
     viewModelOf(::LoginViewModel)
+    viewModelOf(::ForgotPasswordViewModel)
     viewModelOf(::RegisterViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::SplashViewModel)

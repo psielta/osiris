@@ -6,6 +6,7 @@ import com.osiris.mobile.domain.model.AccountEdit
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
 import com.osiris.mobile.domain.model.MovementType
+import com.osiris.mobile.domain.model.StatementPdf
 
 interface AccountRepository {
     suspend fun list(): OsirisResult<List<Account>>
@@ -14,6 +15,7 @@ interface AccountRepository {
     suspend fun update(id: String, name: String, type: AccountType): OsirisResult<Unit>
     suspend fun archive(id: String): OsirisResult<Unit>
     suspend fun statement(id: String): OsirisResult<AccountStatement>
+    suspend fun downloadStatementPdf(id: String): OsirisResult<StatementPdf>
     suspend fun createMovement(
         accountId: String,
         type: MovementType,

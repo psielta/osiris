@@ -9,6 +9,8 @@ public sealed record RegisterRequest(
     string Password,
     string ConfirmPassword);
 
+public sealed record ForgotPasswordRequest(string Email);
+
 public sealed record RefreshTokenRequest(string RefreshToken);
 
 public sealed record LogoutRequest(string RefreshToken);

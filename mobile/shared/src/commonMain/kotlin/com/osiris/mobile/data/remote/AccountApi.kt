@@ -14,7 +14,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
 class AccountApi(
@@ -49,9 +51,30 @@ class AccountApi(
     suspend fun statement(id: String): StatementDto =
         authClient.get("$base/$id/statement").body()
 
+    suspend fun downloadStatementPdf(id: String): PdfDownloadResponse {
+        val response: HttpResponse = authClient.get("$base/$id/pdf")
+        val contentDisposition = response.headers[HttpHeaders.ContentDisposition]
+        return PdfDownloadResponse(
+            fileName = contentDisposition.fileNameFromDisposition() ?: "extrato-$id.pdf",
+            contentType = response.headers[HttpHeaders.ContentType] ?: "application/pdf",
+            bytes = response.body(),
+        )
+    }
+
     suspend fun createMovement(accountId: String, request: CreateMovementRequest): CreatedIdResponse =
         authClient.post("$base/$accountId/movements") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
+
+    private fun String?.fileNameFromDisposition(): String? {
+        if (this.isNullOrBlank()) return null
+        return split(';')
+            .map { it.trim() }
+            .firstOrNull { it.startsWith("filename=", ignoreCase = true) }
+            ?.substringAfter('=')
+            ?.trim()
+            ?.trim('"')
+            ?.takeIf { it.isNotBlank() }
+    }
 }

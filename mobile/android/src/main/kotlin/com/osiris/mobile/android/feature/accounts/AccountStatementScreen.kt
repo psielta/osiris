@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,25 +26,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
+import com.osiris.mobile.android.ui.components.openPdf
 import com.osiris.mobile.android.ui.components.RefreshOnResume
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.Movement
 import com.osiris.mobile.domain.model.MovementType
+import com.osiris.mobile.presentation.accounts.AccountStatementEvent
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -61,8 +69,19 @@ fun AccountStatementScreen(
     viewModel: AccountStatementViewModel = koinViewModel { parametersOf(accountId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     RefreshOnResume { viewModel.load() }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is AccountStatementEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+                is AccountStatementEvent.OpenPdf -> openPdf(context, event.pdf)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -73,8 +92,20 @@ fun AccountStatementScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
+                actions = {
+                    if (state.statement != null) {
+                        IconButton(onClick = viewModel::downloadPdf, enabled = !state.isDownloadingPdf) {
+                            if (state.isDownloadingPdf) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                            } else {
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.statement_pdf))
+                            }
+                        }
+                    }
+                },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.statement?.isActive == true) {
                 ExtendedFloatingActionButton(

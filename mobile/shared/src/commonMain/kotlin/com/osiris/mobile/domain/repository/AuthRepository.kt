@@ -14,6 +14,8 @@ interface AuthRepository {
         confirmPassword: String,
     ): OsirisResult<AuthUser>
 
+    suspend fun forgotPassword(email: String): OsirisResult<Unit>
+
     suspend fun currentUser(): OsirisResult<AuthUser>
 
     suspend fun logout()

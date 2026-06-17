@@ -2,6 +2,7 @@ package com.osiris.mobile.data.remote
 
 import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.data.dto.AuthTokensDto
+import com.osiris.mobile.data.dto.ForgotPasswordRequest
 import com.osiris.mobile.data.dto.LoginRequest
 import com.osiris.mobile.data.dto.LogoutRequest
 import com.osiris.mobile.data.dto.RegisterRequest
@@ -30,6 +31,13 @@ class AuthApi(
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
+
+    suspend fun forgotPassword(request: ForgotPasswordRequest) {
+        plainClient.post(url("forgot-password")) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+    }
 
     suspend fun me(): UserProfileDto =
         authClient.get(url("me")).body()

@@ -11,6 +11,14 @@
     <string name="login_to_register">Criar conta</string>
     <string name="login_forgot_password">Esqueci minha senha</string>
 
+    <!-- Forgot password -->
+    <string name="forgot_password_title">Recuperar senha</string>
+    <string name="forgot_password_subtitle">Informe seu e-mail para receber as instrucoes.</string>
+    <string name="forgot_password_email_label">E-mail</string>
+    <string name="forgot_password_submit">Enviar instrucoes</string>
+    <string name="forgot_password_success">Se este e-mail existir, enviaremos as instrucoes de recuperacao.</string>
+    <string name="forgot_password_to_login">Voltar para login</string>
+
     <!-- Register -->
     <string name="register_title">Criar conta</string>
     <string name="register_subtitle">Comece a organizar suas finanças</string>

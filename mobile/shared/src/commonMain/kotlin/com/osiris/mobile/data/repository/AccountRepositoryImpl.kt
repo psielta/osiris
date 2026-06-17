@@ -16,6 +16,7 @@ import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
 import com.osiris.mobile.domain.model.Movement
 import com.osiris.mobile.domain.model.MovementType
+import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.repository.AccountRepository
 
 class AccountRepositoryImpl(private val api: AccountApi) : AccountRepository {
@@ -43,6 +44,11 @@ class AccountRepositoryImpl(private val api: AccountApi) : AccountRepository {
 
     override suspend fun statement(id: String): OsirisResult<AccountStatement> = osirisCatching {
         api.statement(id).toDomain()
+    }
+
+    override suspend fun downloadStatementPdf(id: String): OsirisResult<StatementPdf> = osirisCatching {
+        val response = api.downloadStatementPdf(id)
+        StatementPdf(response.fileName, response.contentType, response.bytes)
     }
 
     override suspend fun createMovement(
