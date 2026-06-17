@@ -59,6 +59,7 @@ fun AccountsListScreen(
     onEdit: (String) -> Unit,
     onOpenStatement: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    showBackButton: Boolean = true,
     viewModel: AccountsListViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -80,8 +81,10 @@ fun AccountsListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.accounts_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    if (showBackButton) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        }
                     }
                 },
             )

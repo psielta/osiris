@@ -35,6 +35,11 @@
     <string name="home_greeting">Olá, %1$s</string>
     <string name="home_workspace">Área de trabalho: %1$s</string>
     <string name="home_logout">Sair</string>
+    <string name="more_title">Mais</string>
+    <string name="more_secondary_title">Outras areas</string>
+    <string name="more_categories_subtitle">Organize receitas e despesas</string>
+    <string name="more_statements_subtitle">Acompanhe faturas e pagamentos</string>
+    <string name="more_purchases_subtitle">Consulte compras no cartao</string>
 
     <string name="coming_soon">Em breve.</string>
 

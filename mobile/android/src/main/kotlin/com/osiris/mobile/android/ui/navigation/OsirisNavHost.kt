@@ -1,11 +1,29 @@
 package com.osiris.mobile.android.ui.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.osiris.mobile.android.R
 import com.osiris.mobile.android.feature.accounts.AccountFormScreen
 import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
 import com.osiris.mobile.android.feature.accounts.AccountsListScreen
@@ -34,65 +52,98 @@ import com.osiris.mobile.android.feature.splash.SplashScreen
 @Composable
 fun OsirisNavHost() {
     val navController = rememberNavController()
+    val mainTabs = remember {
+        listOf(
+            MainTab(Routes.Dashboard, R.string.dashboard_title, Icons.Filled.Home),
+            MainTab(Routes.AccountsList, R.string.accounts_title, Icons.AutoMirrored.Filled.List),
+            MainTab(Routes.CardsList, R.string.cards_title, Icons.Filled.ShoppingCart),
+            MainTab(Routes.BillsList, R.string.bills_title, Icons.Filled.Check),
+            MainTab(Routes.More, R.string.more_title, Icons.Filled.MoreVert),
+        )
+    }
+    val mainTabRoutes = remember(mainTabs) { mainTabs.map { it.route }.toSet() }
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
 
-    NavHost(navController = navController, startDestination = Routes.Splash) {
-        composable(Routes.Splash) {
-            SplashScreen(
-                onAuthenticated = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Splash) { inclusive = true }
-                    }
-                },
-                onUnauthenticated = {
-                    navController.navigate(Routes.Login) {
-                        popUpTo(Routes.Splash) { inclusive = true }
-                    }
-                },
-            )
+    fun navigateMainTab(route: String) {
+        navController.navigate(route) {
+            popUpTo(Routes.Dashboard) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
         }
-        composable(Routes.Login) {
-            LoginScreen(
-                onNavigateHome = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Login) { inclusive = true }
-                    }
-                },
-                onNavigateRegister = { navController.navigate(Routes.Register) },
-                onNavigateForgotPassword = { navController.navigate(Routes.ForgotPassword) },
-            )
-        }
-        composable(Routes.ForgotPassword) {
-            ForgotPasswordScreen(onNavigateBack = { navController.popBackStack() })
-        }
-        composable(Routes.Register) {
-            RegisterScreen(
-                onNavigateHome = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Login) { inclusive = true }
-                    }
-                },
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-        composable(Routes.Home) {
-            HomeScreen(
-                onSignedOut = {
-                    navController.navigate(Routes.Login) {
-                        popUpTo(Routes.Home) { inclusive = true }
-                    }
-                },
-                onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
-                onNavigateAccounts = { navController.navigate(Routes.AccountsList) },
-                onNavigateCards = { navController.navigate(Routes.CardsList) },
-                onNavigateDashboard = { navController.navigate(Routes.Dashboard) },
-                onNavigateStatements = { navController.navigate(Routes.AllStatements) },
-                onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
-                onNavigateBills = { navController.navigate(Routes.BillsList) },
-            )
-        }
-        composable(Routes.Dashboard) {
-            DashboardScreen(onNavigateBack = { navController.popBackStack() })
-        }
+    }
+
+    Scaffold(
+        bottomBar = {
+            if (currentRoute in mainTabRoutes) {
+                MainBottomBar(
+                    tabs = mainTabs,
+                    currentRoute = currentRoute,
+                    onTabSelected = ::navigateMainTab,
+                )
+            }
+        },
+    ) { rootPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Routes.Splash,
+            modifier = Modifier.padding(rootPadding),
+        ) {
+            composable(Routes.Splash) {
+                SplashScreen(
+                    onAuthenticated = {
+                        navController.navigate(Routes.Dashboard) {
+                            popUpTo(Routes.Splash) { inclusive = true }
+                        }
+                    },
+                    onUnauthenticated = {
+                        navController.navigate(Routes.Login) {
+                            popUpTo(Routes.Splash) { inclusive = true }
+                        }
+                    },
+                )
+            }
+            composable(Routes.Login) {
+                LoginScreen(
+                    onNavigateHome = {
+                        navController.navigate(Routes.Dashboard) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    },
+                    onNavigateRegister = { navController.navigate(Routes.Register) },
+                    onNavigateForgotPassword = { navController.navigate(Routes.ForgotPassword) },
+                )
+            }
+            composable(Routes.ForgotPassword) {
+                ForgotPasswordScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable(Routes.Register) {
+                RegisterScreen(
+                    onNavigateHome = {
+                        navController.navigate(Routes.Dashboard) {
+                            popUpTo(Routes.Login) { inclusive = true }
+                        }
+                    },
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+            composable(Routes.More) {
+                HomeScreen(
+                    onSignedOut = {
+                        navController.navigate(Routes.Login) {
+                            popUpTo(Routes.Dashboard) { inclusive = true }
+                        }
+                    },
+                    onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
+                    onNavigateStatements = { navController.navigate(Routes.AllStatements) },
+                    onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
+                )
+            }
+            composable(Routes.Dashboard) {
+                DashboardScreen(onNavigateBack = { navController.popBackStack() }, showBackButton = false)
+            }
         composable(Routes.CategoriesList) {
             CategoriesListScreen(
                 onCreate = { navController.navigate(Routes.categoryForm()) },
@@ -121,6 +172,7 @@ fun OsirisNavHost() {
                 onEdit = { id -> navController.navigate(Routes.accountForm(id)) },
                 onOpenStatement = { id -> navController.navigate(Routes.accountStatement(id)) },
                 onNavigateBack = { navController.popBackStack() },
+                showBackButton = false,
             )
         }
         composable(
@@ -164,6 +216,7 @@ fun OsirisNavHost() {
                 onEdit = { id -> navController.navigate(Routes.cardForm(id)) },
                 onOpenDetails = { id -> navController.navigate(Routes.cardDetails(id)) },
                 onNavigateBack = { navController.popBackStack() },
+                showBackButton = false,
             )
         }
         composable(Routes.AllPurchases) {
@@ -183,6 +236,7 @@ fun OsirisNavHost() {
                 onCreate = { navController.navigate(Routes.billForm()) },
                 onOpenDetails = { id -> navController.navigate(Routes.billDetails(id)) },
                 onNavigateBack = { navController.popBackStack() },
+                showBackButton = false,
             )
         }
         composable(
@@ -289,6 +343,31 @@ fun OsirisNavHost() {
                 cardId = backStackEntry.arguments?.getString(Routes.CardIdArg).orEmpty(),
                 statementId = backStackEntry.arguments?.getString(Routes.StatementIdArg).orEmpty(),
                 onDone = { navController.popBackStack() },
+            )
+        }
+    }
+}
+}
+
+private data class MainTab(
+    val route: String,
+    val labelRes: Int,
+    val icon: ImageVector,
+)
+
+@Composable
+private fun MainBottomBar(
+    tabs: List<MainTab>,
+    currentRoute: String?,
+    onTabSelected: (String) -> Unit,
+) {
+    NavigationBar {
+        tabs.forEach { tab ->
+            NavigationBarItem(
+                selected = currentRoute == tab.route,
+                onClick = { onTabSelected(tab.route) },
+                icon = { Icon(tab.icon, contentDescription = null) },
+                label = { Text(androidx.compose.ui.res.stringResource(tab.labelRes)) },
             )
         }
     }

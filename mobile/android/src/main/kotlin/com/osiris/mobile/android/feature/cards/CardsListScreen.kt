@@ -58,6 +58,7 @@ fun CardsListScreen(
     onEdit: (String) -> Unit,
     onOpenDetails: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    showBackButton: Boolean = true,
     viewModel: CardsListViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,8 +80,10 @@ fun CardsListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.cards_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    if (showBackButton) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        }
                     }
                 },
             )
