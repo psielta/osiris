@@ -12,11 +12,13 @@ using Osiris.Application.Features.CreditCardPurchases.Commands.CreateCreditCardP
 using Osiris.Application.Features.CreditCardPurchases.Commands.DeleteCreditCardPurchase;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetPurchasePreview;
+using Osiris.Application.Features.CreditCardPurchases.Queries.ListAllCreditCardPurchases;
 using Osiris.Application.Features.CreditCardPurchases.Queries.ListCreditCardPurchases;
 using Osiris.Application.Features.CreditCardStatementPayments.Commands.RegisterCreditCardStatementPayment;
 using Osiris.Application.Features.CreditCardStatements.Queries.ExportCreditCardStatementPdf;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCreditCardStatementDetails;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCurrentCreditCardStatement;
+using Osiris.Application.Features.CreditCardStatements.Queries.ListAllCreditCardStatements;
 using Osiris.Application.Features.CreditCardStatements.Queries.ListCreditCardStatements;
 
 namespace Osiris.Api.Controllers.V1;
@@ -94,6 +96,20 @@ public sealed class CreditCardsController : ApiControllerBase
     {
         var overview = await _mediator.Send(new GetCreditCardOverviewQuery(id), cancellationToken);
         return overview is null ? NotFound() : Ok(overview);
+    }
+
+    [HttpGet("purchases")]
+    public async Task<IActionResult> ListAllPurchases(CancellationToken cancellationToken)
+    {
+        var purchases = await _mediator.Send(new ListAllCreditCardPurchasesQuery(), cancellationToken);
+        return Ok(purchases);
+    }
+
+    [HttpGet("statements")]
+    public async Task<IActionResult> ListAllStatements(CancellationToken cancellationToken)
+    {
+        var statements = await _mediator.Send(new ListAllCreditCardStatementsQuery(), cancellationToken);
+        return Ok(statements);
     }
 
     [HttpGet("{cardId:guid}/purchases")]
