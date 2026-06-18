@@ -26,8 +26,20 @@ Authenticated users can read end-user guides in the documentation area:
 Each guide has its own slug route, for example:
 
 ```text
-/docs/categories
+/docs/accounts
 ```
+
+Current in-app guides:
+
+- `/docs/getting-started`
+- `/docs/dashboard`
+- `/docs/categories`
+- `/docs/accounts`
+- `/docs/cards`
+- `/docs/purchases`
+- `/docs/statements`
+- `/docs/bills`
+- `/docs/reports`
 
 The pages render Markdown in the browser with CDN libraries, following the same documentation style used in the Contabil API reference page:
 
@@ -52,6 +64,8 @@ Protected Markdown endpoints follow the same slug:
 ```text
 /docs/{slug}.md
 ```
+
+The Web project explicitly publishes Markdown files from `src/Osiris.Web/Docs` through `Osiris.Web.csproj`; keep that `Content Include="Docs\**\*.md"` rule in place so production can serve `/docs/{slug}.md`.
 
 To add documentation for another screen, add a Markdown file under `src/Osiris.Web/Docs`, register it in `catalog.json`, and link to `/docs/{slug}`. Keep end-user guides written for non-technical users. They should explain financial concepts in plain language and avoid accounting jargon.
 

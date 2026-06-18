@@ -51,8 +51,15 @@ public sealed class DocsFlowTests : IAsyncLifetime
         var html = await client.GetStringAsync("/docs");
 
         Assert.Contains("Documentação do Osiris", html);
-        Assert.Contains("Guia simples de categorias", html);
+        Assert.Contains("Primeiros passos no Osiris", html);
+        Assert.Contains("Como ler o painel", html);
         Assert.Contains("href=\"/docs/categories\"", html);
+        Assert.Contains("href=\"/docs/accounts\"", html);
+        Assert.Contains("href=\"/docs/cards\"", html);
+        Assert.Contains("href=\"/docs/purchases\"", html);
+        Assert.Contains("href=\"/docs/statements\"", html);
+        Assert.Contains("href=\"/docs/bills\"", html);
+        Assert.Contains("href=\"/docs/reports\"", html);
     }
 
     [Fact]
@@ -61,26 +68,35 @@ public sealed class DocsFlowTests : IAsyncLifetime
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
 
-        var html = await client.GetStringAsync("/docs/categories");
+        var html = await client.GetStringAsync("/docs/accounts");
 
         Assert.Contains("marked.min.js", html);
         Assert.Contains("DOMPurify", html);
-        Assert.Contains("data-markdown-url=\"/docs/categories.md\"", html);
+        Assert.Contains("data-markdown-url=\"/docs/accounts.md\"", html);
         Assert.Contains("Todos os guias", html);
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "Integration")]
-    public async Task Markdown_ShouldReturnProtectedMarkdownForSlug()
+    [InlineData("getting-started", "# Primeiros passos no Osiris")]
+    [InlineData("dashboard", "# Como ler o painel")]
+    [InlineData("categories", "# Guia simples de categorias")]
+    [InlineData("accounts", "# Guia simples de contas")]
+    [InlineData("cards", "# Guia simples de cartões")]
+    [InlineData("purchases", "# Compras no cartão")]
+    [InlineData("statements", "# Faturas de cartão")]
+    [InlineData("bills", "# Contas a pagar")]
+    [InlineData("reports", "# Relatórios")]
+    public async Task Markdown_ShouldReturnProtectedMarkdownForSlug(string slug, string heading)
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
 
-        var response = await client.GetAsync("/docs/categories.md");
+        var response = await client.GetAsync($"/docs/{slug}.md");
         var markdown = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("text/markdown", response.Content.Headers.ContentType?.MediaType);
-        Assert.Contains("# Guia simples de categorias", markdown);
+        Assert.Contains(heading, markdown);
     }
 
     [Fact]

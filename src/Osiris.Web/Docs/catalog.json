@@ -1,5 +1,23 @@
 [
   {
+    "slug": "getting-started",
+    "title": "Primeiros passos no Osiris",
+    "description": "Configure o básico para começar a acompanhar contas, cartões, gastos e saldo previsto.",
+    "group": "Começando",
+    "icon": "ph ph-compass",
+    "markdownFile": "getting-started.md",
+    "order": 1
+  },
+  {
+    "slug": "dashboard",
+    "title": "Como ler o painel",
+    "description": "Entenda os cartões, alertas, gráficos e a diferença entre visão de gastos e visão de caixa.",
+    "group": "Começando",
+    "icon": "ph ph-gauge",
+    "markdownFile": "dashboard.md",
+    "order": 2
+  },
+  {
     "slug": "categories",
     "title": "Guia simples de categorias",
     "description": "Entenda como usar categorias para organizar receitas e despesas sem termos técnicos.",
@@ -25,5 +43,41 @@
     "icon": "ph ph-credit-card",
     "markdownFile": "cards.md",
     "order": 30
+  },
+  {
+    "slug": "purchases",
+    "title": "Compras no cartão",
+    "description": "Registre compras à vista ou parceladas e entenda como elas entram nas faturas.",
+    "group": "Financeiro",
+    "icon": "ph ph-shopping-cart",
+    "markdownFile": "purchases.md",
+    "order": 40
+  },
+  {
+    "slug": "statements",
+    "title": "Faturas de cartão",
+    "description": "Acompanhe fechamento, vencimento, status, saldo em aberto e pagamentos de fatura.",
+    "group": "Financeiro",
+    "icon": "ph ph-receipt",
+    "markdownFile": "statements.md",
+    "order": 50
+  },
+  {
+    "slug": "bills",
+    "title": "Contas a pagar",
+    "description": "Use contas a pagar para obrigações fora do cartão, como aluguel, internet, escola e boletos.",
+    "group": "Financeiro",
+    "icon": "ph ph-calendar-check",
+    "markdownFile": "bills.md",
+    "order": 60
+  },
+  {
+    "slug": "reports",
+    "title": "Relatórios",
+    "description": "Baixe PDFs sintéticos ou analíticos para conferir o caixa do mês e o saldo previsto.",
+    "group": "Financeiro",
+    "icon": "ph ph-file-pdf",
+    "markdownFile": "reports.md",
+    "order": 70
   }
 ]
