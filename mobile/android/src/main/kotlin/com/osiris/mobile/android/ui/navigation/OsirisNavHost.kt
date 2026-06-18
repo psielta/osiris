@@ -43,6 +43,8 @@ import com.osiris.mobile.android.feature.cards.StatementDetailsScreen
 import com.osiris.mobile.android.feature.categories.CategoriesListScreen
 import com.osiris.mobile.android.feature.categories.CategoryFormScreen
 import com.osiris.mobile.android.feature.dashboard.DashboardScreen
+import com.osiris.mobile.android.feature.docs.DocumentationDetailScreen
+import com.osiris.mobile.android.feature.docs.DocumentationListScreen
 import com.osiris.mobile.android.feature.home.HomeScreen
 import com.osiris.mobile.android.feature.login.ForgotPasswordScreen
 import com.osiris.mobile.android.feature.login.LoginScreen
@@ -141,11 +143,27 @@ fun OsirisNavHost() {
                     onNavigateStatements = { navController.navigate(Routes.AllStatements) },
                     onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
                     onNavigateReports = { navController.navigate(Routes.Reports) },
+                    onNavigateDocs = { navController.navigate(Routes.DocsList) },
                 )
             }
             composable(Routes.Dashboard) {
                 DashboardScreen(onNavigateBack = { navController.popBackStack() }, showBackButton = false)
             }
+        composable(Routes.DocsList) {
+            DocumentationListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onOpenGuide = { slug -> navController.navigate(Routes.docsDetails(slug)) },
+            )
+        }
+        composable(
+            route = Routes.DocsDetailsPattern,
+            arguments = listOf(navArgument(Routes.DocSlugArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            DocumentationDetailScreen(
+                slug = backStackEntry.arguments?.getString(Routes.DocSlugArg).orEmpty(),
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
         composable(Routes.Reports) {
             ReportsScreen(onNavigateBack = { navController.popBackStack() })
         }

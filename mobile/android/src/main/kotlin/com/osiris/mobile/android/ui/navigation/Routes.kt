@@ -8,6 +8,9 @@ object Routes {
     const val Home = "home"
     const val More = "more"
     const val Dashboard = "dashboard"
+    const val DocsList = "docs"
+    const val DocsDetailsPattern = "docs/{docSlug}"
+    const val DocSlugArg = "docSlug"
     const val Reports = "reports"
     const val CategoriesList = "categories"
     const val CategoryForm = "category-form"
@@ -67,4 +70,6 @@ object Routes {
         if (billId == null) BillForm else "bill-form?billId=$billId"
 
     fun billDetails(billId: String): String = "bill-details/$billId"
+
+    fun docsDetails(slug: String): String = "docs/$slug"
 }

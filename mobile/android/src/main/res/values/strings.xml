@@ -41,8 +41,14 @@
     <string name="more_statements_subtitle">Acompanhe faturas e pagamentos</string>
     <string name="more_purchases_subtitle">Consulte compras no cartao</string>
     <string name="more_reports_subtitle">Exporte visoes de caixa em PDF</string>
+    <string name="more_docs_subtitle">Guias simples para usar o Osiris</string>
 
     <string name="coming_soon">Em breve.</string>
+
+    <!-- Documentation -->
+    <string name="docs_title">Documentação</string>
+    <string name="docs_intro">Guias rápidos para entender cada área financeira do sistema.</string>
+    <string name="docs_not_found">Guia não encontrado.</string>
 
     <!-- Categories -->
     <string name="categories_title">Categorias</string>

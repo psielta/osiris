@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -49,6 +50,7 @@ fun HomeScreen(
     onNavigateStatements: () -> Unit,
     onNavigatePurchases: () -> Unit,
     onNavigateReports: () -> Unit,
+    onNavigateDocs: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -99,6 +101,13 @@ fun HomeScreen(
                 subtitle = stringResource(R.string.more_reports_subtitle),
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onNavigateReports,
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            MoreActionRow(
+                title = stringResource(R.string.docs_title),
+                subtitle = stringResource(R.string.more_docs_subtitle),
+                icon = Icons.Filled.Info,
+                onClick = onNavigateDocs,
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             MoreActionRow(
