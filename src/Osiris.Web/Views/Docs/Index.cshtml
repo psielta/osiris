@@ -36,9 +36,9 @@
                     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         @foreach (var item in group.OrderBy(item => item.Order).ThenBy(item => item.Title))
                         {
-                            <a asp-controller="Docs" asp-action="Show" asp-route-slug="@item.Slug" class="group rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition hover:border-amber-300 hover:shadow">
+                            <a asp-controller="Docs" asp-action="Show" asp-route-slug="@item.Slug" class="group rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition hover:border-amber-300 hover:shadow dark:hover:border-amber-500/40 dark:hover:bg-slate-800/40">
                                 <div class="flex items-start gap-4">
-                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 transition group-hover:bg-amber-100">
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 transition group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20">
                                         <i class="@item.Icon text-2xl" aria-hidden="true"></i>
                                     </div>
                                     <div>

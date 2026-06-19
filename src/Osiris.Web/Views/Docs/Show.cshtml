@@ -8,10 +8,38 @@
 @section Styles {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css" />
     <style>
+        .docs-markdown {
+            --docs-heading: #020617;
+            --docs-body: #475569;
+            --docs-muted: #64748b;
+            --docs-border: #e2e8f0;
+            --docs-panel: #f8fafc;
+            --docs-inline-code-bg: #f1f5f9;
+            --docs-inline-code-text: #0f172a;
+            --docs-note-bg: #fffbeb;
+            --docs-note-border: #f59e0b;
+            --docs-note-text: #78350f;
+            --docs-link: #b45309;
+        }
+
+        .dark .docs-markdown {
+            --docs-heading: #f8fafc;
+            --docs-body: #cbd5e1;
+            --docs-muted: #94a3b8;
+            --docs-border: #334155;
+            --docs-panel: #0f172a;
+            --docs-inline-code-bg: rgba(51, 65, 85, .7);
+            --docs-inline-code-text: #e2e8f0;
+            --docs-note-bg: rgba(245, 158, 11, .12);
+            --docs-note-border: rgba(245, 158, 11, .75);
+            --docs-note-text: #fcd34d;
+            --docs-link: #fbbf24;
+        }
+
         .docs-markdown h1,
         .docs-markdown h2,
         .docs-markdown h3 {
-            color: #020617;
+            color: var(--docs-heading);
             font-weight: 700;
             line-height: 1.25;
             scroll-margin-top: 24px;
@@ -23,7 +51,7 @@
         }
 
         .docs-markdown h2 {
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--docs-border);
             font-size: 1.25rem;
             margin-top: 2rem;
             padding-top: 1.5rem;
@@ -36,7 +64,7 @@
 
         .docs-markdown p,
         .docs-markdown li {
-            color: #475569;
+            color: var(--docs-body);
             font-size: .9375rem;
             line-height: 1.7;
         }
@@ -60,17 +88,24 @@
         }
 
         .docs-markdown blockquote {
-            border-left: 4px solid #f59e0b;
+            border-left: 4px solid var(--docs-note-border);
             margin-top: 1rem;
             padding: .75rem 1rem;
-            background: #fffbeb;
+            background: var(--docs-note-bg);
             border-radius: .375rem;
         }
 
         .docs-markdown blockquote p {
-            color: #78350f;
+            color: var(--docs-note-text);
             font-weight: 600;
             margin: 0;
+        }
+
+        .docs-markdown a {
+            color: var(--docs-link);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: .2em;
         }
 
         .docs-markdown table {
@@ -83,37 +118,38 @@
 
         .docs-markdown th,
         .docs-markdown td {
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--docs-border);
             padding: .75rem;
             text-align: left;
             vertical-align: top;
         }
 
         .docs-markdown th {
-            background: #f8fafc;
-            color: #334155;
+            background: var(--docs-panel);
+            color: var(--docs-heading);
             font-size: .8125rem;
             font-weight: 700;
             text-transform: uppercase;
         }
 
         .docs-markdown td {
-            color: #475569;
+            color: var(--docs-body);
             font-size: .875rem;
         }
 
         .docs-markdown code {
-            background: #f1f5f9;
+            background: var(--docs-inline-code-bg);
             border-radius: .25rem;
-            color: #0f172a;
+            color: var(--docs-inline-code-text);
             font-size: .85em;
             padding: .15rem .35rem;
         }
 
         .docs-markdown pre {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--docs-panel);
+            border: 1px solid var(--docs-border);
             border-radius: .5rem;
+            color: var(--docs-inline-code-text);
             margin-top: 1rem;
             overflow-x: auto;
             padding: 1rem;
@@ -121,7 +157,45 @@
 
         .docs-markdown pre code {
             background: transparent;
+            color: inherit;
             padding: 0;
+        }
+
+        .docs-markdown .hljs {
+            background: transparent;
+            color: inherit;
+        }
+
+        .dark .docs-markdown .hljs-comment,
+        .dark .docs-markdown .hljs-quote {
+            color: #94a3b8;
+        }
+
+        .dark .docs-markdown .hljs-keyword,
+        .dark .docs-markdown .hljs-selector-tag,
+        .dark .docs-markdown .hljs-subst {
+            color: #93c5fd;
+        }
+
+        .dark .docs-markdown .hljs-literal,
+        .dark .docs-markdown .hljs-number,
+        .dark .docs-markdown .hljs-variable,
+        .dark .docs-markdown .hljs-template-variable {
+            color: #fca5a5;
+        }
+
+        .dark .docs-markdown .hljs-string,
+        .dark .docs-markdown .hljs-doctag,
+        .dark .docs-markdown .hljs-attr,
+        .dark .docs-markdown .hljs-symbol,
+        .dark .docs-markdown .hljs-bullet {
+            color: #86efac;
+        }
+
+        .dark .docs-markdown .hljs-title,
+        .dark .docs-markdown .hljs-section,
+        .dark .docs-markdown .hljs-name {
+            color: #fbbf24;
         }
     </style>
 }
@@ -149,7 +223,7 @@
                         {
                             var itemClass = item.Slug == Model.Current.Slug
                                 ? "block rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1.5 text-sm font-medium text-amber-900 dark:text-amber-200"
-                                : "block rounded-md px-2 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950";
+                                : "block rounded-md px-2 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-slate-100";
                             <a asp-controller="Docs" asp-action="Show" asp-route-slug="@item.Slug" class="@itemClass">@item.Title</a>
                         }
                     </nav>
@@ -219,8 +293,8 @@
                     link.href = `#${id}`;
                     link.textContent = heading.textContent;
                     link.className = heading.tagName === 'H2'
-                        ? 'block rounded-md px-2 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950'
-                        : 'block rounded-md px-4 py-1 text-xs text-slate-500 transition hover:bg-slate-50 hover:text-slate-900';
+                        ? 'block rounded-md px-2 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-slate-100'
+                        : 'block rounded-md px-4 py-1 text-xs text-slate-500 dark:text-slate-400 transition hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100';
                     toc.appendChild(link);
                 });
 
