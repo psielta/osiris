@@ -1,0 +1,187 @@
+@using Osiris.Application.Common.Csv
+@model CsvImportMappingViewModel
+
+@{
+    ViewData["Title"] = "Mapear colunas do CSV";
+    Layout = "_AuthenticatedLayout";
+
+    const string LabelClass = "block text-sm font-medium text-slate-700 dark:text-slate-300";
+    const string FieldClass = "mt-1 block h-10 w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200";
+    const string CardClass = "rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm";
+}
+
+<section class="space-y-6">
+    <div>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Mapear colunas do CSV</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Conta: @Model.AccountName · Arquivo: @Model.FileName</p>
+    </div>
+
+    <div asp-validation-summary="All" class="rounded-md bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"></div>
+
+    <form asp-action="ImportCsvPreview" asp-route-id="@Model.AccountId" method="post" class="space-y-6">
+        <input type="hidden" asp-for="FileName" />
+        <input type="hidden" asp-for="FileContentBase64" />
+
+        <div class="@CardClass space-y-4">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Formato do arquivo</h3>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <label asp-for="Delimiter" class="@LabelClass">Separador</label>
+                    <select asp-for="Delimiter" class="@FieldClass">
+                        <option value=";">Ponto e vírgula ( ; )</option>
+                        <option value=",">Vírgula ( , )</option>
+                        <option value="\t">Tabulação</option>
+                    </select>
+                </div>
+                <div>
+                    <label asp-for="Encoding" class="@LabelClass">Codificação</label>
+                    <select asp-for="Encoding" class="@FieldClass">
+                        <option value="utf-8">UTF-8</option>
+                        <option value="windows-1252">Windows-1252 (ANSI)</option>
+                    </select>
+                </div>
+                <div>
+                    <label asp-for="HeaderLineIndex" class="@LabelClass">Linha do cabeçalho</label>
+                    <select asp-for="HeaderLineIndex" asp-items="Model.HeaderLineOptions" class="@FieldClass"></select>
+                </div>
+                <div class="flex items-end">
+                    <label class="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" asp-for="HasHeader" class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-amber-600 focus:ring-amber-500" />
+                        Primeira linha é cabeçalho
+                    </label>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button type="submit" formaction="@Url.Action("ImportCsvMap", new { id = Model.AccountId })"
+                        class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Atualizar amostra</button>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Use após mudar o separador, a codificação ou a linha do cabeçalho.</span>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <table class="min-w-full text-xs">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @for (var r = 0; r < Model.SampleRows.Count; r++)
+                    {
+                        var row = Model.SampleRows[r];
+                        <tr class="@(r == Model.HeaderLineIndex ? "bg-amber-50 dark:bg-amber-500/10 font-semibold text-slate-900 dark:text-slate-100" : "text-slate-600 dark:text-slate-300")">
+                            <td class="px-2 py-1 text-right text-slate-400 dark:text-slate-500 select-none">@(r + 1)</td>
+                            @foreach (var cell in row)
+                            {
+                                <td class="px-2 py-1 whitespace-nowrap">@cell</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="@CardClass space-y-4">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Mapeamento de colunas</h3>
+
+            <div>
+                <label asp-for="AmountMode" class="@LabelClass">Como o valor e o tipo estão no arquivo?</label>
+                <select asp-for="AmountMode" id="amountMode" class="@FieldClass">
+                    <option value="@nameof(CsvAmountMode.SignedAmount)">Valor único com sinal (− para despesa)</option>
+                    <option value="@nameof(CsvAmountMode.DebitCredit)">Colunas separadas de crédito e débito</option>
+                    <option value="@nameof(CsvAmountMode.TypeColumn)">Valor + coluna de tipo (texto)</option>
+                </select>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label asp-for="DateColumn" class="@LabelClass">Data</label>
+                    <select asp-for="DateColumn" asp-items="Model.ColumnOptions" class="@FieldClass"></select>
+                    <span asp-validation-for="DateColumn" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
+                </div>
+                <div>
+                    <label asp-for="DescriptionColumn" class="@LabelClass">Descrição</label>
+                    <select asp-for="DescriptionColumn" asp-items="Model.ColumnOptions" class="@FieldClass"></select>
+                </div>
+                <div>
+                    <label asp-for="SecondaryDescriptionColumn" class="@LabelClass">Descrição secundária (opcional)</label>
+                    <select asp-for="SecondaryDescriptionColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Nenhuma —</option>
+                    </select>
+                </div>
+
+                <div data-mode="@nameof(CsvAmountMode.SignedAmount) @nameof(CsvAmountMode.TypeColumn)">
+                    <label asp-for="AmountColumn" class="@LabelClass">Valor</label>
+                    <select asp-for="AmountColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Selecione —</option>
+                    </select>
+                </div>
+                <div data-mode="@nameof(CsvAmountMode.DebitCredit)">
+                    <label asp-for="CreditColumn" class="@LabelClass">Crédito (entradas)</label>
+                    <select asp-for="CreditColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Selecione —</option>
+                    </select>
+                </div>
+                <div data-mode="@nameof(CsvAmountMode.DebitCredit)">
+                    <label asp-for="DebitColumn" class="@LabelClass">Débito (saídas)</label>
+                    <select asp-for="DebitColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Selecione —</option>
+                    </select>
+                </div>
+                <div data-mode="@nameof(CsvAmountMode.TypeColumn)">
+                    <label asp-for="TypeColumn" class="@LabelClass">Coluna de tipo</label>
+                    <select asp-for="TypeColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Selecione —</option>
+                    </select>
+                </div>
+                <div>
+                    <label asp-for="ExternalIdColumn" class="@LabelClass">Identificador único (opcional)</label>
+                    <select asp-for="ExternalIdColumn" asp-items="Model.ColumnOptions" class="@FieldClass">
+                        <option value="">— Nenhuma —</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="@CardClass">
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label asp-for="DateFormat" class="@LabelClass">Formato da data</label>
+                    <select asp-for="DateFormat" class="@FieldClass">
+                        <option value="dd/MM/yyyy">dd/MM/aaaa (31/12/2026)</option>
+                        <option value="yyyy-MM-dd">aaaa-MM-dd (2026-12-31)</option>
+                        <option value="dd/MM/yy">dd/MM/aa (31/12/26)</option>
+                        <option value="dd-MM-yyyy">dd-MM-aaaa (31-12-2026)</option>
+                        <option value="MM/dd/yyyy">MM/dd/aaaa (12/31/2026)</option>
+                    </select>
+                </div>
+                <div>
+                    <label asp-for="DecimalSeparator" class="@LabelClass">Separador decimal</label>
+                    <select asp-for="DecimalSeparator" class="@FieldClass">
+                        <option value=",">Vírgula (1.234,56)</option>
+                        <option value=".">Ponto (1,234.56)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <a asp-action="ImportCsv" asp-route-id="@Model.AccountId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Trocar arquivo</a>
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Pré-visualizar</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const select = document.getElementById('amountMode');
+            if (!select) return;
+            function sync() {
+                const mode = select.value;
+                document.querySelectorAll('[data-mode]').forEach(function (el) {
+                    const modes = (el.getAttribute('data-mode') || '').split(' ');
+                    el.style.display = modes.indexOf(mode) >= 0 ? '' : 'none';
+                });
+            }
+            select.addEventListener('change', sync);
+            sync();
+        })();
+    </script>
+}

@@ -9,6 +9,8 @@ import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.AccountEdit
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
+import com.osiris.mobile.domain.model.CsvAnalysis
+import com.osiris.mobile.domain.model.CsvImportMapping
 import com.osiris.mobile.domain.model.MovementType
 import com.osiris.mobile.domain.model.OfxImportPreview
 import com.osiris.mobile.domain.model.OfxImportResult
@@ -95,6 +97,21 @@ private class FakeAccountRepository(
         accountId: String,
         selections: List<OfxImportSelection>,
     ): OsirisResult<OfxImportResult> = unused()
+
+    override suspend fun analyzeCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        delimiter: String?,
+        encoding: String?,
+    ): OsirisResult<CsvAnalysis> = unused()
+
+    override suspend fun previewCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        mapping: CsvImportMapping,
+    ): OsirisResult<OfxImportPreview> = unused()
 
     private fun <T> unused(): OsirisResult<T> =
         OsirisResult.Failure(OsirisError("Nao usado neste teste."))

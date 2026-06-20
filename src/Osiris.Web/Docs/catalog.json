@@ -45,6 +45,15 @@
     "order": 25
   },
   {
+    "slug": "csv-import",
+    "title": "Importar extrato em CSV",
+    "description": "Importe um CSV do banco mapeando as colunas (data, descrição, valor) e revise antes de confirmar.",
+    "group": "Financeiro",
+    "icon": "ph ph-table",
+    "markdownFile": "csv-import.md",
+    "order": 26
+  },
+  {
     "slug": "cards",
     "title": "Guia simples de cartões",
     "description": "Entenda o que é um cartão de crédito no Osiris, limite, fechamento e vencimento, e como ele difere de uma conta.",

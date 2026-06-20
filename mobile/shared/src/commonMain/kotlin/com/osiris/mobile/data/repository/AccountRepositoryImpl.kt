@@ -5,12 +5,15 @@ import com.osiris.mobile.data.dto.AccountEditDto
 import com.osiris.mobile.data.dto.AccountListItemDto
 import com.osiris.mobile.data.dto.CreateAccountRequest
 import com.osiris.mobile.data.dto.CreateMovementRequest
+import com.osiris.mobile.data.dto.CsvAnalysisDto
+import com.osiris.mobile.data.dto.CsvImportMappingDto
 import com.osiris.mobile.data.dto.ImportOfxLineRequest
 import com.osiris.mobile.data.dto.ImportOfxStatementRequest
 import com.osiris.mobile.data.dto.MovementDto
 import com.osiris.mobile.data.dto.OfxImportLineDto
 import com.osiris.mobile.data.dto.OfxImportPreviewDto
 import com.osiris.mobile.data.dto.OfxImportResultDto
+import com.osiris.mobile.data.dto.PreviewCsvImportRequest
 import com.osiris.mobile.data.dto.StatementDto
 import com.osiris.mobile.data.dto.UpdateAccountRequest
 import com.osiris.mobile.data.network.osirisCatching
@@ -21,6 +24,9 @@ import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.AccountEdit
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
+import com.osiris.mobile.domain.model.CsvAmountMode
+import com.osiris.mobile.domain.model.CsvAnalysis
+import com.osiris.mobile.domain.model.CsvImportMapping
 import com.osiris.mobile.domain.model.Movement
 import com.osiris.mobile.domain.model.MovementType
 import com.osiris.mobile.domain.model.OfxImportLine
@@ -29,6 +35,8 @@ import com.osiris.mobile.domain.model.OfxImportResult
 import com.osiris.mobile.domain.model.OfxImportSelection
 import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.repository.AccountRepository
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class AccountRepositoryImpl(
     private val api: AccountApi,
@@ -102,6 +110,27 @@ class AccountRepositoryImpl(
         bus.notify(DataScope.Accounts, DataScope.Dashboard, DataScope.Reports)
         result
     }
+
+    override suspend fun analyzeCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        delimiter: String?,
+        encoding: String?,
+    ): OsirisResult<CsvAnalysis> = osirisCatching {
+        api.analyzeCsvImport(accountId, fileName, bytes, delimiter, encoding).toDomain()
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override suspend fun previewCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        mapping: CsvImportMapping,
+    ): OsirisResult<OfxImportPreview> = osirisCatching {
+        val request = PreviewCsvImportRequest(fileName, Base64.encode(bytes), mapping.toDto())
+        api.previewCsvImport(accountId, request).toDomain()
+    }
 }
 
 private fun AccountListItemDto.toDomain() =
@@ -127,3 +156,46 @@ private fun OfxImportResultDto.toDomain() =
 
 private fun OfxImportSelection.toRequest() =
     ImportOfxLineRequest(externalId, occurredOn, amount, type.apiValue, description, categoryId)
+
+private fun CsvAnalysisDto.toDomain() =
+    CsvAnalysis(accountId, accountName, delimiter, encoding, suggestedHeaderLineIndex, sampleRows, savedMapping?.toDomain())
+
+private fun CsvImportMappingDto.toDomain() =
+    CsvImportMapping(
+        delimiter = delimiter,
+        encoding = encoding,
+        hasHeader = hasHeader,
+        headerLineIndex = headerLineIndex,
+        amountMode = CsvAmountMode.fromApi(amountMode),
+        dateColumn = dateColumn,
+        descriptionColumn = descriptionColumn,
+        secondaryDescriptionColumn = secondaryDescriptionColumn,
+        amountColumn = amountColumn,
+        creditColumn = creditColumn,
+        debitColumn = debitColumn,
+        typeColumn = typeColumn,
+        externalIdColumn = externalIdColumn,
+        dateFormat = dateFormat,
+        decimalSeparator = decimalSeparator,
+    )
+
+private fun CsvImportMapping.toDto() =
+    CsvImportMappingDto(
+        delimiter = delimiter,
+        encoding = encoding,
+        hasHeader = hasHeader,
+        headerLineIndex = headerLineIndex,
+        amountMode = amountMode.apiValue,
+        dateColumn = dateColumn,
+        descriptionColumn = descriptionColumn,
+        secondaryDescriptionColumn = secondaryDescriptionColumn,
+        amountColumn = amountColumn,
+        creditColumn = creditColumn,
+        debitColumn = debitColumn,
+        typeColumn = typeColumn,
+        externalIdColumn = externalIdColumn,
+        incomeTokens = emptyList(),
+        expenseTokens = emptyList(),
+        dateFormat = dateFormat,
+        decimalSeparator = decimalSeparator,
+    )

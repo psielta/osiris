@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Osiris.Api.Contracts;
+using Osiris.Application.Common.Csv;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.AnalyzeCsvImport;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.ImportOfxStatement;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewCsvImport;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewOfxImport;
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
@@ -21,6 +24,9 @@ namespace Osiris.Api.Controllers.V1;
 public sealed class FinancialAccountsController : ApiControllerBase
 {
     private const long MaxOfxUploadBytes = 5 * 1024 * 1024;
+
+    // Base64 inflates the payload ~4/3, so the JSON CSV preview body needs more headroom than the raw 5 MB file.
+    private const long MaxCsvJsonBytes = 8 * 1024 * 1024;
 
     private readonly IMediator _mediator;
 
@@ -134,6 +140,54 @@ public sealed class FinancialAccountsController : ApiControllerBase
         var result = await _mediator.Send(new ImportOfxStatementCommand(id, lines), cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("{id:guid}/movements/import/csv/analyze")]
+    [RequestSizeLimit(MaxOfxUploadBytes)]
+    public async Task<IActionResult> AnalyzeCsvImport(
+        Guid id,
+        IFormFile? file,
+        [FromQuery] string? delimiter,
+        [FromQuery] string? encoding,
+        CancellationToken cancellationToken)
+    {
+        var content = await ReadAllBytesAsync(file, cancellationToken);
+
+        var result = await _mediator.Send(
+            new AnalyzeCsvImportCommand(id, content, file?.FileName ?? string.Empty, delimiter, encoding),
+            cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("{id:guid}/movements/import/csv/preview")]
+    [RequestSizeLimit(MaxCsvJsonBytes)]
+    public async Task<IActionResult> PreviewCsvImport(Guid id, PreviewCsvImportRequest request, CancellationToken cancellationToken)
+    {
+        var content = DecodeBase64(request.Content);
+
+        var result = await _mediator.Send(
+            new PreviewCsvImportCommand(id, content, request.FileName ?? string.Empty, request.Mapping ?? new CsvImportMapping()),
+            cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    private static byte[] DecodeBase64(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return [];
+        }
+
+        try
+        {
+            return Convert.FromBase64String(content);
+        }
+        catch (FormatException)
+        {
+            return [];
+        }
     }
 
     private static async Task<byte[]> ReadAllBytesAsync(IFormFile? file, CancellationToken cancellationToken)

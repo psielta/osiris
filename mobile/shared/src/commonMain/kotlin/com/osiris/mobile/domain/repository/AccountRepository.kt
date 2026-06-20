@@ -5,6 +5,8 @@ import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.AccountEdit
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
+import com.osiris.mobile.domain.model.CsvAnalysis
+import com.osiris.mobile.domain.model.CsvImportMapping
 import com.osiris.mobile.domain.model.MovementType
 import com.osiris.mobile.domain.model.OfxImportPreview
 import com.osiris.mobile.domain.model.OfxImportResult
@@ -32,4 +34,19 @@ interface AccountRepository {
     suspend fun previewOfxImport(accountId: String, fileName: String, bytes: ByteArray): OsirisResult<OfxImportPreview>
 
     suspend fun confirmOfxImport(accountId: String, selections: List<OfxImportSelection>): OsirisResult<OfxImportResult>
+
+    suspend fun analyzeCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        delimiter: String? = null,
+        encoding: String? = null,
+    ): OsirisResult<CsvAnalysis>
+
+    suspend fun previewCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        mapping: CsvImportMapping,
+    ): OsirisResult<OfxImportPreview>
 }

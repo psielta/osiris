@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -34,7 +36,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,6 +69,7 @@ fun AccountStatementScreen(
     accountId: String,
     onAddMovement: () -> Unit,
     onImport: () -> Unit,
+    onImportCsv: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: AccountStatementViewModel = koinViewModel { parametersOf(accountId) },
 ) {
@@ -92,8 +97,25 @@ fun AccountStatementScreen(
                 },
                 actions = {
                     if (state.statement?.isActive == true) {
-                        TextButton(onClick = onImport) {
+                        var importMenuOpen by remember { mutableStateOf(false) }
+                        TextButton(onClick = { importMenuOpen = true }) {
                             Text(stringResource(R.string.statement_import_ofx))
+                        }
+                        DropdownMenu(expanded = importMenuOpen, onDismissRequest = { importMenuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.import_ofx_menu)) },
+                                onClick = {
+                                    importMenuOpen = false
+                                    onImport()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.statement_import_csv)) },
+                                onClick = {
+                                    importMenuOpen = false
+                                    onImportCsv()
+                                },
+                            )
                         }
                     }
                     if (state.statement != null) {

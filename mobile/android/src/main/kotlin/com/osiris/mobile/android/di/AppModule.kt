@@ -7,6 +7,7 @@ import com.osiris.mobile.data.session.TokenStore
 import com.osiris.mobile.presentation.accounts.AccountFormViewModel
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import com.osiris.mobile.presentation.accounts.AccountsListViewModel
+import com.osiris.mobile.presentation.accounts.CsvImportViewModel
 import com.osiris.mobile.presentation.accounts.MovementFormViewModel
 import com.osiris.mobile.presentation.accounts.OfxImportViewModel
 import com.osiris.mobile.presentation.bills.BillDetailsViewModel
@@ -51,6 +52,7 @@ val appModule = module {
     viewModel { parameters -> AccountStatementViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> MovementFormViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> OfxImportViewModel(get(), get(), parameters.get<String>()) }
+    viewModel { parameters -> CsvImportViewModel(get(), get(), parameters.get<String>()) }
     viewModelOf(::CardsListViewModel)
     viewModel { parameters -> CardFormViewModel(get(), get(), parameters.getOrNull<String>()) }
     viewModel { parameters -> CardDetailsViewModel(get(), get(), parameters.get<String>()) }

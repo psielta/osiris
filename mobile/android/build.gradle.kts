@@ -23,8 +23,8 @@ android {
         applicationId = "br.com.mateussalgueiro.osiris"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 7
-        versionName = "0.5.0"
+        versionCode = 8
+        versionName = "0.6.0"
     }
 
     buildFeatures {

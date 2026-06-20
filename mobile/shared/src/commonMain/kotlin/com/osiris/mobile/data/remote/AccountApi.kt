@@ -6,8 +6,10 @@ import com.osiris.mobile.data.dto.AccountListItemDto
 import com.osiris.mobile.data.dto.CreateAccountRequest
 import com.osiris.mobile.data.dto.CreateMovementRequest
 import com.osiris.mobile.data.dto.CreatedIdResponse
+import com.osiris.mobile.data.dto.CsvAnalysisDto
 import com.osiris.mobile.data.dto.ImportOfxStatementRequest
 import com.osiris.mobile.data.dto.OfxImportPreviewDto
+import com.osiris.mobile.data.dto.PreviewCsvImportRequest
 import com.osiris.mobile.data.dto.OfxImportResultDto
 import com.osiris.mobile.data.dto.StatementDto
 import com.osiris.mobile.data.dto.UpdateAccountRequest
@@ -93,6 +95,38 @@ class AccountApi(
 
     suspend fun confirmOfxImport(accountId: String, request: ImportOfxStatementRequest): OfxImportResultDto =
         authClient.post("$base/$accountId/movements/import") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun analyzeCsvImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+        delimiter: String? = null,
+        encoding: String? = null,
+    ): CsvAnalysisDto =
+        authClient.post("$base/$accountId/movements/import/csv/analyze") {
+            delimiter?.let { url.parameters.append("delimiter", it) }
+            encoding?.let { url.parameters.append("encoding", it) }
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "application/octet-stream")
+                                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                            },
+                        )
+                    },
+                ),
+            )
+        }.body()
+
+    suspend fun previewCsvImport(accountId: String, request: PreviewCsvImportRequest): OfxImportPreviewDto =
+        authClient.post("$base/$accountId/movements/import/csv/preview") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

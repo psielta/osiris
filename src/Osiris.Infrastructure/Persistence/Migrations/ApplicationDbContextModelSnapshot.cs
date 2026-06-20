@@ -444,6 +444,38 @@ namespace Osiris.Infrastructure.Persistence.Migrations
                     b.ToTable("CreditCardStatementPayments", (string)null);
                 });
 
+            modelBuilder.Entity("Osiris.Domain.Entities.CsvImportPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FinancialAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Mapping")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinancialAccountId");
+
+                    b.HasIndex("TenantId", "FinancialAccountId")
+                        .IsUnique();
+
+                    b.ToTable("CsvImportPreferences", (string)null);
+                });
+
             modelBuilder.Entity("Osiris.Domain.Entities.FinancialAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -886,6 +918,21 @@ namespace Osiris.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("FinancialAccountId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Osiris.Domain.Entities.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Osiris.Domain.Entities.CsvImportPreference", b =>
+                {
+                    b.HasOne("Osiris.Domain.Entities.FinancialAccount", null)
+                        .WithMany()
+                        .HasForeignKey("FinancialAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Osiris.Domain.Entities.Tenant", null)
                         .WithMany()

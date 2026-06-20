@@ -106,15 +106,46 @@
     <string name="statement_current_balance">Saldo atual</string>
     <string name="statement_empty">Nenhum lançamento ainda.</string>
     <string name="statement_import_ofx">Importar</string>
+    <string name="statement_import_csv">Importar CSV</string>
 
     <!-- OFX import -->
     <string name="import_ofx_title">Importar extrato OFX</string>
+    <string name="import_ofx_menu">Importar OFX</string>
     <string name="import_ofx_help">Selecione o arquivo .ofx exportado pelo internet banking do seu banco. Você poderá revisar os lançamentos antes de confirmar.</string>
     <string name="import_ofx_select_file">Selecionar arquivo</string>
     <string name="import_ofx_summary">%1$d novos · %2$d já importados</string>
     <string name="import_ofx_category_all">Categoria para todos</string>
     <string name="import_ofx_confirm">Importar %1$d selecionado(s)</string>
     <string name="import_ofx_already_imported">Já importado</string>
+
+    <!-- CSV import -->
+    <string name="import_csv_title">Importar extrato CSV</string>
+    <string name="import_csv_help">Selecione um arquivo .csv exportado pelo internet banking do seu banco. Você poderá ajustar as colunas e revisar os lançamentos antes de confirmar.</string>
+    <string name="import_csv_select_file">Selecionar arquivo</string>
+    <string name="csv_change_file">Trocar arquivo</string>
+    <string name="csv_format_section">Formato</string>
+    <string name="csv_delimiter">Separador de colunas</string>
+    <string name="csv_encoding">Codificação</string>
+    <string name="csv_header_line">Linha do cabeçalho</string>
+    <string name="csv_has_header">Primeira linha é cabeçalho</string>
+    <string name="csv_columns_section">Colunas</string>
+    <string name="csv_col_none">Não usar</string>
+    <string name="csv_col_date">Data</string>
+    <string name="csv_col_description">Descrição</string>
+    <string name="csv_col_description2">Descrição secundária (opcional)</string>
+    <string name="csv_amount_mode">Como o valor é informado</string>
+    <string name="csv_mode_signed">Valor com sinal</string>
+    <string name="csv_mode_debit_credit">Débito/Crédito</string>
+    <string name="csv_mode_type">Coluna de tipo</string>
+    <string name="csv_col_amount">Valor</string>
+    <string name="csv_col_credit">Crédito</string>
+    <string name="csv_col_debit">Débito</string>
+    <string name="csv_col_type">Tipo</string>
+    <string name="csv_col_external_id">Identificador único (opcional)</string>
+    <string name="csv_formats_section">Formatos</string>
+    <string name="csv_date_format">Formato da data</string>
+    <string name="csv_decimal_separator">Separador decimal</string>
+    <string name="csv_preview">Pré-visualizar</string>
 
     <!-- Movements -->
     <string name="movement_new">Novo lançamento</string>

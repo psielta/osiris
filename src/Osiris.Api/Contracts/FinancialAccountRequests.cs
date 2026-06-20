@@ -1,3 +1,4 @@
+using Osiris.Application.Common.Csv;
 using Osiris.Domain.Enums;
 
 namespace Osiris.Api.Contracts;
@@ -23,3 +24,9 @@ public sealed record ImportOfxLineRequest(
     FinancialAccountMovementType Type,
     string Description,
     Guid? CategoryId);
+
+/// <summary>
+/// CSV import preview request. <see cref="Content"/> is the Base64-encoded file (so the bytes and the
+/// column mapping travel together as JSON); the decoded size is validated against the 5 MB limit.
+/// </summary>
+public sealed record PreviewCsvImportRequest(string? FileName, string? Content, CsvImportMapping? Mapping);

@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Osiris.Application.Common.Behaviors;
+using Osiris.Application.Common.Csv;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Ofx;
 using Osiris.Application.Features.Categories.Services;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<DefaultFinancialCategoriesSeeder>();
 
         services.AddSingleton<IOfxStatementParser, OfxStatementParser>();
+        services.AddSingleton<ICsvStatementParser, CsvStatementParser>();
 
         return services;
     }

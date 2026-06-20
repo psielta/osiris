@@ -20,6 +20,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<FinancialAccountMovement> FinancialAccountMovements => Set<FinancialAccountMovement>();
 
+    public DbSet<CsvImportPreference> CsvImportPreferences => Set<CsvImportPreference>();
+
     public DbSet<CreditCard> CreditCards => Set<CreditCard>();
 
     public DbSet<CreditCardPurchase> CreditCardPurchases => Set<CreditCardPurchase>();
