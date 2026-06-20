@@ -39,6 +39,9 @@ public sealed class FinancialAccountMovementConfiguration : IEntityTypeConfigura
         builder.Property(movement => movement.Notes)
             .HasMaxLength(500);
 
+        builder.Property(movement => movement.ExternalId)
+            .HasMaxLength(255);
+
         builder.Property(movement => movement.CreatedAtUtc)
             .IsRequired();
 
@@ -47,6 +50,12 @@ public sealed class FinancialAccountMovementConfiguration : IEntityTypeConfigura
         builder.HasIndex(movement => movement.FinancialAccountId);
 
         builder.HasIndex(movement => new { movement.TenantId, movement.OccurredOn });
+
+        // Idempotency for OFX import: an external transaction id is unique within an account.
+        // Filtered so manual movements (ExternalId == null) are exempt from the constraint.
+        builder.HasIndex(movement => new { movement.TenantId, movement.FinancialAccountId, movement.ExternalId })
+            .IsUnique()
+            .HasFilter("\"ExternalId\" IS NOT NULL");
 
         builder.HasOne<Tenant>()
             .WithMany()

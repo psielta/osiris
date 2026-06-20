@@ -105,6 +105,16 @@
     <string name="statement_initial_balance">Saldo inicial</string>
     <string name="statement_current_balance">Saldo atual</string>
     <string name="statement_empty">Nenhum lançamento ainda.</string>
+    <string name="statement_import_ofx">Importar</string>
+
+    <!-- OFX import -->
+    <string name="import_ofx_title">Importar extrato OFX</string>
+    <string name="import_ofx_help">Selecione o arquivo .ofx exportado pelo internet banking do seu banco. Você poderá revisar os lançamentos antes de confirmar.</string>
+    <string name="import_ofx_select_file">Selecionar arquivo</string>
+    <string name="import_ofx_summary">%1$d novos · %2$d já importados</string>
+    <string name="import_ofx_category_all">Categoria para todos</string>
+    <string name="import_ofx_confirm">Importar %1$d selecionado(s)</string>
+    <string name="import_ofx_already_imported">Já importado</string>
 
     <!-- Movements -->
     <string name="movement_new">Novo lançamento</string>

@@ -1,0 +1,110 @@
+@using System.Globalization
+@model OfxImportPreviewViewModel
+
+@{
+    ViewData["Title"] = "Revisar importação";
+    Layout = "_AuthenticatedLayout";
+}
+
+<section class="space-y-6">
+    <div>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Financeiro</p>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-950 dark:text-slate-100">Revisar importação</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Conta: @Model.AccountName
+            @if (Model.PeriodStart is not null && Model.PeriodEnd is not null)
+            {
+                <span> · Período: @Model.PeriodStart.Value.ToString("dd/MM/yyyy") a @Model.PeriodEnd.Value.ToString("dd/MM/yyyy")</span>
+            }
+        </p>
+    </div>
+
+    <div asp-validation-summary="All" class="rounded-md bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"></div>
+
+    <div class="grid gap-4 sm:grid-cols-3">
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lançamentos no arquivo</p>
+            <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">@Model.TotalCount</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Novos</p>
+            <p class="mt-2 text-xl font-semibold text-emerald-600">@Model.NewCount</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Já importados</p>
+            <p class="mt-2 text-xl font-semibold text-slate-500 dark:text-slate-400">@Model.DuplicateCount</p>
+        </div>
+    </div>
+
+    <form asp-action="ImportConfirm" asp-route-id="@Model.AccountId" method="post" class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm text-slate-600 dark:text-slate-300">Revise os lançamentos, ajuste as categorias e confirme a importação. Os já importados vêm desmarcados.</p>
+            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                Categoria para todos:
+                <select onchange="document.querySelectorAll('.js-row-category').forEach(s => s.value = this.value);"
+                        class="h-10 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                    <option value="">Sem categoria</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Value">@category.Text</option>
+                    }
+                </select>
+            </label>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-800">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Importar</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Data</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Descrição</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tipo</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Valor</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        var line = Model.Lines[i];
+                        <tr class="@(line.IsDuplicate ? "bg-slate-50/60 dark:bg-slate-800/30" : null)">
+                            <td class="px-4 py-3 align-top">
+                                <input type="checkbox" asp-for="Lines[i].Include" class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-amber-600 focus:ring-amber-500" />
+                                <input type="hidden" name="Lines[@i].ExternalId" value="@line.ExternalId" />
+                                <input type="hidden" name="Lines[@i].OccurredOn" value="@line.OccurredOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
+                                <input type="hidden" name="Lines[@i].Amount" value="@line.Amount.ToString(CultureInfo.InvariantCulture)" />
+                                <input type="hidden" name="Lines[@i].Type" value="@line.Type" />
+                                <input type="hidden" name="Lines[@i].Description" value="@line.Description" />
+                                <input type="hidden" name="Lines[@i].IsDuplicate" value="@line.IsDuplicate.ToString().ToLowerInvariant()" />
+                            </td>
+                            <td class="px-4 py-3 align-top text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">@line.OccurredOn.ToString("dd/MM/yyyy")</td>
+                            <td class="px-4 py-3 align-top text-sm font-medium text-slate-950 dark:text-slate-100">
+                                @line.Description
+                                @if (line.IsDuplicate)
+                                {
+                                    <span class="ml-2 inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">Já importado</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 align-top text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">@line.Type.ToDisplayName()</td>
+                            <td class="px-4 py-3 align-top text-right text-sm font-semibold @(line.IsInflow ? "text-emerald-600" : "text-red-600 dark:text-red-400") whitespace-nowrap">
+                                @(line.IsInflow ? "+" : "−")@line.Amount.ToBrl()
+                            </td>
+                            <td class="px-4 py-3 align-top">
+                                <select asp-for="Lines[i].CategoryId" asp-items="Model.Categories"
+                                        class="js-row-category h-10 w-full min-w-44 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                                    <option value="">Sem categoria</option>
+                                </select>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <a asp-action="Import" asp-route-id="@Model.AccountId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Trocar arquivo</a>
+            <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">Importar lançamentos selecionados</button>
+        </div>
+    </form>
+</section>

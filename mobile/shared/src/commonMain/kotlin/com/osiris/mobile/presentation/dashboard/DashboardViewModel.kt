@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.DashboardSummary
 import com.osiris.mobile.domain.repository.DashboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +29,7 @@ data class DashboardUiState(
 
 class DashboardViewModel(
     private val dashboardRepository: DashboardRepository,
+    private val dataChangeBus: DataChangeBus,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardUiState())
@@ -33,6 +37,7 @@ class DashboardViewModel(
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Dashboard) { load() }
     }
 
     fun load() {

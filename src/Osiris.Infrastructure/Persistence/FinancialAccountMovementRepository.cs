@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Osiris.Application.Common.Exceptions;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
 
@@ -21,6 +23,47 @@ public sealed class FinancialAccountMovementRepository : IFinancialAccountMoveme
         await _dbContext.FinancialAccountMovements.AddAsync(movement, cancellationToken);
         _dbContext.FinancialAccounts.Update(account);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddRangeAsync(
+        IReadOnlyCollection<FinancialAccountMovement> movements,
+        FinancialAccount account,
+        CancellationToken cancellationToken)
+    {
+        await _dbContext.FinancialAccountMovements.AddRangeAsync(movements, cancellationToken);
+        _dbContext.FinancialAccounts.Update(account);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+            when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // The unique (TenantId, FinancialAccountId, ExternalId) index rejected a concurrently
+            // imported transaction. Nothing was persisted; surface it as an already-imported signal.
+            throw new DuplicateExternalIdException(exception);
+        }
+    }
+
+    public async Task<IReadOnlyCollection<string>> ListExistingExternalIdsAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        IReadOnlyCollection<string> externalIds,
+        CancellationToken cancellationToken)
+    {
+        if (externalIds.Count == 0)
+        {
+            return [];
+        }
+
+        return await _dbContext.FinancialAccountMovements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && movement.ExternalId != null
+                && externalIds.Contains(movement.ExternalId))
+            .Select(movement => movement.ExternalId!)
+            .ToArrayAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<FinancialAccountMovement>> ListByAccountAsync(

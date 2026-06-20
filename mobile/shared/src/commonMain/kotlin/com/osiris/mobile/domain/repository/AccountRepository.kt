@@ -6,6 +6,9 @@ import com.osiris.mobile.domain.model.AccountEdit
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.AccountType
 import com.osiris.mobile.domain.model.MovementType
+import com.osiris.mobile.domain.model.OfxImportPreview
+import com.osiris.mobile.domain.model.OfxImportResult
+import com.osiris.mobile.domain.model.OfxImportSelection
 import com.osiris.mobile.domain.model.StatementPdf
 
 interface AccountRepository {
@@ -25,4 +28,8 @@ interface AccountRepository {
         categoryId: String?,
         notes: String?,
     ): OsirisResult<Unit>
+
+    suspend fun previewOfxImport(accountId: String, fileName: String, bytes: ByteArray): OsirisResult<OfxImportPreview>
+
+    suspend fun confirmOfxImport(accountId: String, selections: List<OfxImportSelection>): OsirisResult<OfxImportResult>
 }

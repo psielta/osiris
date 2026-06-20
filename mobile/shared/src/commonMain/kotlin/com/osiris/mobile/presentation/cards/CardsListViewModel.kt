@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.cards
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.CreditCard
 import com.osiris.mobile.domain.repository.CardRepository
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +27,10 @@ sealed interface CardsListEvent {
     data class ShowMessage(val message: String) : CardsListEvent
 }
 
-class CardsListViewModel(private val cardRepository: CardRepository) : ViewModel() {
+class CardsListViewModel(
+    private val cardRepository: CardRepository,
+    private val dataChangeBus: DataChangeBus,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(CardsListUiState())
     val state: StateFlow<CardsListUiState> = _state.asStateFlow()
@@ -34,6 +40,7 @@ class CardsListViewModel(private val cardRepository: CardRepository) : ViewModel
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Cards) { load() }
     }
 
     fun load() {
@@ -58,7 +65,7 @@ class CardsListViewModel(private val cardRepository: CardRepository) : ViewModel
     fun archive(id: String) {
         viewModelScope.launch {
             when (val result = cardRepository.archiveCard(id)) {
-                is OsirisResult.Success -> load()
+                is OsirisResult.Success -> Unit
                 is OsirisResult.Failure -> _events.send(CardsListEvent.ShowMessage(result.error.message))
             }
         }

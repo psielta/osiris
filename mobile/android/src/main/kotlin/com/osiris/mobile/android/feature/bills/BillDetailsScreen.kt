@@ -45,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.ui.components.OsirisDateField
 import com.osiris.mobile.android.ui.components.OsirisDropdownField
-import com.osiris.mobile.android.ui.components.RefreshOnResume
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.BillStatus
@@ -65,8 +64,6 @@ fun BillDetailsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmDelete by remember { mutableStateOf(false) }
-
-    RefreshOnResume { viewModel.load() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->

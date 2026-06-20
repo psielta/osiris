@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.cards
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.CreditCardStatementOverview
 import com.osiris.mobile.domain.repository.CardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,7 @@ data class AllStatementsUiState(
 
 class AllStatementsViewModel(
     private val cardRepository: CardRepository,
+    private val dataChangeBus: DataChangeBus,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AllStatementsUiState())
@@ -28,6 +32,7 @@ class AllStatementsViewModel(
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Cards) { load() }
     }
 
     fun load() {

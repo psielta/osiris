@@ -8,12 +8,17 @@ import com.osiris.mobile.data.dto.PayBillRequest
 import com.osiris.mobile.data.dto.UpdateBillRequest
 import com.osiris.mobile.data.network.osirisCatching
 import com.osiris.mobile.data.remote.BillApi
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
 import com.osiris.mobile.domain.model.Bill
 import com.osiris.mobile.domain.model.BillDetails
 import com.osiris.mobile.domain.model.BillStatus
 import com.osiris.mobile.domain.repository.BillRepository
 
-class BillRepositoryImpl(private val api: BillApi) : BillRepository {
+class BillRepositoryImpl(
+    private val api: BillApi,
+    private val bus: DataChangeBus,
+) : BillRepository {
 
     override suspend fun list(month: Int, year: Int): OsirisResult<List<Bill>> = osirisCatching {
         api.list(month, year).map { it.toDomain() }
@@ -32,6 +37,7 @@ class BillRepositoryImpl(private val api: BillApi) : BillRepository {
         notes: String?,
     ): OsirisResult<Unit> = osirisCatching {
         api.create(CreateBillRequest(description, amount, dueDate, categoryId, paymentAccountId, notes))
+        bus.notify(DataScope.Bills, DataScope.Dashboard, DataScope.Reports)
         Unit
     }
 
@@ -45,19 +51,23 @@ class BillRepositoryImpl(private val api: BillApi) : BillRepository {
         notes: String?,
     ): OsirisResult<Unit> = osirisCatching {
         api.update(id, UpdateBillRequest(description, amount, dueDate, categoryId, paymentAccountId, notes))
+        bus.notify(DataScope.Bills, DataScope.Dashboard, DataScope.Reports)
     }
 
     override suspend fun delete(id: String): OsirisResult<Unit> = osirisCatching {
         api.delete(id)
+        bus.notify(DataScope.Bills, DataScope.Accounts, DataScope.Dashboard, DataScope.Reports)
     }
 
     override suspend fun pay(id: String, paidAt: String, paymentAccountId: String?): OsirisResult<Unit> =
         osirisCatching {
             api.pay(id, PayBillRequest(paidAt, paymentAccountId))
+            bus.notify(DataScope.Bills, DataScope.Accounts, DataScope.Dashboard, DataScope.Reports)
         }
 
     override suspend fun markPending(id: String): OsirisResult<Unit> = osirisCatching {
         api.markPending(id)
+        bus.notify(DataScope.Bills, DataScope.Accounts, DataScope.Dashboard, DataScope.Reports)
     }
 }
 

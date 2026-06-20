@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Features.Categories.Queries.ListCategories;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.ImportOfxStatement;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewOfxImport;
+using Osiris.Application.Features.FinancialAccountMovements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
@@ -23,6 +26,8 @@ namespace Osiris.Web.Controllers;
 public sealed class FinancialAccountsController : AppController
 {
     private const string MovementPrefix = "Movement";
+
+    private const long MaxOfxUploadBytes = 5 * 1024 * 1024;
 
     private readonly IMediator _mediator;
 
@@ -157,6 +162,110 @@ public sealed class FinancialAccountsController : AppController
         return File(file.Content, file.ContentType, file.FileName);
     }
 
+    [HttpGet("{id:guid}/import")]
+    public async Task<IActionResult> Import(Guid id, CancellationToken cancellationToken)
+    {
+        var account = await _mediator.Send(new GetFinancialAccountForEditQuery(id), cancellationToken);
+        if (account is null)
+        {
+            return NotFound();
+        }
+
+        return View(new OfxImportUploadViewModel { AccountId = account.Id, AccountName = account.Name });
+    }
+
+    [HttpPost("{id:guid}/import/preview")]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(MaxOfxUploadBytes)]
+    public async Task<IActionResult> ImportPreview(Guid id, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var account = await _mediator.Send(new GetFinancialAccountForEditQuery(id), cancellationToken);
+        if (account is null)
+        {
+            return NotFound();
+        }
+
+        var uploadModel = new OfxImportUploadViewModel { AccountId = account.Id, AccountName = account.Name };
+
+        if (file is null || file.Length == 0)
+        {
+            ModelState.AddModelError(string.Empty, "Selecione um arquivo OFX para importar.");
+            return View(nameof(Import), uploadModel);
+        }
+
+        byte[] content;
+        await using (var stream = new MemoryStream())
+        {
+            await file.CopyToAsync(stream, cancellationToken);
+            content = stream.ToArray();
+        }
+
+        try
+        {
+            var result = await _mediator.Send(
+                new PreviewOfxImportCommand(account.Id, content, file.FileName),
+                cancellationToken);
+
+            if (result.IsFailure)
+            {
+                AddResultErrors(result);
+                return View(nameof(Import), uploadModel);
+            }
+
+            var categories = await LoadCategoryItemsAsync(cancellationToken);
+            return View(nameof(ImportPreview), BuildPreviewViewModel(result.Value!, categories));
+        }
+        catch (ValidationException exception)
+        {
+            AddValidationErrors(exception);
+            return View(nameof(Import), uploadModel);
+        }
+    }
+
+    [HttpPost("{id:guid}/import/confirm")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportConfirm(
+        Guid id,
+        OfxImportPreviewViewModel model,
+        CancellationToken cancellationToken)
+    {
+        var selectedLines = model.Lines
+            .Where(line => line.Include)
+            .Select(line => new ImportOfxLineInput(
+                line.ExternalId,
+                line.OccurredOn,
+                line.Amount,
+                line.Type,
+                line.Description,
+                line.CategoryId))
+            .ToList();
+
+        if (selectedLines.Count == 0)
+        {
+            ModelState.AddModelError(string.Empty, "Selecione ao menos um lançamento para importar.");
+            return View(nameof(ImportPreview), await RebuildPreviewAsync(model, cancellationToken));
+        }
+
+        try
+        {
+            var result = await _mediator.Send(new ImportOfxStatementCommand(id, selectedLines), cancellationToken);
+
+            if (result.IsFailure)
+            {
+                AddResultErrors(result);
+                return View(nameof(ImportPreview), await RebuildPreviewAsync(model, cancellationToken));
+            }
+
+            TempData["ImportSummary"] = BuildSummaryMessage(result.Value!);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        catch (ValidationException exception)
+        {
+            AddValidationErrors(exception);
+            return View(nameof(ImportPreview), await RebuildPreviewAsync(model, cancellationToken));
+        }
+    }
+
     [HttpPost("{id:guid}/movements")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateMovement(
@@ -224,6 +333,63 @@ public sealed class FinancialAccountsController : AppController
             Movement = movement,
             Categories = categoryItems
         };
+    }
+
+    private async Task<SelectListItem[]> LoadCategoryItemsAsync(CancellationToken cancellationToken)
+    {
+        var categories = await _mediator.Send(new ListCategoriesQuery(IncludeArchived: false), cancellationToken);
+        return categories
+            .Select(category => new SelectListItem { Text = category.Name, Value = category.Id.ToString() })
+            .ToArray();
+    }
+
+    private static OfxImportPreviewViewModel BuildPreviewViewModel(
+        OfxImportPreviewDto preview,
+        IReadOnlyCollection<SelectListItem> categories)
+    {
+        return new OfxImportPreviewViewModel
+        {
+            AccountId = preview.AccountId,
+            AccountName = preview.AccountName,
+            BankId = preview.BankId,
+            AccountNumber = preview.AccountNumber,
+            PeriodStart = preview.PeriodStart,
+            PeriodEnd = preview.PeriodEnd,
+            TotalCount = preview.TotalCount,
+            NewCount = preview.NewCount,
+            DuplicateCount = preview.DuplicateCount,
+            Categories = categories,
+            Lines = preview.Lines
+                .Select(line => new OfxImportLineViewModel
+                {
+                    ExternalId = line.ExternalId,
+                    OccurredOn = line.OccurredOn,
+                    Amount = line.Amount,
+                    Type = line.Type,
+                    Description = line.Description,
+                    IsDuplicate = line.IsDuplicate,
+                    Include = !line.IsDuplicate
+                })
+                .ToList()
+        };
+    }
+
+    private async Task<OfxImportPreviewViewModel> RebuildPreviewAsync(
+        OfxImportPreviewViewModel model,
+        CancellationToken cancellationToken)
+    {
+        model.Categories = await LoadCategoryItemsAsync(cancellationToken);
+        model.TotalCount = model.Lines.Count;
+        model.DuplicateCount = model.Lines.Count(line => line.IsDuplicate);
+        model.NewCount = model.TotalCount - model.DuplicateCount;
+        return model;
+    }
+
+    private static string BuildSummaryMessage(OfxImportResultDto summary)
+    {
+        return summary.SkippedDuplicates > 0
+            ? $"{summary.Imported} lançamento(s) importado(s). {summary.SkippedDuplicates} ignorado(s) por já existirem."
+            : $"{summary.Imported} lançamento(s) importado(s).";
     }
 
     private void AddMovementResultErrors(Result result)

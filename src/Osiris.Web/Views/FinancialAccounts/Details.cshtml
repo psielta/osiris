@@ -18,10 +18,24 @@
                 <i class="ph ph-file-pdf" aria-hidden="true"></i>
                 Exportar PDF
             </a>
+            @if (Model.Account.IsActive)
+            {
+                <a asp-action="Import" asp-route-id="@Model.Account.Id" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="ph ph-upload-simple" aria-hidden="true"></i>
+                    Importar OFX
+                </a>
+            }
             <a asp-action="Edit" asp-route-id="@Model.Account.Id" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Editar conta</a>
             <a asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Voltar</a>
         </div>
     </div>
+
+    @if (TempData["ImportSummary"] is string importSummary)
+    {
+        <div class="rounded-md border border-emerald-300 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-300">
+            @importSummary
+        </div>
+    }
 
     @if (!Model.Account.IsActive)
     {

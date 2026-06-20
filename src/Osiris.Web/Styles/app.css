@@ -29,7 +29,7 @@
 }
 
 /*
- * Let native controls (selects, date pickers, scrollbars) follow the active theme.
+ * Let native controls (date pickers, scrollbars) follow the active theme.
  */
 :root {
   color-scheme: light;
@@ -37,6 +37,28 @@
 
 .dark {
   color-scheme: dark;
+}
+
+/*
+ * A closed <select> does not reliably follow `color-scheme` for its background across browsers,
+ * so it can render white in dark mode even when the rest of the form is dark. Give selects an
+ * explicit themed surface. Kept in the `base` layer so per-element `dark:bg-*` utilities still win.
+ */
+@layer base {
+  select {
+    background-color: #ffffff;
+    color: #0f172a; /* slate-900 */
+  }
+
+  .dark select {
+    background-color: #0f172a; /* slate-900 */
+    color: #f1f5f9; /* slate-100 */
+  }
+
+  .dark select option {
+    background-color: #0f172a; /* slate-900 */
+    color: #f1f5f9; /* slate-100 */
+  }
 }
 
 /*

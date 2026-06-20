@@ -1,8 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Osiris.Api.Contracts;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.ImportOfxStatement;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewOfxImport;
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
@@ -17,6 +20,8 @@ namespace Osiris.Api.Controllers.V1;
 [Route("api/v1/accounts")]
 public sealed class FinancialAccountsController : ApiControllerBase
 {
+    private const long MaxOfxUploadBytes = 5 * 1024 * 1024;
+
     private readonly IMediator _mediator;
 
     public FinancialAccountsController(IMediator mediator)
@@ -98,5 +103,48 @@ public sealed class FinancialAccountsController : ApiControllerBase
         return result.IsSuccess
             ? StatusCode(StatusCodes.Status201Created, new { id = result.Value })
             : Problem(result);
+    }
+
+    [HttpPost("{id:guid}/movements/import/preview")]
+    [RequestSizeLimit(MaxOfxUploadBytes)]
+    public async Task<IActionResult> PreviewImport(Guid id, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var content = await ReadAllBytesAsync(file, cancellationToken);
+
+        var result = await _mediator.Send(
+            new PreviewOfxImportCommand(id, content, file?.FileName ?? string.Empty),
+            cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("{id:guid}/movements/import")]
+    public async Task<IActionResult> Import(Guid id, ImportOfxStatementRequest request, CancellationToken cancellationToken)
+    {
+        var lines = (request.Lines ?? [])
+            .Select(line => new ImportOfxLineInput(
+                line.ExternalId,
+                line.OccurredOn,
+                line.Amount,
+                line.Type,
+                line.Description,
+                line.CategoryId))
+            .ToList();
+
+        var result = await _mediator.Send(new ImportOfxStatementCommand(id, lines), cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    private static async Task<byte[]> ReadAllBytesAsync(IFormFile? file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+        {
+            return [];
+        }
+
+        await using var stream = new MemoryStream();
+        await file.CopyToAsync(stream, cancellationToken);
+        return stream.ToArray();
     }
 }

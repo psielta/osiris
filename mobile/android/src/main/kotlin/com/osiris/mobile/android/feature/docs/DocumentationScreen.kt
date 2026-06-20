@@ -1,21 +1,26 @@
 package com.osiris.mobile.android.feature.docs
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -205,20 +210,70 @@ private fun MarkdownTable(rows: List<List<String>>) {
         return
     }
 
+    val columnCount = rows.maxOfOrNull { it.size } ?: return
+    val normalizedRows = rows.map { row ->
+        List(columnCount) { index -> row.getOrElse(index) { "" } }
+    }
+
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            rows.forEachIndexed { index, row ->
-                if (index > 0) {
-                    HorizontalDivider()
-                }
-                Text(
-                    text = row.joinToString("  |  "),
-                    style = if (index == 0) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium,
-                    color = if (index == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = if (index == 0) FontWeight.SemiBold else FontWeight.Normal,
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(12.dp),
+        ) {
+            normalizedRows.forEachIndexed { index, row ->
+                MarkdownTableRow(
+                    cells = row,
+                    isHeader = index == 0,
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun MarkdownTableRow(
+    cells: List<String>,
+    isHeader: Boolean,
+) {
+    Row {
+        cells.forEach { cell ->
+            MarkdownTableCell(text = cell, isHeader = isHeader)
+        }
+    }
+}
+
+@Composable
+private fun MarkdownTableCell(
+    text: String,
+    isHeader: Boolean,
+) {
+    val backgroundColor = if (isHeader) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val contentColor = if (isHeader) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Box(
+        modifier = Modifier
+            .width(164.dp)
+            .heightIn(min = 48.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            .background(backgroundColor)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = text,
+            style = if (isHeader) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium,
+            color = contentColor,
+            fontWeight = if (isHeader) FontWeight.SemiBold else FontWeight.Normal,
+        )
     }
 }
 
@@ -259,7 +314,7 @@ private fun parseMarkdown(markdown: String): List<MarkdownBlock> {
             return@forEach
         }
 
-        if (line.startsWith("|") && line.endsWith("|")) {
+        if (isTableRow(line)) {
             flushParagraph()
             val cells = parseTableCells(line)
             if (!isTableSeparator(cells)) {
@@ -308,8 +363,11 @@ private fun parseMarkdown(markdown: String): List<MarkdownBlock> {
 private val numberedLineRegex = Regex("""^(\d+)\.\s+(.+)$""")
 private val markdownLinkRegex = Regex("""\[([^\]]+)]\([^)]+\)""")
 
+private fun isTableRow(line: String): Boolean =
+    line.count { it == '|' } >= 2
+
 private fun parseTableCells(line: String): List<String> =
-    line.trim('|').split('|').map { cleanInline(it.trim()) }
+    line.trim().trim('|').split('|').map { cleanInline(it.trim()) }
 
 private fun isTableSeparator(cells: List<String>): Boolean =
     cells.isNotEmpty() && cells.all { cell -> cell.all { it == '-' || it == ':' || it.isWhitespace() } }

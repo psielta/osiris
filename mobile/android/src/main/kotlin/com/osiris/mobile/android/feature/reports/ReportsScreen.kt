@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
+import com.osiris.mobile.android.ui.components.OsirisPullToRefresh
 import com.osiris.mobile.android.ui.components.openPdf
 import com.osiris.mobile.presentation.reports.ReportsEvent
 import com.osiris.mobile.presentation.reports.ReportsViewModel
@@ -69,52 +70,58 @@ fun ReportsScreen(
             )
         },
     ) { padding ->
-        LazyColumn(
+        OsirisPullToRefresh(
+            isRefreshing = state.isRefreshing,
+            onRefresh = viewModel::load,
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(onClick = viewModel::previousMonth, modifier = Modifier.weight(1f)) { Text("<") }
-                    Text(
-                        text = "${state.month.toString().padStart(2, '0')}/${state.year}",
-                        modifier = Modifier.weight(2f).align(Alignment.CenterVertically),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    OutlinedButton(onClick = viewModel::nextMonth, modifier = Modifier.weight(1f)) { Text(">") }
-                }
-            }
-
-            if (state.error != null) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 item {
-                    Text(
-                        text = state.error!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = viewModel::previousMonth, modifier = Modifier.weight(1f)) { Text("<") }
+                        Text(
+                            text = "${state.month.toString().padStart(2, '0')}/${state.year}",
+                            modifier = Modifier.weight(2f).align(Alignment.CenterVertically),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        OutlinedButton(onClick = viewModel::nextMonth, modifier = Modifier.weight(1f)) { Text(">") }
+                    }
+                }
+
+                if (state.error != null) {
+                    item {
+                        Text(
+                            text = state.error!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+
+                item {
+                    ReportCard(
+                        title = stringResource(R.string.report_cash_synthetic_title),
+                        body = stringResource(R.string.report_cash_synthetic_body),
+                        button = stringResource(R.string.report_download_pdf),
+                        isDownloading = state.isDownloadingSynthetic,
+                        onDownload = viewModel::downloadSynthetic,
                     )
                 }
-            }
 
-            item {
-                ReportCard(
-                    title = stringResource(R.string.report_cash_synthetic_title),
-                    body = stringResource(R.string.report_cash_synthetic_body),
-                    button = stringResource(R.string.report_download_pdf),
-                    isDownloading = state.isDownloadingSynthetic,
-                    onDownload = viewModel::downloadSynthetic,
-                )
-            }
-
-            item {
-                ReportCard(
-                    title = stringResource(R.string.report_cash_analytic_title),
-                    body = stringResource(R.string.report_cash_analytic_body),
-                    button = stringResource(R.string.report_download_pdf),
-                    isDownloading = state.isDownloadingAnalytic,
-                    onDownload = viewModel::downloadAnalytic,
-                )
+                item {
+                    ReportCard(
+                        title = stringResource(R.string.report_cash_analytic_title),
+                        body = stringResource(R.string.report_cash_analytic_body),
+                        button = stringResource(R.string.report_download_pdf),
+                        isDownloading = state.isDownloadingAnalytic,
+                        onDownload = viewModel::downloadAnalytic,
+                    )
+                }
             }
         }
     }

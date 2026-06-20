@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.reports
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.repository.ReportRepository
 import kotlinx.coroutines.channels.Channel
@@ -22,6 +25,7 @@ import kotlinx.datetime.todayIn
 data class ReportsUiState(
     val month: Int = currentMonth(),
     val year: Int = currentYear(),
+    val isRefreshing: Boolean = false,
     val isDownloadingSynthetic: Boolean = false,
     val isDownloadingAnalytic: Boolean = false,
     val error: String? = null,
@@ -33,12 +37,21 @@ sealed interface ReportsEvent {
 
 class ReportsViewModel(
     private val reportRepository: ReportRepository,
+    private val dataChangeBus: DataChangeBus,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReportsUiState())
     val state: StateFlow<ReportsUiState> = _state.asStateFlow()
 
     private val _events = Channel<ReportsEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    init {
+        observeDataChanges(dataChangeBus, DataScope.Reports) { load() }
+    }
+
+    fun load() {
+        _state.update { it.copy(isRefreshing = false, error = null) }
+    }
 
     fun previousMonth() = moveMonth(-1)
 

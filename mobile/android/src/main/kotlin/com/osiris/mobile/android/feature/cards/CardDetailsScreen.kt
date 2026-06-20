@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
-import com.osiris.mobile.android.ui.components.RefreshOnResume
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.CreditCardPurchase
 import com.osiris.mobile.domain.model.CreditCardStatement
@@ -64,8 +63,6 @@ fun CardDetailsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableIntStateOf(0) }
-
-    RefreshOnResume { viewModel.load() }
 
     Scaffold(
         topBar = {

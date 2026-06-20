@@ -22,6 +22,7 @@ object Routes {
     const val AccountFormPattern = "account-form?accountId={accountId}"
     const val AccountStatementPattern = "account-statement/{accountId}"
     const val MovementFormPattern = "movement-form/{accountId}"
+    const val OfxImportPattern = "ofx-import/{accountId}"
     const val AccountIdArg = "accountId"
 
     const val CardsList = "cards"
@@ -52,6 +53,8 @@ object Routes {
     fun accountStatement(accountId: String): String = "account-statement/$accountId"
 
     fun movementForm(accountId: String): String = "movement-form/$accountId"
+
+    fun ofxImport(accountId: String): String = "ofx-import/$accountId"
 
     fun cardForm(cardId: String? = null): String =
         if (cardId == null) CardForm else "card-form?cardId=$cardId"

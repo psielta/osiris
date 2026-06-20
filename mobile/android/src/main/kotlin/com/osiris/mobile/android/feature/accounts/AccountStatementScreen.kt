@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.ui.components.openPdf
-import com.osiris.mobile.android.ui.components.RefreshOnResume
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.Movement
@@ -65,14 +64,13 @@ private val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 fun AccountStatementScreen(
     accountId: String,
     onAddMovement: () -> Unit,
+    onImport: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: AccountStatementViewModel = koinViewModel { parametersOf(accountId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-
-    RefreshOnResume { viewModel.load() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -93,6 +91,11 @@ fun AccountStatementScreen(
                     }
                 },
                 actions = {
+                    if (state.statement?.isActive == true) {
+                        TextButton(onClick = onImport) {
+                            Text(stringResource(R.string.statement_import_ofx))
+                        }
+                    }
                     if (state.statement != null) {
                         IconButton(onClick = viewModel::downloadPdf, enabled = !state.isDownloadingPdf) {
                             if (state.isDownloadingPdf) {

@@ -44,7 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
-import com.osiris.mobile.android.ui.components.RefreshOnResume
+import com.osiris.mobile.android.ui.components.OsirisPullToRefresh
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.AccountType
@@ -65,8 +65,6 @@ fun AccountsListScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var pendingArchive by remember { mutableStateOf<Account?>(null) }
-
-    RefreshOnResume { viewModel.load() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -98,37 +96,43 @@ fun AccountsListScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        when {
-            state.isLoading -> Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-
-            state.error != null -> Box(Modifier.fillMaxSize().padding(padding).padding(24.dp), Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+        OsirisPullToRefresh(
+            isRefreshing = state.isLoading,
+            onRefresh = viewModel::load,
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-            }
 
-            state.active.isEmpty() && state.archived.isEmpty() -> Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                Text(stringResource(R.string.accounts_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
-            ) {
-                if (state.active.isNotEmpty()) {
-                    item { SectionHeader(stringResource(R.string.account_active_section)) }
-                    items(state.active, key = { it.id }) { account ->
-                        AccountRow(account, onClick = { onOpenStatement(account.id) }, onEdit = { onEdit(account.id) }, onArchive = { pendingArchive = account })
+                state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.height(12.dp))
+                        TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
                     }
                 }
-                if (state.archived.isNotEmpty()) {
-                    item { SectionHeader(stringResource(R.string.account_archived_section)) }
-                    items(state.archived, key = { it.id }) { account ->
-                        AccountRow(account, onClick = { onOpenStatement(account.id) }, onEdit = null, onArchive = null)
+
+                state.active.isEmpty() && state.archived.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    Text(stringResource(R.string.accounts_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                else -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                ) {
+                    if (state.active.isNotEmpty()) {
+                        item { SectionHeader(stringResource(R.string.account_active_section)) }
+                        items(state.active, key = { it.id }) { account ->
+                            AccountRow(account, onClick = { onOpenStatement(account.id) }, onEdit = { onEdit(account.id) }, onArchive = { pendingArchive = account })
+                        }
+                    }
+                    if (state.archived.isNotEmpty()) {
+                        item { SectionHeader(stringResource(R.string.account_archived_section)) }
+                        items(state.archived, key = { it.id }) { account ->
+                            AccountRow(account, onClick = { onOpenStatement(account.id) }, onEdit = null, onArchive = null)
+                        }
                     }
                 }
             }

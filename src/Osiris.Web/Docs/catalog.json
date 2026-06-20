@@ -36,6 +36,15 @@
     "order": 20
   },
   {
+    "slug": "ofx-import",
+    "title": "Importar extrato em OFX",
+    "description": "Baixe o extrato do banco em OFX e importe os lançamentos para a conta, revisando antes de confirmar.",
+    "group": "Financeiro",
+    "icon": "ph ph-upload-simple",
+    "markdownFile": "ofx-import.md",
+    "order": 25
+  },
+  {
     "slug": "cards",
     "title": "Guia simples de cartões",
     "description": "Entenda o que é um cartão de crédito no Osiris, limite, fechamento e vencimento, e como ele difere de uma conta.",

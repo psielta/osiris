@@ -6,16 +6,22 @@ import com.osiris.mobile.data.dto.AccountListItemDto
 import com.osiris.mobile.data.dto.CreateAccountRequest
 import com.osiris.mobile.data.dto.CreateMovementRequest
 import com.osiris.mobile.data.dto.CreatedIdResponse
+import com.osiris.mobile.data.dto.ImportOfxStatementRequest
+import com.osiris.mobile.data.dto.OfxImportPreviewDto
+import com.osiris.mobile.data.dto.OfxImportResultDto
 import com.osiris.mobile.data.dto.StatementDto
 import com.osiris.mobile.data.dto.UpdateAccountRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
@@ -63,6 +69,30 @@ class AccountApi(
 
     suspend fun createMovement(accountId: String, request: CreateMovementRequest): CreatedIdResponse =
         authClient.post("$base/$accountId/movements") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun previewOfxImport(accountId: String, fileName: String, bytes: ByteArray): OfxImportPreviewDto =
+        authClient.post("$base/$accountId/movements/import/preview") {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "application/octet-stream")
+                                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                            },
+                        )
+                    },
+                ),
+            )
+        }.body()
+
+    suspend fun confirmOfxImport(accountId: String, request: ImportOfxStatementRequest): OfxImportResultDto =
+        authClient.post("$base/$accountId/movements/import") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

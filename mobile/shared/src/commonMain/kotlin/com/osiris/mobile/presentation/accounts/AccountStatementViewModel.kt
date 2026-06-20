@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.accounts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.AccountStatement
 import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.repository.AccountRepository
@@ -28,6 +31,7 @@ sealed interface AccountStatementEvent {
 
 class AccountStatementViewModel(
     private val accountRepository: AccountRepository,
+    private val dataChangeBus: DataChangeBus,
     private val accountId: String,
 ) : ViewModel() {
 
@@ -39,6 +43,7 @@ class AccountStatementViewModel(
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Accounts) { load() }
     }
 
     fun load() {

@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.feature.cards.formatDate
 import com.osiris.mobile.android.feature.cards.statementStatusLabel
+import com.osiris.mobile.android.ui.components.OsirisPullToRefresh
 import com.osiris.mobile.android.ui.components.parseHexColor
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.CreditCardDashboard
@@ -95,27 +96,32 @@ fun DashboardScreen(
             )
         },
     ) { padding ->
-        when {
-            state.isLoading -> Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-
-            state.error != null -> Box(Modifier.fillMaxSize().padding(padding).padding(24.dp), Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+        OsirisPullToRefresh(
+            isRefreshing = state.isLoading,
+            onRefresh = viewModel::load,
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-            }
 
-            state.summary != null -> DashboardContent(
-                summary = state.summary!!,
-                month = state.month,
-                year = state.year,
-                onPrevious = viewModel::previousMonth,
-                onNext = viewModel::nextMonth,
-                modifier = Modifier.padding(padding),
-            )
+                state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.height(12.dp))
+                        TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+                    }
+                }
+
+                state.summary != null -> DashboardContent(
+                    summary = state.summary!!,
+                    month = state.month,
+                    year = state.year,
+                    onPrevious = viewModel::previousMonth,
+                    onNext = viewModel::nextMonth,
+                )
+            }
         }
     }
 }

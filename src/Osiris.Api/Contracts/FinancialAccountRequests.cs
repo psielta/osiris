@@ -13,3 +13,13 @@ public sealed record CreateMovementRequest(
     string Description,
     Guid? CategoryId,
     string? Notes);
+
+public sealed record ImportOfxStatementRequest(IReadOnlyList<ImportOfxLineRequest> Lines);
+
+public sealed record ImportOfxLineRequest(
+    string ExternalId,
+    DateOnly OccurredOn,
+    decimal Amount,
+    FinancialAccountMovementType Type,
+    string Description,
+    Guid? CategoryId);

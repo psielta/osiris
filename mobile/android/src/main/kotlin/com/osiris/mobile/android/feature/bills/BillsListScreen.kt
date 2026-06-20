@@ -41,7 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
-import com.osiris.mobile.android.ui.components.RefreshOnResume
+import com.osiris.mobile.android.ui.components.OsirisPullToRefresh
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.Bill
 import com.osiris.mobile.domain.model.BillStatus
@@ -60,8 +60,6 @@ fun BillsListScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    RefreshOnResume { viewModel.load() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -93,41 +91,47 @@ fun BillsListScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        when {
-            state.isLoading -> Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-
-            state.error != null -> Box(Modifier.fillMaxSize().padding(padding).padding(24.dp), Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+        OsirisPullToRefresh(
+            isRefreshing = state.isLoading,
+            onRefresh = viewModel::load,
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-            }
 
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(onClick = viewModel::previousMonth, modifier = Modifier.weight(1f)) { Text("<") }
-                        Text(
-                            text = "${state.month.toString().padStart(2, '0')}/${state.year}",
-                            modifier = Modifier.weight(2f).align(Alignment.CenterVertically),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        OutlinedButton(onClick = viewModel::nextMonth, modifier = Modifier.weight(1f)) { Text(">") }
+                state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.height(12.dp))
+                        TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
                     }
                 }
-                if (state.bills.isEmpty()) {
-                    item { EmptyText(stringResource(R.string.bills_empty)) }
-                } else {
-                    items(state.bills, key = { it.id }) { bill ->
-                        BillRow(bill, onClick = { onOpenDetails(bill.id) })
+
+                else -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            OutlinedButton(onClick = viewModel::previousMonth, modifier = Modifier.weight(1f)) { Text("<") }
+                            Text(
+                                text = "${state.month.toString().padStart(2, '0')}/${state.year}",
+                                modifier = Modifier.weight(2f).align(Alignment.CenterVertically),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            OutlinedButton(onClick = viewModel::nextMonth, modifier = Modifier.weight(1f)) { Text(">") }
+                        }
+                    }
+                    if (state.bills.isEmpty()) {
+                        item { EmptyText(stringResource(R.string.bills_empty)) }
+                    } else {
+                        items(state.bills, key = { it.id }) { bill ->
+                            BillRow(bill, onClick = { onOpenDetails(bill.id) })
+                        }
                     }
                 }
             }

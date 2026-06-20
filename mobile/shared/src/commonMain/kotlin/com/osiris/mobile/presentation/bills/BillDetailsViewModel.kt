@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.bills
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.model.BillDetails
 import com.osiris.mobile.domain.repository.AccountRepository
@@ -36,6 +39,7 @@ sealed interface BillDetailsEvent {
 class BillDetailsViewModel(
     private val billRepository: BillRepository,
     private val accountRepository: AccountRepository,
+    private val dataChangeBus: DataChangeBus,
     private val billId: String,
 ) : ViewModel() {
 
@@ -47,6 +51,7 @@ class BillDetailsViewModel(
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Bills) { load() }
     }
 
     fun load() {
@@ -85,7 +90,6 @@ class BillDetailsViewModel(
             when (val result = billRepository.pay(billId, current.paidAt, current.paymentAccountId)) {
                 is OsirisResult.Success -> {
                     _state.update { it.copy(isUpdating = false) }
-                    load()
                 }
 
                 is OsirisResult.Failure -> {
@@ -102,7 +106,6 @@ class BillDetailsViewModel(
             when (val result = billRepository.markPending(billId)) {
                 is OsirisResult.Success -> {
                     _state.update { it.copy(isUpdating = false) }
-                    load()
                 }
 
                 is OsirisResult.Failure -> {

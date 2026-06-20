@@ -4,6 +4,7 @@ import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.core.result.OsirisResult
 import com.osiris.mobile.data.remote.CardApi
 import com.osiris.mobile.data.remote.osirisJson
+import com.osiris.mobile.data.sync.RecordingDataChangeBus
 import com.osiris.mobile.domain.model.StatementStatus
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -20,7 +21,11 @@ import kotlin.test.assertTrue
 
 class CardRepositoryTest {
 
-    private fun repository(content: String, status: HttpStatusCode = HttpStatusCode.OK): CardRepositoryImpl {
+    private fun repository(
+        content: String,
+        status: HttpStatusCode = HttpStatusCode.OK,
+        bus: RecordingDataChangeBus = RecordingDataChangeBus(),
+    ): CardRepositoryImpl {
         val engine = MockEngine {
             respond(content, status, headersOf(HttpHeaders.ContentType, "application/json"))
         }
@@ -28,7 +33,7 @@ class CardRepositoryTest {
             expectSuccess = true
             install(ContentNegotiation) { json(osirisJson) }
         }
-        return CardRepositoryImpl(CardApi(client, ApiConfig("http://test/")))
+        return CardRepositoryImpl(CardApi(client, ApiConfig("http://test/")), bus)
     }
 
     @Test

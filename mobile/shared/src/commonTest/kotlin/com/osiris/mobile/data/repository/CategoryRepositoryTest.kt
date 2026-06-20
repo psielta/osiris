@@ -4,6 +4,7 @@ import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.core.result.OsirisResult
 import com.osiris.mobile.data.remote.CategoryApi
 import com.osiris.mobile.data.remote.osirisJson
+import com.osiris.mobile.data.sync.RecordingDataChangeBus
 import com.osiris.mobile.domain.model.CategoryType
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -20,7 +21,11 @@ import kotlin.test.assertTrue
 
 class CategoryRepositoryTest {
 
-    private fun repository(content: String, status: HttpStatusCode): CategoryRepositoryImpl {
+    private fun repository(
+        content: String,
+        status: HttpStatusCode,
+        bus: RecordingDataChangeBus = RecordingDataChangeBus(),
+    ): CategoryRepositoryImpl {
         val engine = MockEngine {
             respond(content, status, headersOf(HttpHeaders.ContentType, "application/json"))
         }
@@ -28,7 +33,7 @@ class CategoryRepositoryTest {
             expectSuccess = true
             install(ContentNegotiation) { json(osirisJson) }
         }
-        return CategoryRepositoryImpl(CategoryApi(client, ApiConfig("http://test/")))
+        return CategoryRepositoryImpl(CategoryApi(client, ApiConfig("http://test/")), bus)
     }
 
     @Test

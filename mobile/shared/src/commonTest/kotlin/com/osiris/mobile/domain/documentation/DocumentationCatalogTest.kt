@@ -16,6 +16,7 @@ class DocumentationCatalogTest {
                 "dashboard",
                 "categories",
                 "accounts",
+                "ofx-import",
                 "cards",
                 "purchases",
                 "statements",

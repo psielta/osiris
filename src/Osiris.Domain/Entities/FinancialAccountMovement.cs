@@ -17,7 +17,8 @@ public sealed class FinancialAccountMovement : BaseEntity
         Guid? categoryId = null,
         string? relatedEntityType = null,
         Guid? relatedEntityId = null,
-        string? notes = null)
+        string? notes = null,
+        string? externalId = null)
     {
         if (tenantId == Guid.Empty)
         {
@@ -44,6 +45,7 @@ public sealed class FinancialAccountMovement : BaseEntity
         RelatedEntityType = NormalizeOptional(relatedEntityType);
         RelatedEntityId = relatedEntityId;
         Notes = NormalizeOptional(notes);
+        ExternalId = NormalizeOptional(externalId);
     }
 
     public Guid TenantId { get; private set; }
@@ -56,6 +58,13 @@ public sealed class FinancialAccountMovement : BaseEntity
     public string? RelatedEntityType { get; private set; }
     public Guid? RelatedEntityId { get; private set; }
     public string? Notes { get; private set; }
+
+    /// <summary>
+    /// Stable identifier of the source transaction when this movement was imported from an
+    /// external statement (OFX <c>FITID</c>, or a synthesized key when the bank omits it).
+    /// Null for movements created manually or by internal flows. Used to skip duplicates on re-import.
+    /// </summary>
+    public string? ExternalId { get; private set; }
 
     private static string NormalizeRequiredDescription(string description)
     {

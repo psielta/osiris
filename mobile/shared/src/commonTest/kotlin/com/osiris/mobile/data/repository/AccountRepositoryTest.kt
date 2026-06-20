@@ -4,6 +4,7 @@ import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.core.result.OsirisResult
 import com.osiris.mobile.data.remote.AccountApi
 import com.osiris.mobile.data.remote.osirisJson
+import com.osiris.mobile.data.sync.RecordingDataChangeBus
 import com.osiris.mobile.domain.model.AccountType
 import com.osiris.mobile.domain.model.MovementType
 import io.ktor.client.HttpClient
@@ -21,7 +22,11 @@ import kotlin.test.assertTrue
 
 class AccountRepositoryTest {
 
-    private fun repository(content: String, status: HttpStatusCode): AccountRepositoryImpl {
+    private fun repository(
+        content: String,
+        status: HttpStatusCode,
+        bus: RecordingDataChangeBus = RecordingDataChangeBus(),
+    ): AccountRepositoryImpl {
         val engine = MockEngine {
             respond(content, status, headersOf(HttpHeaders.ContentType, "application/json"))
         }
@@ -29,7 +34,7 @@ class AccountRepositoryTest {
             expectSuccess = true
             install(ContentNegotiation) { json(osirisJson) }
         }
-        return AccountRepositoryImpl(AccountApi(client, ApiConfig("http://test/")))
+        return AccountRepositoryImpl(AccountApi(client, ApiConfig("http://test/")), bus)
     }
 
     @Test

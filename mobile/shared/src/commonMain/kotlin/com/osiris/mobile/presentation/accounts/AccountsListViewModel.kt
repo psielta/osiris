@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.accounts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.Account
 import com.osiris.mobile.domain.repository.AccountRepository
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +27,10 @@ sealed interface AccountsListEvent {
     data class ShowMessage(val message: String) : AccountsListEvent
 }
 
-class AccountsListViewModel(private val accountRepository: AccountRepository) : ViewModel() {
+class AccountsListViewModel(
+    private val accountRepository: AccountRepository,
+    private val dataChangeBus: DataChangeBus,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountsListUiState())
     val state: StateFlow<AccountsListUiState> = _state.asStateFlow()
@@ -34,6 +40,7 @@ class AccountsListViewModel(private val accountRepository: AccountRepository) : 
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Accounts) { load() }
     }
 
     fun load() {
@@ -58,7 +65,7 @@ class AccountsListViewModel(private val accountRepository: AccountRepository) : 
     fun archive(id: String) {
         viewModelScope.launch {
             when (val result = accountRepository.archive(id)) {
-                is OsirisResult.Success -> load()
+                is OsirisResult.Success -> Unit
                 is OsirisResult.Failure -> _events.send(AccountsListEvent.ShowMessage(result.error.message))
             }
         }

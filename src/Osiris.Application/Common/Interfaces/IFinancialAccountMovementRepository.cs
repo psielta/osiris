@@ -9,6 +9,17 @@ public interface IFinancialAccountMovementRepository
         FinancialAccount account,
         CancellationToken cancellationToken);
 
+    Task AddRangeAsync(
+        IReadOnlyCollection<FinancialAccountMovement> movements,
+        FinancialAccount account,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<string>> ListExistingExternalIdsAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        IReadOnlyCollection<string> externalIds,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyCollection<FinancialAccountMovement>> ListByAccountAsync(
         Guid tenantId,
         Guid financialAccountId,

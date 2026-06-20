@@ -28,6 +28,7 @@ import com.osiris.mobile.android.feature.accounts.AccountFormScreen
 import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
 import com.osiris.mobile.android.feature.accounts.AccountsListScreen
 import com.osiris.mobile.android.feature.accounts.MovementFormScreen
+import com.osiris.mobile.android.feature.accounts.OfxImportScreen
 import com.osiris.mobile.android.feature.bills.BillDetailsScreen
 import com.osiris.mobile.android.feature.bills.BillFormScreen
 import com.osiris.mobile.android.feature.bills.BillsListScreen
@@ -221,6 +222,7 @@ fun OsirisNavHost() {
             AccountStatementScreen(
                 accountId = accountId,
                 onAddMovement = { navController.navigate(Routes.movementForm(accountId)) },
+                onImport = { navController.navigate(Routes.ofxImport(accountId)) },
                 onNavigateBack = { navController.popBackStack() },
             )
         }
@@ -229,6 +231,15 @@ fun OsirisNavHost() {
             arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
         ) { backStackEntry ->
             MovementFormScreen(
+                accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.OfxImportPattern,
+            arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            OfxImportScreen(
                 accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
                 onDone = { navController.popBackStack() },
             )

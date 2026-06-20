@@ -3,6 +3,9 @@ package com.osiris.mobile.presentation.categories
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
+import com.osiris.mobile.data.sync.observeDataChanges
 import com.osiris.mobile.domain.model.Category
 import com.osiris.mobile.domain.repository.CategoryRepository
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +27,10 @@ sealed interface CategoriesListEvent {
     data class ShowMessage(val message: String) : CategoriesListEvent
 }
 
-class CategoriesListViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
+class CategoriesListViewModel(
+    private val categoryRepository: CategoryRepository,
+    private val dataChangeBus: DataChangeBus,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(CategoriesListUiState())
     val state: StateFlow<CategoriesListUiState> = _state.asStateFlow()
@@ -34,6 +40,7 @@ class CategoriesListViewModel(private val categoryRepository: CategoryRepository
 
     init {
         load()
+        observeDataChanges(dataChangeBus, DataScope.Categories) { load() }
     }
 
     fun load() {
@@ -62,7 +69,7 @@ class CategoriesListViewModel(private val categoryRepository: CategoryRepository
     private fun mutate(action: suspend () -> OsirisResult<Unit>) {
         viewModelScope.launch {
             when (val result = action()) {
-                is OsirisResult.Success -> load()
+                is OsirisResult.Success -> Unit
                 is OsirisResult.Failure -> _events.send(CategoriesListEvent.ShowMessage(result.error.message))
             }
         }

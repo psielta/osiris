@@ -21,6 +21,8 @@ import com.osiris.mobile.data.dto.StatementPaymentDto
 import com.osiris.mobile.data.dto.UpdateCardRequest
 import com.osiris.mobile.data.network.osirisCatching
 import com.osiris.mobile.data.remote.CardApi
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DataScope
 import com.osiris.mobile.domain.model.CreditCard
 import com.osiris.mobile.domain.model.CreditCardDetails
 import com.osiris.mobile.domain.model.CreditCardOverview
@@ -39,7 +41,10 @@ import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.model.StatementStatus
 import com.osiris.mobile.domain.repository.CardRepository
 
-class CardRepositoryImpl(private val api: CardApi) : CardRepository {
+class CardRepositoryImpl(
+    private val api: CardApi,
+    private val bus: DataChangeBus,
+) : CardRepository {
 
     override suspend fun listCards(): OsirisResult<List<CreditCard>> = osirisCatching {
         api.listCards().map { it.toDomain() }
@@ -57,6 +62,7 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         paymentAccountId: String?,
     ): OsirisResult<Unit> = osirisCatching {
         api.createCard(CreateCardRequest(name, limit, closingDay, dueDay, paymentAccountId))
+        bus.notify(DataScope.Cards, DataScope.Dashboard, DataScope.Reports)
         Unit
     }
 
@@ -69,10 +75,12 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         paymentAccountId: String?,
     ): OsirisResult<Unit> = osirisCatching {
         api.updateCard(id, UpdateCardRequest(name, limit, closingDay, dueDay, paymentAccountId))
+        bus.notify(DataScope.Cards, DataScope.Dashboard, DataScope.Reports)
     }
 
     override suspend fun archiveCard(id: String): OsirisResult<Unit> = osirisCatching {
         api.archiveCard(id)
+        bus.notify(DataScope.Cards, DataScope.Dashboard, DataScope.Reports)
     }
 
     override suspend fun overview(cardId: String): OsirisResult<CreditCardOverview> = osirisCatching {
@@ -117,11 +125,13 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
             cardId,
             CreatePurchaseRequest(categoryId, description, totalAmount, purchaseDate, installments, notes),
         )
+        bus.notify(DataScope.Cards, DataScope.Dashboard, DataScope.Reports)
         Unit
     }
 
     override suspend fun deletePurchase(cardId: String, purchaseId: String): OsirisResult<Unit> = osirisCatching {
         api.deletePurchase(cardId, purchaseId)
+        bus.notify(DataScope.Cards, DataScope.Dashboard, DataScope.Reports)
     }
 
     override suspend fun listStatements(cardId: String): OsirisResult<List<CreditCardStatement>> = osirisCatching {
@@ -153,6 +163,7 @@ class CardRepositoryImpl(private val api: CardApi) : CardRepository {
         notes: String?,
     ): OsirisResult<Unit> = osirisCatching {
         api.payStatement(cardId, statementId, RegisterStatementPaymentRequest(amount, paidAt, financialAccountId, notes))
+        bus.notify(DataScope.Cards, DataScope.Accounts, DataScope.Dashboard, DataScope.Reports)
         Unit
     }
 

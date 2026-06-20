@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
-import com.osiris.mobile.android.ui.components.RefreshOnResume
 import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.CreditCardPurchaseOverview
 import com.osiris.mobile.presentation.cards.AllPurchasesViewModel
@@ -48,8 +47,6 @@ fun AllPurchasesScreen(
     viewModel: AllPurchasesViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    RefreshOnResume { viewModel.load() }
 
     Scaffold(
         topBar = {

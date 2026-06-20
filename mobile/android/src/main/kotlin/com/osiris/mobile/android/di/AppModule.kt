@@ -8,6 +8,7 @@ import com.osiris.mobile.presentation.accounts.AccountFormViewModel
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import com.osiris.mobile.presentation.accounts.AccountsListViewModel
 import com.osiris.mobile.presentation.accounts.MovementFormViewModel
+import com.osiris.mobile.presentation.accounts.OfxImportViewModel
 import com.osiris.mobile.presentation.bills.BillDetailsViewModel
 import com.osiris.mobile.presentation.bills.BillFormViewModel
 import com.osiris.mobile.presentation.bills.BillsListViewModel
@@ -47,19 +48,20 @@ val appModule = module {
     viewModel { parameters -> CategoryFormViewModel(get(), parameters.getOrNull<String>()) }
     viewModelOf(::AccountsListViewModel)
     viewModel { parameters -> AccountFormViewModel(get(), parameters.getOrNull<String>()) }
-    viewModel { parameters -> AccountStatementViewModel(get(), parameters.get<String>()) }
+    viewModel { parameters -> AccountStatementViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> MovementFormViewModel(get(), get(), parameters.get<String>()) }
+    viewModel { parameters -> OfxImportViewModel(get(), get(), parameters.get<String>()) }
     viewModelOf(::CardsListViewModel)
     viewModel { parameters -> CardFormViewModel(get(), get(), parameters.getOrNull<String>()) }
-    viewModel { parameters -> CardDetailsViewModel(get(), parameters.get<String>()) }
+    viewModel { parameters -> CardDetailsViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> PurchaseFormViewModel(get(), get(), parameters.get<String>()) }
-    viewModel { parameters -> PurchaseDetailsViewModel(get(), parameters[0], parameters[1]) }
-    viewModel { parameters -> StatementDetailsViewModel(get(), parameters[0], parameters[1]) }
+    viewModel { parameters -> PurchaseDetailsViewModel(get(), get(), parameters[0], parameters[1]) }
+    viewModel { parameters -> StatementDetailsViewModel(get(), get(), parameters[0], parameters[1]) }
     viewModel { parameters -> PaymentFormViewModel(get(), get(), parameters[0], parameters[1]) }
     viewModelOf(::DashboardViewModel)
     viewModelOf(::BillsListViewModel)
     viewModel { parameters -> BillFormViewModel(get(), get(), get(), parameters.getOrNull<String>()) }
-    viewModel { parameters -> BillDetailsViewModel(get(), get(), parameters.get<String>()) }
+    viewModel { parameters -> BillDetailsViewModel(get(), get(), get(), parameters.get<String>()) }
     viewModelOf(::AllPurchasesViewModel)
     viewModelOf(::AllStatementsViewModel)
     viewModelOf(::ReportsViewModel)

@@ -17,6 +17,8 @@ import com.osiris.mobile.data.repository.CategoryRepositoryImpl
 import com.osiris.mobile.data.repository.DashboardRepositoryImpl
 import com.osiris.mobile.data.repository.ReportRepositoryImpl
 import com.osiris.mobile.data.session.SessionManager
+import com.osiris.mobile.data.sync.DataChangeBus
+import com.osiris.mobile.data.sync.DefaultDataChangeBus
 import com.osiris.mobile.domain.repository.AccountRepository
 import com.osiris.mobile.domain.repository.AuthRepository
 import com.osiris.mobile.domain.repository.BillRepository
@@ -36,16 +38,17 @@ val sharedModule = module {
     single<HttpClient>(named("plain")) { buildPlainClient() }
     single { SessionManager(get(), get(named("plain")), get()) }
     single<HttpClient>(named("auth")) { buildAuthClient(get()) }
+    single<DataChangeBus> { DefaultDataChangeBus() }
     single { AuthApi(get(named("plain")), get(named("auth")), get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single { CategoryApi(get(named("auth")), get()) }
-    single<CategoryRepository> { CategoryRepositoryImpl(get()) }
+    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single { AccountApi(get(named("auth")), get()) }
-    single<AccountRepository> { AccountRepositoryImpl(get()) }
+    single<AccountRepository> { AccountRepositoryImpl(get(), get()) }
     single { CardApi(get(named("auth")), get()) }
-    single<CardRepository> { CardRepositoryImpl(get()) }
+    single<CardRepository> { CardRepositoryImpl(get(), get()) }
     single { BillApi(get(named("auth")), get()) }
-    single<BillRepository> { BillRepositoryImpl(get()) }
+    single<BillRepository> { BillRepositoryImpl(get(), get()) }
     single { DashboardApi(get(named("auth")), get()) }
     single<DashboardRepository> { DashboardRepositoryImpl(get()) }
     single { ReportApi(get(named("auth")), get()) }

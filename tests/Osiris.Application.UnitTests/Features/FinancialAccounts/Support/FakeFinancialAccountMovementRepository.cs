@@ -18,6 +18,32 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
         return Task.CompletedTask;
     }
 
+    public Task AddRangeAsync(
+        IReadOnlyCollection<FinancialAccountMovement> movements,
+        FinancialAccount account,
+        CancellationToken cancellationToken)
+    {
+        _movements.AddRange(movements);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyCollection<string>> ListExistingExternalIdsAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        IReadOnlyCollection<string> externalIds,
+        CancellationToken cancellationToken)
+    {
+        var existing = _movements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && movement.ExternalId != null
+                && externalIds.Contains(movement.ExternalId))
+            .Select(movement => movement.ExternalId!)
+            .ToArray();
+
+        return Task.FromResult<IReadOnlyCollection<string>>(existing);
+    }
+
     public Task<IReadOnlyCollection<FinancialAccountMovement>> ListByAccountAsync(
         Guid tenantId,
         Guid financialAccountId,

@@ -514,6 +514,10 @@ namespace Osiris.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<Guid>("FinancialAccountId")
                         .HasColumnType("uuid");
 
@@ -544,6 +548,10 @@ namespace Osiris.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId");
 
                     b.HasIndex("TenantId", "OccurredOn");
+
+                    b.HasIndex("TenantId", "FinancialAccountId", "ExternalId")
+                        .IsUnique()
+                        .HasFilter("\"ExternalId\" IS NOT NULL");
 
                     b.ToTable("FinancialAccountMovements", (string)null);
                 });
