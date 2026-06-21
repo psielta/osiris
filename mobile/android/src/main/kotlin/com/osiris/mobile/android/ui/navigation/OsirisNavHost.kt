@@ -30,6 +30,7 @@ import com.osiris.mobile.android.feature.accounts.AccountsListScreen
 import com.osiris.mobile.android.feature.accounts.CsvImportScreen
 import com.osiris.mobile.android.feature.accounts.MovementFormScreen
 import com.osiris.mobile.android.feature.accounts.OfxImportScreen
+import com.osiris.mobile.android.feature.accounts.PdfImportScreen
 import com.osiris.mobile.android.feature.bills.BillDetailsScreen
 import com.osiris.mobile.android.feature.bills.BillFormScreen
 import com.osiris.mobile.android.feature.bills.BillsListScreen
@@ -225,6 +226,7 @@ fun OsirisNavHost() {
                 onAddMovement = { navController.navigate(Routes.movementForm(accountId)) },
                 onImport = { navController.navigate(Routes.ofxImport(accountId)) },
                 onImportCsv = { navController.navigate(Routes.csvImport(accountId)) },
+                onImportPdf = { navController.navigate(Routes.pdfImport(accountId)) },
                 onNavigateBack = { navController.popBackStack() },
             )
         }
@@ -251,6 +253,15 @@ fun OsirisNavHost() {
             arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
         ) { backStackEntry ->
             CsvImportScreen(
+                accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Routes.PdfImportPattern,
+            arguments = listOf(navArgument(Routes.AccountIdArg) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            PdfImportScreen(
                 accountId = backStackEntry.arguments?.getString(Routes.AccountIdArg).orEmpty(),
                 onDone = { navController.popBackStack() },
             )

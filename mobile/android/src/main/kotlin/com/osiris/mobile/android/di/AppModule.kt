@@ -10,6 +10,7 @@ import com.osiris.mobile.presentation.accounts.AccountsListViewModel
 import com.osiris.mobile.presentation.accounts.CsvImportViewModel
 import com.osiris.mobile.presentation.accounts.MovementFormViewModel
 import com.osiris.mobile.presentation.accounts.OfxImportViewModel
+import com.osiris.mobile.presentation.accounts.PdfImportViewModel
 import com.osiris.mobile.presentation.bills.BillDetailsViewModel
 import com.osiris.mobile.presentation.bills.BillFormViewModel
 import com.osiris.mobile.presentation.bills.BillsListViewModel
@@ -53,6 +54,7 @@ val appModule = module {
     viewModel { parameters -> MovementFormViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> OfxImportViewModel(get(), get(), parameters.get<String>()) }
     viewModel { parameters -> CsvImportViewModel(get(), get(), parameters.get<String>()) }
+    viewModel { parameters -> PdfImportViewModel(get(), get(), parameters.get<String>()) }
     viewModelOf(::CardsListViewModel)
     viewModel { parameters -> CardFormViewModel(get(), get(), parameters.getOrNull<String>()) }
     viewModel { parameters -> CardDetailsViewModel(get(), get(), parameters.get<String>()) }

@@ -101,6 +101,14 @@ class AccountRepositoryImpl(
         api.previewOfxImport(accountId, fileName, bytes).toDomain()
     }
 
+    override suspend fun previewPdfImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+    ): OsirisResult<OfxImportPreview> = osirisCatching {
+        api.previewPdfImport(accountId, fileName, bytes).toDomain()
+    }
+
     override suspend fun confirmOfxImport(
         accountId: String,
         selections: List<OfxImportSelection>,

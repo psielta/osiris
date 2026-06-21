@@ -46,6 +46,7 @@ services:
     environment:
       ASPNETCORE_URLS: http://0.0.0.0:13453
       ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      Gemini__ApiKey: ${GEMINI_API_KEY:-}
     depends_on:
       osiris-db:
         condition: service_healthy
@@ -66,6 +67,7 @@ services:
       ASPNETCORE_URLS: http://0.0.0.0:13455
       ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY}
+      Gemini__ApiKey: ${GEMINI_API_KEY:-}
     depends_on:
       osiris-db:
         condition: service_healthy

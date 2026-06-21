@@ -33,6 +33,8 @@ interface AccountRepository {
 
     suspend fun previewOfxImport(accountId: String, fileName: String, bytes: ByteArray): OsirisResult<OfxImportPreview>
 
+    suspend fun previewPdfImport(accountId: String, fileName: String, bytes: ByteArray): OsirisResult<OfxImportPreview>
+
     suspend fun confirmOfxImport(accountId: String, selections: List<OfxImportSelection>): OsirisResult<OfxImportResult>
 
     suspend fun analyzeCsvImport(

@@ -85,7 +85,7 @@ public sealed class BillsFlowTests : IAsyncLifetime
         {
             description = "Aluguel",
             amount = 120.00m,
-            dueDate = "2026-06-20",
+            dueDate = "2026-06-30",
             categoryId,
             paymentAccountId = accountId,
             notes = "Contrato"

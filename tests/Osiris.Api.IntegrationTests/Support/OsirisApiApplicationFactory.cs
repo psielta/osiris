@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Osiris.Application.Common.Pdf;
 using Osiris.Infrastructure.Persistence;
 using Testcontainers.PostgreSql;
 
@@ -71,6 +74,13 @@ public sealed class OsirisApiApplicationFactory : WebApplicationFactory<Program>
                 ["ConnectionStrings:DefaultConnection"] = _connectionString
                     ?? throw new InvalidOperationException("PostgreSQL test container has not started.")
             });
+        });
+
+        // Replace the real Gemini AI extractor with a deterministic fake so tests never call the API.
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IPdfStatementExtractor>();
+            services.AddSingleton<IPdfStatementExtractor, FakePdfStatementExtractor>();
         });
     }
 

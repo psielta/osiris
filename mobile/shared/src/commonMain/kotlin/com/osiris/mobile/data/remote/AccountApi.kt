@@ -93,6 +93,24 @@ class AccountApi(
             )
         }.body()
 
+    suspend fun previewPdfImport(accountId: String, fileName: String, bytes: ByteArray): OfxImportPreviewDto =
+        authClient.post("$base/$accountId/movements/import/pdf/preview") {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "application/pdf")
+                                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                            },
+                        )
+                    },
+                ),
+            )
+        }.body()
+
     suspend fun confirmOfxImport(accountId: String, request: ImportOfxStatementRequest): OfxImportResultDto =
         authClient.post("$base/$accountId/movements/import") {
             contentType(ContentType.Application.Json)

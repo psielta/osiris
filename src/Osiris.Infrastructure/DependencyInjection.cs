@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Osiris.Application.Common.Interfaces;
+using Osiris.Application.Common.Pdf;
 using Osiris.Infrastructure.Common;
 using Osiris.Infrastructure.Email;
+using Osiris.Infrastructure.Gemini;
 using Osiris.Infrastructure.Identity;
 using Osiris.Infrastructure.Persistence;
 using Osiris.Infrastructure.Reporting;
@@ -73,6 +76,15 @@ public static class DependencyInjection
         services.AddSingleton<IFinancialAccountStatementPdfRenderer, FinancialAccountStatementPdfRenderer>();
         services.AddSingleton<ICreditCardStatementPdfRenderer, CreditCardStatementPdfRenderer>();
         services.AddSingleton<ICashFlowReportPdfRenderer, CashFlowReportPdfRenderer>();
+
+        // AI statement extraction (Gemini) — the first outbound HTTP client in the backend.
+        services.Configure<GeminiOptions>(configuration.GetSection(GeminiOptions.SectionName));
+        services.AddHttpClient<IPdfStatementExtractor, GeminiPdfStatementExtractor>((serviceProvider, client) =>
+        {
+            var geminiOptions = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
+            client.BaseAddress = new Uri(geminiOptions.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(geminiOptions.TimeoutSeconds);
+        });
 
         return services;
     }

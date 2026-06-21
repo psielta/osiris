@@ -70,6 +70,7 @@ fun AccountStatementScreen(
     onAddMovement: () -> Unit,
     onImport: () -> Unit,
     onImportCsv: () -> Unit,
+    onImportPdf: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: AccountStatementViewModel = koinViewModel { parametersOf(accountId) },
 ) {
@@ -114,6 +115,13 @@ fun AccountStatementScreen(
                                 onClick = {
                                     importMenuOpen = false
                                     onImportCsv()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.statement_import_pdf)) },
+                                onClick = {
+                                    importMenuOpen = false
+                                    onImportPdf()
                                 },
                             )
                         }

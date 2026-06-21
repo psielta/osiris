@@ -93,6 +93,12 @@ private class FakeAccountRepository(
         bytes: ByteArray,
     ): OsirisResult<OfxImportPreview> = unused()
 
+    override suspend fun previewPdfImport(
+        accountId: String,
+        fileName: String,
+        bytes: ByteArray,
+    ): OsirisResult<OfxImportPreview> = unused()
+
     override suspend fun confirmOfxImport(
         accountId: String,
         selections: List<OfxImportSelection>,

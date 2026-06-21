@@ -107,6 +107,7 @@
     <string name="statement_empty">Nenhum lançamento ainda.</string>
     <string name="statement_import_ofx">Importar</string>
     <string name="statement_import_csv">Importar CSV</string>
+    <string name="statement_import_pdf">Importar PDF (IA)</string>
 
     <!-- OFX import -->
     <string name="import_ofx_title">Importar extrato OFX</string>
@@ -117,6 +118,12 @@
     <string name="import_ofx_category_all">Categoria para todos</string>
     <string name="import_ofx_confirm">Importar %1$d selecionado(s)</string>
     <string name="import_ofx_already_imported">Já importado</string>
+
+    <!-- PDF import (IA) -->
+    <string name="import_pdf_title">Importar extrato PDF (IA)</string>
+    <string name="import_pdf_help">Selecione o PDF do extrato do seu banco. A IA vai extrair os lançamentos para você revisar antes de confirmar. Pode levar alguns segundos.</string>
+    <string name="import_pdf_select_file">Selecionar PDF</string>
+    <string name="import_pdf_processing">Processando com IA…</string>
 
     <!-- CSV import -->
     <string name="import_csv_title">Importar extrato CSV</string>

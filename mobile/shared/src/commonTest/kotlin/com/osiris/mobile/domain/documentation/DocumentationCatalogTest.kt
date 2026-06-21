@@ -17,6 +17,8 @@ class DocumentationCatalogTest {
                 "categories",
                 "accounts",
                 "ofx-import",
+                "csv-import",
+                "pdf-import",
                 "cards",
                 "purchases",
                 "statements",

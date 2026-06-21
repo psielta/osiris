@@ -11,6 +11,7 @@ using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManua
 using Osiris.Application.Features.FinancialAccountMovements.Commands.ImportOfxStatement;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewCsvImport;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewOfxImport;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewPdfImport;
 using Osiris.Application.Features.FinancialAccountMovements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
@@ -33,6 +34,8 @@ public sealed class FinancialAccountsController : AppController
     private const string CsvMappingViewName = "ImportCsvMapping";
 
     private const long MaxOfxUploadBytes = 5 * 1024 * 1024;
+
+    private const long MaxPdfUploadBytes = 15 * 1024 * 1024;
 
     private readonly IMediator _mediator;
 
@@ -367,6 +370,66 @@ public sealed class FinancialAccountsController : AppController
             AddValidationErrors(exception);
             await PopulateSampleAsync(model, cancellationToken);
             return View(CsvMappingViewName, model);
+        }
+    }
+
+    [HttpGet("{id:guid}/import/pdf")]
+    public async Task<IActionResult> ImportPdf(Guid id, CancellationToken cancellationToken)
+    {
+        var account = await _mediator.Send(new GetFinancialAccountForEditQuery(id), cancellationToken);
+        if (account is null)
+        {
+            return NotFound();
+        }
+
+        return View(new OfxImportUploadViewModel { AccountId = account.Id, AccountName = account.Name });
+    }
+
+    [HttpPost("{id:guid}/import/pdf/preview")]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(MaxPdfUploadBytes)]
+    public async Task<IActionResult> ImportPdfPreview(Guid id, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var account = await _mediator.Send(new GetFinancialAccountForEditQuery(id), cancellationToken);
+        if (account is null)
+        {
+            return NotFound();
+        }
+
+        var uploadModel = new OfxImportUploadViewModel { AccountId = account.Id, AccountName = account.Name };
+
+        if (file is null || file.Length == 0)
+        {
+            ModelState.AddModelError(string.Empty, "Selecione um arquivo PDF para importar.");
+            return View(nameof(ImportPdf), uploadModel);
+        }
+
+        byte[] content;
+        await using (var stream = new MemoryStream())
+        {
+            await file.CopyToAsync(stream, cancellationToken);
+            content = stream.ToArray();
+        }
+
+        try
+        {
+            var result = await _mediator.Send(
+                new PreviewPdfImportCommand(account.Id, content, file.FileName),
+                cancellationToken);
+
+            if (result.IsFailure)
+            {
+                AddResultErrors(result);
+                return View(nameof(ImportPdf), uploadModel);
+            }
+
+            var categories = await LoadCategoryItemsAsync(cancellationToken);
+            return View(nameof(ImportPreview), BuildPreviewViewModel(result.Value!, categories));
+        }
+        catch (ValidationException exception)
+        {
+            AddValidationErrors(exception);
+            return View(nameof(ImportPdf), uploadModel);
         }
     }
 

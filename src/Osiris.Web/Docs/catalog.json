@@ -54,6 +54,15 @@
     "order": 26
   },
   {
+    "slug": "pdf-import",
+    "title": "Importar extrato em PDF (IA)",
+    "description": "Importe um PDF do extrato e deixe a inteligência artificial extrair os lançamentos para você revisar e confirmar.",
+    "group": "Financeiro",
+    "icon": "ph ph-robot",
+    "markdownFile": "pdf-import.md",
+    "order": 27
+  },
+  {
     "slug": "cards",
     "title": "Guia simples de cartões",
     "description": "Entenda o que é um cartão de crédito no Osiris, limite, fechamento e vencimento, e como ele difere de uma conta.",

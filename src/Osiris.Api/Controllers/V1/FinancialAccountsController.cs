@@ -9,6 +9,7 @@ using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManua
 using Osiris.Application.Features.FinancialAccountMovements.Commands.ImportOfxStatement;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewCsvImport;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewOfxImport;
+using Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewPdfImport;
 using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
@@ -27,6 +28,8 @@ public sealed class FinancialAccountsController : ApiControllerBase
 
     // Base64 inflates the payload ~4/3, so the JSON CSV preview body needs more headroom than the raw 5 MB file.
     private const long MaxCsvJsonBytes = 8 * 1024 * 1024;
+
+    private const long MaxPdfUploadBytes = 15 * 1024 * 1024;
 
     private readonly IMediator _mediator;
 
@@ -168,6 +171,19 @@ public sealed class FinancialAccountsController : ApiControllerBase
 
         var result = await _mediator.Send(
             new PreviewCsvImportCommand(id, content, request.FileName ?? string.Empty, request.Mapping ?? new CsvImportMapping()),
+            cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("{id:guid}/movements/import/pdf/preview")]
+    [RequestSizeLimit(MaxPdfUploadBytes)]
+    public async Task<IActionResult> PreviewPdfImport(Guid id, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var content = await ReadAllBytesAsync(file, cancellationToken);
+
+        var result = await _mediator.Send(
+            new PreviewPdfImportCommand(id, content, file?.FileName ?? string.Empty),
             cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : Problem(result);
