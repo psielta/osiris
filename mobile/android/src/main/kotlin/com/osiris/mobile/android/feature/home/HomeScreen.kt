@@ -13,9 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,8 +45,6 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     onSignedOut: () -> Unit,
     onNavigateCategories: () -> Unit,
-    onNavigateStatements: () -> Unit,
-    onNavigatePurchases: () -> Unit,
     onNavigateReports: () -> Unit,
     onNavigateDocs: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
@@ -115,20 +111,6 @@ fun HomeScreen(
                 subtitle = stringResource(R.string.more_categories_subtitle),
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onNavigateCategories,
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            MoreActionRow(
-                title = stringResource(R.string.statements_title),
-                subtitle = stringResource(R.string.more_statements_subtitle),
-                icon = Icons.Filled.Check,
-                onClick = onNavigateStatements,
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            MoreActionRow(
-                title = stringResource(R.string.purchases_title),
-                subtitle = stringResource(R.string.more_purchases_subtitle),
-                icon = Icons.Filled.ShoppingCart,
-                onClick = onNavigatePurchases,
             )
 
             Spacer(Modifier.height(28.dp))

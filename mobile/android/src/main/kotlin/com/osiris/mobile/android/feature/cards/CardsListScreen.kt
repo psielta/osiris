@@ -14,24 +14,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,18 +44,19 @@ import com.osiris.mobile.presentation.cards.CardsListEvent
 import com.osiris.mobile.presentation.cards.CardsListViewModel
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Body of the "Cartões" sub-tab inside [CardsHubScreen]. Owns no scaffold/top bar; the hub provides the
+ * chrome (top bar, tabs, "Novo cartão" FAB and the snackbar host passed in).
+ */
 @Composable
-fun CardsListScreen(
-    onCreate: () -> Unit,
+fun CardsListContent(
+    modifier: Modifier,
+    snackbarHostState: SnackbarHostState,
     onEdit: (String) -> Unit,
     onOpenDetails: (String) -> Unit,
-    onNavigateBack: () -> Unit,
-    showBackButton: Boolean = true,
     viewModel: CardsListViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
     var pendingArchive by remember { mutableStateOf<CreditCard?>(null) }
 
     LaunchedEffect(Unit) {
@@ -73,75 +67,52 @@ fun CardsListScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.cards_title)) },
-                navigationIcon = {
-                    if (showBackButton) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                        }
-                    }
-                },
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onCreate,
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.card_new)) },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
-        OsirisPullToRefresh(
-            isRefreshing = state.isLoading,
-            onRefresh = viewModel::load,
-            modifier = Modifier.fillMaxSize().padding(padding),
-        ) {
-            when {
-                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
+    OsirisPullToRefresh(
+        isRefreshing = state.isLoading,
+        onRefresh = viewModel::load,
+        modifier = modifier,
+    ) {
+        when {
+            state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
 
-                state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(state.error!!, color = MaterialTheme.colorScheme.error)
-                        Spacer(Modifier.height(12.dp))
-                        TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+            state.error != null -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(12.dp))
+                    TextButton(onClick = viewModel::load) { Text(stringResource(R.string.retry)) }
+                }
+            }
+
+            state.active.isEmpty() && state.archived.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                Text(stringResource(R.string.cards_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+            ) {
+                if (state.active.isNotEmpty()) {
+                    item { SectionHeader(stringResource(R.string.card_active_section)) }
+                    items(state.active, key = { it.id }) { card ->
+                        CardRow(
+                            card = card,
+                            onClick = { onOpenDetails(card.id) },
+                            onEdit = { onEdit(card.id) },
+                            onArchive = { pendingArchive = card },
+                        )
                     }
                 }
-
-                state.active.isEmpty() && state.archived.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    Text(stringResource(R.string.cards_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                ) {
-                    if (state.active.isNotEmpty()) {
-                        item { SectionHeader(stringResource(R.string.card_active_section)) }
-                        items(state.active, key = { it.id }) { card ->
-                            CardRow(
-                                card = card,
-                                onClick = { onOpenDetails(card.id) },
-                                onEdit = { onEdit(card.id) },
-                                onArchive = { pendingArchive = card },
-                            )
-                        }
-                    }
-                    if (state.archived.isNotEmpty()) {
-                        item { SectionHeader(stringResource(R.string.card_archived_section)) }
-                        items(state.archived, key = { it.id }) { card ->
-                            CardRow(
-                                card = card,
-                                onClick = { onOpenDetails(card.id) },
-                                onEdit = null,
-                                onArchive = null,
-                            )
-                        }
+                if (state.archived.isNotEmpty()) {
+                    item { SectionHeader(stringResource(R.string.card_archived_section)) }
+                    items(state.archived, key = { it.id }) { card ->
+                        CardRow(
+                            card = card,
+                            onClick = { onOpenDetails(card.id) },
+                            onEdit = null,
+                            onArchive = null,
+                        )
                     }
                 }
             }

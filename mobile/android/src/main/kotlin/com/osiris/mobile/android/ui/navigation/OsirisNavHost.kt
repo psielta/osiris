@@ -34,11 +34,9 @@ import com.osiris.mobile.android.feature.accounts.PdfImportScreen
 import com.osiris.mobile.android.feature.bills.BillDetailsScreen
 import com.osiris.mobile.android.feature.bills.BillFormScreen
 import com.osiris.mobile.android.feature.bills.BillsListScreen
-import com.osiris.mobile.android.feature.cards.AllPurchasesScreen
-import com.osiris.mobile.android.feature.cards.AllStatementsScreen
 import com.osiris.mobile.android.feature.cards.CardDetailsScreen
 import com.osiris.mobile.android.feature.cards.CardFormScreen
-import com.osiris.mobile.android.feature.cards.CardsListScreen
+import com.osiris.mobile.android.feature.cards.CardsHubScreen
 import com.osiris.mobile.android.feature.cards.PaymentFormScreen
 import com.osiris.mobile.android.feature.cards.PurchaseDetailsScreen
 import com.osiris.mobile.android.feature.cards.PurchaseFormScreen
@@ -143,8 +141,6 @@ fun OsirisNavHost() {
                         }
                     },
                     onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
-                    onNavigateStatements = { navController.navigate(Routes.AllStatements) },
-                    onNavigatePurchases = { navController.navigate(Routes.AllPurchases) },
                     onNavigateReports = { navController.navigate(Routes.Reports) },
                     onNavigateDocs = { navController.navigate(Routes.DocsList) },
                 )
@@ -267,24 +263,13 @@ fun OsirisNavHost() {
             )
         }
         composable(Routes.CardsList) {
-            CardsListScreen(
+            CardsHubScreen(
                 onCreate = { navController.navigate(Routes.cardForm()) },
                 onEdit = { id -> navController.navigate(Routes.cardForm(id)) },
                 onOpenDetails = { id -> navController.navigate(Routes.cardDetails(id)) },
-                onNavigateBack = { navController.popBackStack() },
-                showBackButton = false,
-            )
-        }
-        composable(Routes.AllPurchases) {
-            AllPurchasesScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onOpenPurchase = { cardId, purchaseId -> navController.navigate(Routes.purchaseDetails(cardId, purchaseId)) },
-            )
-        }
-        composable(Routes.AllStatements) {
-            AllStatementsScreen(
-                onNavigateBack = { navController.popBackStack() },
                 onOpenStatement = { cardId, statementId -> navController.navigate(Routes.statementDetails(cardId, statementId)) },
+                onOpenPurchase = { cardId, purchaseId -> navController.navigate(Routes.purchaseDetails(cardId, purchaseId)) },
+                onNavigateDocs = { navController.navigate(Routes.DocsList) },
             )
         }
         composable(Routes.BillsList) {
