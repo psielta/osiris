@@ -81,7 +81,7 @@ public sealed class CreditCardPurchasesController : AppController
                     cardId,
                     model.CategoryId,
                     model.Description,
-                    model.TotalAmount,
+                    EffectiveTotal(model.AmountMode, model.TotalAmount, model.Installments),
                     model.PurchaseDate,
                     model.Installments,
                     model.Notes),
@@ -110,17 +110,25 @@ public sealed class CreditCardPurchasesController : AppController
     [HttpGet("preview")]
     public async Task<IActionResult> Preview(
         Guid cardId,
+        CreditCardAmountInputMode amountMode,
         decimal? totalAmount,
         DateOnly? purchaseDate,
         int? installments,
         CancellationToken cancellationToken)
     {
         var preview = await _mediator.Send(
-            new GetPurchasePreviewQuery(cardId, totalAmount, purchaseDate, installments),
+            new GetPurchasePreviewQuery(cardId, EffectiveTotal(amountMode, totalAmount, installments), purchaseDate, installments),
             cancellationToken);
 
         return PartialView("_PurchasePreview", preview);
     }
+
+    // When the user types a per-installment value, the purchase total is value x installments. decimal
+    // arithmetic is exact here, so the result round-trips cleanly through the installment split.
+    private static decimal? EffectiveTotal(CreditCardAmountInputMode amountMode, decimal? amount, int? installments)
+        => amountMode == CreditCardAmountInputMode.PerInstallment && amount.HasValue && installments.HasValue
+            ? amount.Value * installments.Value
+            : amount;
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Details(Guid cardId, Guid id, CancellationToken cancellationToken)

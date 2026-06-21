@@ -32,7 +32,7 @@ Esses dados definem em qual fatura a compra vai cair.
 | Campo | Como preencher |
 | --- | --- |
 | Descrição | Nome simples para reconhecer a compra |
-| Valor total | Valor completo da compra, mesmo quando parcelada |
+| Valor | Valor completo da compra ou, escolhendo "Valor da parcela", quanto vem em cada parcela |
 | Data da compra | Data em que a compra aconteceu |
 | Categoria | Motivo do gasto |
 | Parcelas | Quantidade de parcelas |
@@ -42,7 +42,12 @@ Se a compra foi à vista no cartão, use 1 parcela.
 
 ## Compra parcelada
 
-Em compras parceladas, informe o valor total e o número de parcelas. O Osiris divide o valor entre as parcelas e coloca cada uma na fatura correspondente.
+Em compras parceladas, informe o número de parcelas e o valor. Use o seletor **"Tipo de valor informado"** para escolher como o valor é interpretado:
+
+- **Valor total** — o valor completo da compra; o Osiris divide entre as parcelas.
+- **Valor da parcela** — quanto vem em cada parcela; o Osiris multiplica pelo número de parcelas para chegar ao total. Útil para compras retroativas em que a fatura só mostra o valor da parcela, sem precisar multiplicar na calculadora.
+
+Em ambos os casos, o Osiris coloca cada parcela na fatura correspondente.
 
 Exemplo:
 

@@ -136,6 +136,47 @@ public sealed class CreditCardPurchasesFlowTests : IAsyncLifetime
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task Create_PerInstallmentAmount_ShouldMultiplyToTotal()
+    {
+        var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);
+        var cardId = await CreateCardAsync(client, "Nubank", closingDay: 25, dueDay: 5);
+        var categoryId = await CreateExpenseCategoryAsync(client, "Eletrônicos");
+
+        var path = $"/cards/{cardId}/purchases/create";
+        var token = await IntegrationTestHelpers.GetAntiForgeryTokenAsync(client, path);
+
+        // The user types the per-installment value (50.00) and 3 parcelas; the form must compute total 150.00.
+        var response = await client.PostAsync(
+            path,
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["Description"] = "Geladeira",
+                ["AmountMode"] = "PerInstallment",
+                ["TotalAmount"] = "50.00",
+                ["PurchaseDate"] = "2026-06-10",
+                ["Installments"] = "3",
+                ["CategoryId"] = categoryId.ToString(),
+                ["__RequestVerificationToken"] = token
+            }));
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var purchase = await dbContext.CreditCardPurchases.SingleAsync();
+        Assert.Equal(150.00m, purchase.TotalAmount);
+        Assert.Equal(3, purchase.Installments);
+
+        var amounts = await dbContext.CreditCardInstallments
+            .OrderBy(installment => installment.InstallmentNumber)
+            .Select(installment => installment.Amount)
+            .ToArrayAsync();
+        Assert.Equal(new[] { 50.00m, 50.00m, 50.00m }, amounts);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public async Task Create_TwoPurchasesInSameCycle_ShouldReuseStatement()
     {
         var client = await IntegrationTestHelpers.RegisterAndAuthenticateAsync(_factory);

@@ -26,6 +26,21 @@
             <span asp-validation-for="Description" class="mt-1 block text-sm text-red-600 dark:text-red-400"></span>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Tipo de valor informado</label>
+            <div class="mt-1 inline-flex rounded-md border border-slate-300 dark:border-slate-700 p-0.5">
+                <label class="cursor-pointer">
+                    <input asp-for="AmountMode" type="radio" id="AmountModeTotal" value="Total" class="peer sr-only" />
+                    <span class="block rounded px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 peer-checked:bg-slate-950 peer-checked:text-white dark:peer-checked:bg-amber-500 dark:peer-checked:text-slate-950">Valor total</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input asp-for="AmountMode" type="radio" id="AmountModePerInstallment" value="PerInstallment" class="peer sr-only" />
+                    <span class="block rounded px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 peer-checked:bg-slate-950 peer-checked:text-white dark:peer-checked:bg-amber-500 dark:peer-checked:text-slate-950">Valor da parcela</span>
+                </label>
+            </div>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Escolha "Valor da parcela" para informar quanto vem em cada parcela — o total é calculado automaticamente.</p>
+        </div>
+
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label asp-for="TotalAmount" class="block text-sm font-medium text-slate-700 dark:text-slate-300"></label>
@@ -68,8 +83,8 @@
             <div id="purchase-preview"
                  class="mt-3"
                  hx-get="@Url.Action("Preview", new { cardId = Model.CardId })"
-                 hx-include="#TotalAmount, #PurchaseDate, #Installments"
-                 hx-trigger="change from:#TotalAmount, change from:#PurchaseDate, change from:#Installments, keyup delay:500ms from:#TotalAmount"
+                 hx-include="#TotalAmount, #PurchaseDate, #Installments, [name='AmountMode']"
+                 hx-trigger="change from:#TotalAmount, change from:#PurchaseDate, change from:#Installments, change from:input[name='AmountMode'], keyup delay:500ms from:#TotalAmount"
                  hx-target="this">
                 <p class="text-sm text-slate-500 dark:text-slate-400">Preencha valor, data e parcelas para ver a prévia da compra.</p>
             </div>
