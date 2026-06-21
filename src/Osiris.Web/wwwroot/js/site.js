@@ -45,3 +45,45 @@ document.addEventListener('alpine:init', () => {
         },
     });
 });
+
+// Submit-loading: a submit button with a `data-busy` attribute shows a spinner + busy label and
+// disables itself (and sibling submit buttons) once its form is submitted, preventing double-submit
+// on slow actions (e.g. the AI PDF import). State is reset on back/forward (bfcache) navigation.
+(function () {
+    function showBusy(button) {
+        if (button.dataset.originalHtml === undefined) {
+            button.dataset.originalHtml = button.innerHTML;
+        }
+        button.innerHTML = '<span class="js-busy-spinner" aria-hidden="true"></span>' + button.getAttribute('data-busy');
+        button.disabled = true;
+        const form = button.form;
+        if (form) {
+            form.querySelectorAll('button[type="submit"]').forEach((other) => {
+                if (other !== button) {
+                    other.disabled = true;
+                }
+            });
+        }
+    }
+
+    function restore(button) {
+        button.disabled = false;
+        if (button.dataset.originalHtml !== undefined) {
+            button.innerHTML = button.dataset.originalHtml;
+            delete button.dataset.originalHtml;
+        }
+    }
+
+    document.addEventListener('submit', (event) => {
+        const button = event.submitter;
+        if (!button || !button.hasAttribute('data-busy')) {
+            return;
+        }
+        // Defer so the native form submission starts before the button is disabled.
+        setTimeout(() => showBusy(button), 0);
+    });
+
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('button[data-busy]').forEach(restore);
+    });
+})();

@@ -77,3 +77,34 @@
   box-shadow: 0 0 0 3px rgb(239 68 68 / 0.2); /* red-500 / 20% ring */
   outline: none;
 }
+
+/*
+ * The asp-validation-summary tag helper always renders its styled container, even with no errors
+ * (class `validation-summary-valid`), which otherwise shows as an empty red box. Hide it until a
+ * field fails, at which point MVC swaps the class to `validation-summary-errors` and it appears.
+ */
+.validation-summary-valid {
+  display: none;
+}
+
+/*
+ * Inline spinner for a submit button's busy state (driven by site.js / `data-busy`). Uses
+ * currentColor so it matches the button text on both light and dark surfaces.
+ */
+.js-busy-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: js-busy-spin 0.6s linear infinite;
+  vertical-align: -0.125rem;
+}
+
+@keyframes js-busy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
