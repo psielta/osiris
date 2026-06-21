@@ -66,6 +66,34 @@ public sealed class FinancialAccountMovement : BaseEntity
     /// </summary>
     public string? ExternalId { get; private set; }
 
+    /// <summary>
+    /// When set, this previously un-imported movement (typically a manual entry) was reconciled with
+    /// an imported statement line: its <see cref="ExternalId"/> was stamped so future re-imports skip it.
+    /// Null for movements that were never reconciled.
+    /// </summary>
+    public DateTime? ReconciledAtUtc { get; private set; }
+
+    /// <summary>
+    /// Links a previously un-imported (typically manual) movement to an imported statement line by
+    /// stamping its <see cref="ExternalId"/>, so future re-imports deduplicate it. Does not change the
+    /// account balance: the movement already moved the balance when it was created.
+    /// </summary>
+    public void LinkImportedExternalId(string externalId, DateTime utcNow)
+    {
+        if (string.IsNullOrWhiteSpace(externalId))
+        {
+            throw new ArgumentException("External id is required.", nameof(externalId));
+        }
+
+        if (ExternalId is not null)
+        {
+            throw new InvalidOperationException("Movement is already linked to an imported transaction.");
+        }
+
+        ExternalId = externalId.Trim();
+        ReconciledAtUtc = utcNow;
+    }
+
     private static string NormalizeRequiredDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))

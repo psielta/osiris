@@ -22,6 +22,8 @@ public sealed class OfxImportPreviewViewModel
 
     public int DuplicateCount { get; set; }
 
+    public int SuggestedCount { get; set; }
+
     public List<OfxImportLineViewModel> Lines { get; set; } = new();
 
     public IReadOnlyCollection<SelectListItem> Categories { get; set; } = Array.Empty<SelectListItem>();

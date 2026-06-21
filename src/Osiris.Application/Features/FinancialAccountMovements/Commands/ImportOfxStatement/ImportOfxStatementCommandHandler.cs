@@ -60,9 +60,23 @@ public sealed class ImportOfxStatementCommandHandler
         var existing = (await _movements.ListExistingExternalIdsAsync(tenantId, account.Id, externalIds, cancellationToken))
             .ToHashSet(StringComparer.Ordinal);
 
+        // Load the existing movements the user chose to reconcile with, scoped to the tenant + account.
+        var reconcileIds = request.Lines
+            .Where(line => line.ReconcileWithMovementId is not null)
+            .Select(line => line.ReconcileWithMovementId!.Value)
+            .Distinct()
+            .ToArray();
+        var targets = reconcileIds.Length == 0
+            ? new Dictionary<Guid, FinancialAccountMovement>()
+            : (await _movements.ListByIdsAsync(tenantId, account.Id, reconcileIds, cancellationToken))
+                .ToDictionary(movement => movement.Id);
+
         var utcNow = _dateTimeProvider.UtcNow;
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var movements = new List<FinancialAccountMovement>();
+        var reconciledTargetIds = new HashSet<Guid>();
+        var newMovements = new List<FinancialAccountMovement>();
+        var linkedMovements = new List<FinancialAccountMovement>();
+        var reconciled = 0;
 
         foreach (var line in request.Lines)
         {
@@ -72,8 +86,36 @@ public sealed class ImportOfxStatementCommandHandler
                 continue;
             }
 
+            if (line.ReconcileWithMovementId is { } targetId)
+            {
+                if (!reconciledTargetIds.Add(targetId))
+                {
+                    return Result<OfxImportResultDto>.Failure(
+                        new ResultError("Um lançamento não pode ser conciliado com dois itens importados."));
+                }
+
+                if (!targets.TryGetValue(targetId, out var target))
+                {
+                    return Result<OfxImportResultDto>.Failure(
+                        new ResultError("Lançamento para conciliação não encontrado."));
+                }
+
+                if (target.ExternalId is not null)
+                {
+                    return Result<OfxImportResultDto>.Failure(
+                        new ResultError("Lançamento já conciliado."));
+                }
+
+                // Link the statement line to the existing movement; balance is unchanged (the existing
+                // movement already moved it).
+                target.LinkImportedExternalId(line.ExternalId, utcNow);
+                linkedMovements.Add(target);
+                reconciled++;
+                continue;
+            }
+
             account.ApplyMovement(line.Type, line.Amount, utcNow);
-            movements.Add(new FinancialAccountMovement(
+            newMovements.Add(new FinancialAccountMovement(
                 tenantId,
                 account.Id,
                 line.Type,
@@ -87,23 +129,26 @@ public sealed class ImportOfxStatementCommandHandler
                 externalId: line.ExternalId));
         }
 
-        if (movements.Count == 0)
+        if (newMovements.Count == 0 && linkedMovements.Count == 0)
         {
-            return Result<OfxImportResultDto>.Success(new OfxImportResultDto(0, total, total));
+            return Result<OfxImportResultDto>.Success(new OfxImportResultDto(0, 0, total, total));
         }
 
         try
         {
-            await _movements.AddRangeAsync(movements, account, cancellationToken);
+            await _movements.SaveImportAsync(newMovements, linkedMovements, account, cancellationToken);
         }
         catch (DuplicateExternalIdException)
         {
             // A concurrent import won the unique-index race; nothing was persisted.
-            return Result<OfxImportResultDto>.Success(new OfxImportResultDto(0, total, total));
+            return Result<OfxImportResultDto>.Success(new OfxImportResultDto(0, 0, total, total));
         }
 
-        return Result<OfxImportResultDto>.Success(
-            new OfxImportResultDto(movements.Count, total - movements.Count, total));
+        return Result<OfxImportResultDto>.Success(new OfxImportResultDto(
+            Imported: newMovements.Count,
+            Reconciled: reconciled,
+            SkippedDuplicates: total - newMovements.Count - reconciled,
+            Total: total));
     }
 
     private async Task<ResultError?> ValidateCategoriesAsync(

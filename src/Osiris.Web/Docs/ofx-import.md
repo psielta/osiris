@@ -22,13 +22,26 @@ No computador, abra a conta e clique em **Importar OFX**. No celular, abra o ext
 
 ## Revisar antes de confirmar
 
-Na tela de revisão você decide o que entra:
+Na tela de revisão você decide o que fazer com cada lançamento:
 
-- **Marcar e desmarcar:** cada linha tem uma caixa de seleção. Desmarque o que não quiser importar.
+- **Ação:** em cada linha você escolhe **Importar como novo**, **Conciliar com existente** (quando há um lançamento equivalente já registrado) ou **Ignorar**.
 - **Categoria:** escolha a categoria de cada lançamento, ou use "Categoria para todos" para aplicar a mesma a todos de uma vez. A categoria é opcional — você pode categorizar depois no extrato.
 - **Tipo:** entradas viram receita e saídas viram despesa, conforme o sinal do valor no extrato.
 
 Nada é salvo até você confirmar.
+
+## Conciliar com lançamentos já existentes
+
+Se você já registrou uma movimentação manualmente (por exemplo, R$ 100,00 em 05/06) e ela também aparece no extrato, o Osiris **sugere conciliar** em vez de criar um lançamento novo — assim o valor não entra duas vezes no saldo.
+
+Quando há uma sugestão, a linha já vem como **Conciliar com existente** e mostra o selo **"Sugestão de conciliação"**. Você pode:
+
+- **Aceitar a sugestão:** confirme como está para vincular o lançamento do extrato ao que já existe.
+- **Escolher outro lançamento:** abra a lista de candidatos e selecione manualmente o correto, quando a sugestão automática não acerta.
+- **Importar como novo:** ignore a sugestão e crie um lançamento separado.
+- **Ignorar:** não importe a linha.
+
+A correspondência considera **valor igual + mesmo sentido (entrada/saída) + data próxima (até 3 dias) + semelhança da descrição**. Conciliar **não altera o saldo** (o lançamento original já entrou no saldo); apenas vincula a movimentação do extrato a ele, que passa a contar como já importada.
 
 ## Lançamentos repetidos não entram duas vezes
 

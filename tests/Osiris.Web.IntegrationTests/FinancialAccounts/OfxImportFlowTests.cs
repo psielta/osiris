@@ -110,14 +110,14 @@ public sealed class OfxImportFlowTests : IAsyncLifetime
 
         return await client.PostAsync($"/accounts/{accountId}/import/confirm", new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            ["Lines[0].Include"] = "true",
+            ["Lines[0].Action"] = "New",
             ["Lines[0].ExternalId"] = "WEB-A1",
             ["Lines[0].OccurredOn"] = "2026-06-02",
             ["Lines[0].Amount"] = "1500.00",
             ["Lines[0].Type"] = nameof(FinancialAccountMovementType.Income),
             ["Lines[0].Description"] = "Salario web",
             ["Lines[0].IsDuplicate"] = "false",
-            ["Lines[1].Include"] = "true",
+            ["Lines[1].Action"] = "New",
             ["Lines[1].ExternalId"] = "WEB-A2",
             ["Lines[1].OccurredOn"] = "2026-06-05",
             ["Lines[1].Amount"] = "90.00",

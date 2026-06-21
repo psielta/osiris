@@ -21,7 +21,7 @@
 
     <div asp-validation-summary="All" class="rounded-md bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"></div>
 
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-4">
         <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lançamentos no arquivo</p>
             <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">@Model.TotalCount</p>
@@ -31,6 +31,10 @@
             <p class="mt-2 text-xl font-semibold text-emerald-600">@Model.NewCount</p>
         </div>
         <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Sugestões de conciliação</p>
+            <p class="mt-2 text-xl font-semibold text-amber-600">@Model.SuggestedCount</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Já importados</p>
             <p class="mt-2 text-xl font-semibold text-slate-500 dark:text-slate-400">@Model.DuplicateCount</p>
         </div>
@@ -38,7 +42,7 @@
 
     <form asp-action="ImportConfirm" asp-route-id="@Model.AccountId" method="post" class="space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-slate-600 dark:text-slate-300">Revise os lançamentos, ajuste as categorias e confirme a importação. Os já importados vêm desmarcados.</p>
+            <p class="text-sm text-slate-600 dark:text-slate-300">Revise os lançamentos, concilie com um lançamento existente quando houver sugestão, ajuste as categorias e confirme. Os já importados vêm como ignorados.</p>
             <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                 Categoria para todos:
                 <select onchange="document.querySelectorAll('.js-row-category').forEach(s => s.value = this.value);"
@@ -56,21 +60,39 @@
             <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
                 <thead class="bg-slate-50 dark:bg-slate-800">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Importar</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ação</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Data</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Descrição</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tipo</th>
                         <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Valor</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Categoria / conciliação</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
                     @for (var i = 0; i < Model.Lines.Count; i++)
                     {
                         var line = Model.Lines[i];
-                        <tr class="@(line.IsDuplicate ? "bg-slate-50/60 dark:bg-slate-800/30" : null)">
+                        var canReconcile = line.Candidates.Count > 0 || line.Action == ImportLineAction.Reconcile;
+                        <tr x-data="{ action: '@line.Action' }"
+                            :class="action === 'Ignore' ? 'opacity-60' : ''"
+                            class="@(line.IsDuplicate ? "bg-slate-50/60 dark:bg-slate-800/30" : null)">
                             <td class="px-4 py-3 align-top">
-                                <input type="checkbox" asp-for="Lines[i].Include" class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-amber-600 focus:ring-amber-500" />
+                                @if (line.IsDuplicate)
+                                {
+                                    <input type="hidden" name="Lines[@i].Action" value="Ignore" />
+                                }
+                                else
+                                {
+                                    <select x-model="action" name="Lines[@i].Action" aria-label="Ação para @line.Description"
+                                            class="h-10 w-full min-w-40 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                                        <option value="New">Importar como novo</option>
+                                        @if (canReconcile)
+                                        {
+                                            <option value="Reconcile">Conciliar com existente</option>
+                                        }
+                                        <option value="Ignore">Ignorar</option>
+                                    </select>
+                                }
                                 <input type="hidden" name="Lines[@i].ExternalId" value="@line.ExternalId" />
                                 <input type="hidden" name="Lines[@i].OccurredOn" value="@line.OccurredOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
                                 <input type="hidden" name="Lines[@i].Amount" value="@line.Amount.ToString(CultureInfo.InvariantCulture)" />
@@ -85,13 +107,40 @@
                                 {
                                     <span class="ml-2 inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">Já importado</span>
                                 }
+                                else if (line.SuggestedMatchId is not null)
+                                {
+                                    <span x-show="action === 'Reconcile'" class="ml-2 inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">Sugestão de conciliação</span>
+                                }
                             </td>
                             <td class="px-4 py-3 align-top text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">@line.Type.ToDisplayName()</td>
                             <td class="px-4 py-3 align-top text-right text-sm font-semibold @(line.IsInflow ? "text-emerald-600" : "text-red-600 dark:text-red-400") whitespace-nowrap">
                                 @(line.IsInflow ? "+" : "−")@line.Amount.ToBrl()
                             </td>
                             <td class="px-4 py-3 align-top">
+                                @if (line.Candidates.Count > 0)
+                                {
+                                    <select x-show="action === 'Reconcile'" :disabled="action !== 'Reconcile'"
+                                            name="Lines[@i].ReconcileWithMovementId" aria-label="Lançamento para conciliar com @line.Description"
+                                            class="h-10 w-full min-w-64 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                                        @foreach (var candidate in line.Candidates)
+                                        {
+                                            <option value="@candidate.MovementId" selected="@(candidate.MovementId == line.ReconcileWithMovementId ? "selected" : null)">
+                                                @candidate.OccurredOn.ToString("dd/MM/yyyy") · @candidate.Description · @(candidate.IsInflow ? "+" : "−")@candidate.Amount.ToBrl()
+                                            </option>
+                                        }
+                                    </select>
+                                }
+                                else if (line.ReconcileWithMovementId is not null)
+                                {
+                                    @* Error re-render: candidate list was not round-tripped; preserve the chosen target. *@
+                                    <select x-show="action === 'Reconcile'" :disabled="action !== 'Reconcile'"
+                                            name="Lines[@i].ReconcileWithMovementId" aria-label="Lançamento para conciliar"
+                                            class="h-10 w-full min-w-64 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                                        <option value="@line.ReconcileWithMovementId" selected>Lançamento selecionado</option>
+                                    </select>
+                                }
                                 <select asp-for="Lines[i].CategoryId" asp-items="Model.Categories"
+                                        x-show="action !== 'Reconcile'"
                                         class="js-row-category h-10 w-full min-w-44 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
                                     <option value="">Sem categoria</option>
                                 </select>
@@ -104,7 +153,7 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <a asp-action="Import" asp-route-id="@Model.AccountId" class="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800">Trocar arquivo</a>
-            <button type="submit" data-busy="Importando…" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 disabled:opacity-70">Importar lançamentos selecionados</button>
+            <button type="submit" data-busy="Importando…" class="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 dark:bg-amber-500 px-4 text-sm font-medium text-white dark:text-slate-950 transition hover:bg-slate-800 dark:hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 disabled:opacity-70">Confirmar importação</button>
         </div>
     </form>
 </section>

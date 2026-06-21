@@ -23,7 +23,8 @@ public sealed record ImportOfxLineRequest(
     decimal Amount,
     FinancialAccountMovementType Type,
     string Description,
-    Guid? CategoryId);
+    Guid? CategoryId,
+    Guid? ReconcileWithMovementId);
 
 /// <summary>
 /// CSV import preview request. <see cref="Content"/> is the Base64-encoded file (so the bytes and the

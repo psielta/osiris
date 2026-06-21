@@ -23,10 +23,14 @@ No computador, abra a conta e clique em **Importar PDF (IA)**. No celular, abra 
 Como a IA pode errar em algum lançamento, **revise com atenção** antes de confirmar:
 
 - **Confira valores e datas:** veja se os valores e o sentido (entrada ou saída) batem com o extrato.
-- **Marcar e desmarcar:** desmarque o que não quiser importar.
+- **Ação:** em cada linha você escolhe **Importar como novo**, **Conciliar com existente** ou **Ignorar**.
 - **Categoria:** escolha a categoria de cada lançamento, ou use "Categoria para todos". A categoria é opcional.
 
 Nada é salvo até você confirmar.
+
+## Conciliar com lançamentos já existentes
+
+Se um lançamento extraído corresponde a um que você já registrou manualmente, o Osiris **sugere conciliar** em vez de criar um novo — evitando duplicar o valor no saldo. A linha vem como **Conciliar com existente** com o selo **"Sugestão de conciliação"**; você pode aceitar, escolher outro lançamento na lista, importar como novo ou ignorar. A correspondência usa **valor igual + mesmo sentido + data próxima (até 3 dias) + semelhança da descrição**, e conciliar **não altera o saldo**.
 
 ## Lançamentos repetidos não entram duas vezes
 

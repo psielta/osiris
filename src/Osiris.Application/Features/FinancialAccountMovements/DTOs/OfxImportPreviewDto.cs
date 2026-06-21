@@ -15,4 +15,5 @@ public sealed record OfxImportPreviewDto(
     int TotalCount,
     int NewCount,
     int DuplicateCount,
+    int SuggestedReconciliationCount,
     IReadOnlyList<OfxImportLineDto> Lines);

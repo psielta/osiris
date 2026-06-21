@@ -135,14 +135,14 @@ public sealed class CsvImportFlowTests : IAsyncLifetime
 
         return await client.PostAsync($"/accounts/{accountId}/import/confirm", new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            ["Lines[0].Include"] = "true",
+            ["Lines[0].Action"] = "New",
             ["Lines[0].ExternalId"] = "TX-1",
             ["Lines[0].OccurredOn"] = "2026-02-01",
             ["Lines[0].Amount"] = "1500.00",
             ["Lines[0].Type"] = nameof(FinancialAccountMovementType.Income),
             ["Lines[0].Description"] = "Salario",
             ["Lines[0].IsDuplicate"] = "false",
-            ["Lines[1].Include"] = "true",
+            ["Lines[1].Action"] = "New",
             ["Lines[1].ExternalId"] = "TX-2",
             ["Lines[1].OccurredOn"] = "2026-02-02",
             ["Lines[1].Amount"] = "90.00",

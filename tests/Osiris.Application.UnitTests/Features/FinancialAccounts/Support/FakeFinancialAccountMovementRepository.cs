@@ -27,6 +27,50 @@ internal sealed class FakeFinancialAccountMovementRepository : IFinancialAccount
         return Task.CompletedTask;
     }
 
+    public Task SaveImportAsync(
+        IReadOnlyCollection<FinancialAccountMovement> newMovements,
+        IReadOnlyCollection<FinancialAccountMovement> linkedMovements,
+        FinancialAccount account,
+        CancellationToken cancellationToken)
+    {
+        // Linked movements are mutated in place and already tracked here; only inserts need adding.
+        _movements.AddRange(newMovements);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyCollection<FinancialAccountMovement>> ListReconciliationCandidatesAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        DateOnly fromInclusive,
+        DateOnly toInclusive,
+        CancellationToken cancellationToken)
+    {
+        var candidates = _movements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && movement.ExternalId == null
+                && movement.OccurredOn >= fromInclusive
+                && movement.OccurredOn <= toInclusive)
+            .ToArray();
+
+        return Task.FromResult<IReadOnlyCollection<FinancialAccountMovement>>(candidates);
+    }
+
+    public Task<IReadOnlyCollection<FinancialAccountMovement>> ListByIdsAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken)
+    {
+        var movements = _movements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && ids.Contains(movement.Id))
+            .ToArray();
+
+        return Task.FromResult<IReadOnlyCollection<FinancialAccountMovement>>(movements);
+    }
+
     public Task<IReadOnlyCollection<string>> ListExistingExternalIdsAsync(
         Guid tenantId,
         Guid financialAccountId,

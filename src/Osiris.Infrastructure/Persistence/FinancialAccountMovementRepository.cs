@@ -46,6 +46,39 @@ public sealed class FinancialAccountMovementRepository : IFinancialAccountMoveme
         }
     }
 
+    public async Task SaveImportAsync(
+        IReadOnlyCollection<FinancialAccountMovement> newMovements,
+        IReadOnlyCollection<FinancialAccountMovement> linkedMovements,
+        FinancialAccount account,
+        CancellationToken cancellationToken)
+    {
+        if (newMovements.Count > 0)
+        {
+            await _dbContext.FinancialAccountMovements.AddRangeAsync(newMovements, cancellationToken);
+        }
+
+        if (linkedMovements.Count > 0)
+        {
+            // Reconciled movements are already tracked (loaded via ListByIdsAsync); UpdateRange is a
+            // defensive no-op that guarantees the stamped ExternalId/ReconciledAtUtc are persisted.
+            _dbContext.FinancialAccountMovements.UpdateRange(linkedMovements);
+        }
+
+        _dbContext.FinancialAccounts.Update(account);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+            when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // The unique (TenantId, FinancialAccountId, ExternalId) index rejected a concurrently
+            // imported transaction (insert or reconcile race). Nothing was persisted.
+            throw new DuplicateExternalIdException(exception);
+        }
+    }
+
     public async Task<IReadOnlyCollection<string>> ListExistingExternalIdsAsync(
         Guid tenantId,
         Guid financialAccountId,
@@ -63,6 +96,40 @@ public sealed class FinancialAccountMovementRepository : IFinancialAccountMoveme
                 && movement.ExternalId != null
                 && externalIds.Contains(movement.ExternalId))
             .Select(movement => movement.ExternalId!)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<FinancialAccountMovement>> ListReconciliationCandidatesAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        DateOnly fromInclusive,
+        DateOnly toInclusive,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.FinancialAccountMovements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && movement.ExternalId == null
+                && movement.OccurredOn >= fromInclusive
+                && movement.OccurredOn <= toInclusive)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<FinancialAccountMovement>> ListByIdsAsync(
+        Guid tenantId,
+        Guid financialAccountId,
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        return await _dbContext.FinancialAccountMovements
+            .Where(movement => movement.TenantId == tenantId
+                && movement.FinancialAccountId == financialAccountId
+                && ids.Contains(movement.Id))
             .ToArrayAsync(cancellationToken);
     }
 

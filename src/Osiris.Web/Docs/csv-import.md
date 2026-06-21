@@ -40,13 +40,17 @@ Depois da primeira importação, o Osiris **lembra do mapeamento desta conta**. 
 
 ## Revisar antes de confirmar
 
-Na tela de revisão você decide o que entra:
+Na tela de revisão você decide o que fazer com cada lançamento:
 
-- **Marcar e desmarcar:** cada linha tem uma caixa de seleção. Desmarque o que não quiser importar.
+- **Ação:** em cada linha você escolhe **Importar como novo**, **Conciliar com existente** (quando há um lançamento equivalente já registrado) ou **Ignorar**.
 - **Categoria:** escolha a categoria de cada lançamento, ou use "Categoria para todos". A categoria é opcional.
 - **Tipo:** entradas viram receita e saídas viram despesa, conforme o mapeamento que você escolheu.
 
 Nada é salvo até você confirmar.
+
+## Conciliar com lançamentos já existentes
+
+Se uma linha do extrato corresponde a um lançamento que você já registrou manualmente, o Osiris **sugere conciliar** em vez de criar um novo — evitando duplicar o valor no saldo. A linha vem como **Conciliar com existente** com o selo **"Sugestão de conciliação"**; você pode aceitar, escolher outro lançamento na lista, importar como novo ou ignorar. A correspondência usa **valor igual + mesmo sentido + data próxima (até 3 dias) + semelhança da descrição**, e conciliar **não altera o saldo**. É a mesma tela de revisão da importação OFX.
 
 ## Lançamentos repetidos não entram duas vezes
 

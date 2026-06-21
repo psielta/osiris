@@ -4,6 +4,7 @@ using Osiris.Application.Common.Csv;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Features.FinancialAccountMovements.DTOs;
+using Osiris.Application.Features.FinancialAccountMovements.Reconciliation;
 using Osiris.Domain.Entities;
 using Osiris.Domain.Enums;
 
@@ -85,12 +86,17 @@ public sealed class PreviewCsvImportCommandHandler
                 Type: transaction.Type,
                 IsInflow: transaction.Type.IsInflow(),
                 Description: transaction.Description,
-                IsDuplicate: isDuplicate));
+                IsDuplicate: isDuplicate,
+                SuggestedMovementId: null,
+                Candidates: []));
         }
 
         await RememberMappingAsync(tenantId, account.Id, request.Mapping, cancellationToken);
 
         var duplicateCount = lines.Count(line => line.IsDuplicate);
+
+        var enrichedLines = await ImportReconciliationSuggester.EnrichAsync(
+            _movements, tenantId, account.Id, lines, cancellationToken);
 
         var preview = new OfxImportPreviewDto(
             AccountId: account.Id,
@@ -100,10 +106,11 @@ public sealed class PreviewCsvImportCommandHandler
             CurrencyCode: null,
             PeriodStart: transactions.Min(transaction => transaction.OccurredOn),
             PeriodEnd: transactions.Max(transaction => transaction.OccurredOn),
-            TotalCount: lines.Count,
-            NewCount: lines.Count - duplicateCount,
+            TotalCount: enrichedLines.Count,
+            NewCount: enrichedLines.Count - duplicateCount,
             DuplicateCount: duplicateCount,
-            Lines: lines);
+            SuggestedReconciliationCount: enrichedLines.Count(line => line.SuggestedMovementId is not null),
+            Lines: enrichedLines);
 
         return Result<OfxImportPreviewDto>.Success(preview);
     }

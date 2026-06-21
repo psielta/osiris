@@ -5,6 +5,7 @@ using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Common.Pdf;
 using Osiris.Application.Features.FinancialAccountMovements.DTOs;
+using Osiris.Application.Features.FinancialAccountMovements.Reconciliation;
 using Osiris.Domain.Enums;
 
 namespace Osiris.Application.Features.FinancialAccountMovements.Commands.PreviewPdfImport;
@@ -89,10 +90,15 @@ public sealed class PreviewPdfImportCommandHandler
                 Type: transaction.Type,
                 IsInflow: transaction.Type.IsInflow(),
                 Description: transaction.Description,
-                IsDuplicate: isDuplicate));
+                IsDuplicate: isDuplicate,
+                SuggestedMovementId: null,
+                Candidates: []));
         }
 
         var duplicateCount = lines.Count(line => line.IsDuplicate);
+
+        var enrichedLines = await ImportReconciliationSuggester.EnrichAsync(
+            _movements, tenantId, account.Id, lines, cancellationToken);
 
         var preview = new OfxImportPreviewDto(
             AccountId: account.Id,
@@ -102,10 +108,11 @@ public sealed class PreviewPdfImportCommandHandler
             CurrencyCode: null,
             PeriodStart: transactions.Min(transaction => transaction.OccurredOn),
             PeriodEnd: transactions.Max(transaction => transaction.OccurredOn),
-            TotalCount: lines.Count,
-            NewCount: lines.Count - duplicateCount,
+            TotalCount: enrichedLines.Count,
+            NewCount: enrichedLines.Count - duplicateCount,
             DuplicateCount: duplicateCount,
-            Lines: lines);
+            SuggestedReconciliationCount: enrichedLines.Count(line => line.SuggestedMovementId is not null),
+            Lines: enrichedLines);
 
         return Result<OfxImportPreviewDto>.Success(preview);
     }

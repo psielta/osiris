@@ -137,7 +137,8 @@ public sealed class FinancialAccountsController : ApiControllerBase
                 line.Amount,
                 line.Type,
                 line.Description,
-                line.CategoryId))
+                line.CategoryId,
+                line.ReconcileWithMovementId))
             .ToList();
 
         var result = await _mediator.Send(new ImportOfxStatementCommand(id, lines), cancellationToken);

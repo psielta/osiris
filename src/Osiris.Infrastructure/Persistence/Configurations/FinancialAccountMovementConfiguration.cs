@@ -42,6 +42,8 @@ public sealed class FinancialAccountMovementConfiguration : IEntityTypeConfigura
         builder.Property(movement => movement.ExternalId)
             .HasMaxLength(255);
 
+        builder.Property(movement => movement.ReconciledAtUtc);
+
         builder.Property(movement => movement.CreatedAtUtc)
             .IsRequired();
 

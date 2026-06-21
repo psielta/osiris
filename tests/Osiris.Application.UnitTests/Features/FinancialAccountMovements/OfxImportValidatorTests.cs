@@ -50,7 +50,7 @@ public sealed class OfxImportValidatorTests
     {
         var result = _importValidator.Validate(new ImportOfxStatementCommand(Guid.NewGuid(),
         [
-            new ImportOfxLineInput("A1", new DateOnly(2026, 1, 1), 0m, FinancialAccountMovementType.Income, "x", null),
+            new ImportOfxLineInput("A1", new DateOnly(2026, 1, 1), 0m, FinancialAccountMovementType.Income, "x", null, null),
         ]));
 
         Assert.False(result.IsValid);
@@ -61,7 +61,7 @@ public sealed class OfxImportValidatorTests
     {
         var result = _importValidator.Validate(new ImportOfxStatementCommand(Guid.NewGuid(),
         [
-            new ImportOfxLineInput("A1", new DateOnly(2026, 1, 1), 10m, FinancialAccountMovementType.Income, "x", null),
+            new ImportOfxLineInput("A1", new DateOnly(2026, 1, 1), 10m, FinancialAccountMovementType.Income, "x", null, null),
         ]));
 
         Assert.True(result.IsValid);

@@ -238,14 +238,20 @@ public sealed class FinancialAccountsController : AppController
         CancellationToken cancellationToken)
     {
         var selectedLines = model.Lines
-            .Where(line => line.Include)
-            .Select(line => new ImportOfxLineInput(
-                line.ExternalId,
-                line.OccurredOn,
-                line.Amount,
-                line.Type,
-                line.Description,
-                line.CategoryId))
+            .Where(line => line.Action != ImportLineAction.Ignore)
+            .Select(line =>
+            {
+                // A reconcile without a chosen target falls back to importing as a new movement.
+                var reconcileId = line.Action == ImportLineAction.Reconcile ? line.ReconcileWithMovementId : null;
+                return new ImportOfxLineInput(
+                    line.ExternalId,
+                    line.OccurredOn,
+                    line.Amount,
+                    line.Type,
+                    line.Description,
+                    reconcileId is null ? line.CategoryId : null,
+                    reconcileId);
+            })
             .ToList();
 
         if (selectedLines.Count == 0)
@@ -525,6 +531,7 @@ public sealed class FinancialAccountsController : AppController
             TotalCount = preview.TotalCount,
             NewCount = preview.NewCount,
             DuplicateCount = preview.DuplicateCount,
+            SuggestedCount = preview.SuggestedReconciliationCount,
             Categories = categories,
             Lines = preview.Lines
                 .Select(line => new OfxImportLineViewModel
@@ -535,7 +542,19 @@ public sealed class FinancialAccountsController : AppController
                     Type = line.Type,
                     Description = line.Description,
                     IsDuplicate = line.IsDuplicate,
-                    Include = !line.IsDuplicate
+                    SuggestedMatchId = line.SuggestedMovementId,
+                    Candidates = line.Candidates
+                        .Select(candidate => new ReconciliationCandidateViewModel(
+                            candidate.MovementId,
+                            candidate.OccurredOn,
+                            candidate.Amount,
+                            candidate.IsInflow,
+                            candidate.Description))
+                        .ToList(),
+                    Action = line.IsDuplicate
+                        ? ImportLineAction.Ignore
+                        : (line.SuggestedMovementId is not null ? ImportLineAction.Reconcile : ImportLineAction.New),
+                    ReconcileWithMovementId = line.SuggestedMovementId
                 })
                 .ToList()
         };
@@ -549,14 +568,26 @@ public sealed class FinancialAccountsController : AppController
         model.TotalCount = model.Lines.Count;
         model.DuplicateCount = model.Lines.Count(line => line.IsDuplicate);
         model.NewCount = model.TotalCount - model.DuplicateCount;
+        // Candidate lists are not round-tripped on the error path; reflect the chosen reconcile actions.
+        model.SuggestedCount = model.Lines.Count(line => line.Action == ImportLineAction.Reconcile);
         return model;
     }
 
     private static string BuildSummaryMessage(OfxImportResultDto summary)
     {
-        return summary.SkippedDuplicates > 0
-            ? $"{summary.Imported} lançamento(s) importado(s). {summary.SkippedDuplicates} ignorado(s) por já existirem."
-            : $"{summary.Imported} lançamento(s) importado(s).";
+        var parts = new List<string> { $"{summary.Imported} lançamento(s) importado(s)." };
+
+        if (summary.Reconciled > 0)
+        {
+            parts.Add($"{summary.Reconciled} conciliado(s) com lançamentos existentes.");
+        }
+
+        if (summary.SkippedDuplicates > 0)
+        {
+            parts.Add($"{summary.SkippedDuplicates} ignorado(s) por já existirem.");
+        }
+
+        return string.Join(" ", parts);
     }
 
     private static CsvImportMappingViewModel BuildMappingViewModel(

@@ -34,5 +34,10 @@ public sealed class ImportOfxLineInputValidator : AbstractValidator<ImportOfxLin
         RuleFor(line => line.Description)
             .NotEmpty().WithMessage("Informe a descrição do lançamento.")
             .MaximumLength(200).WithMessage("A descrição deve ter no máximo 200 caracteres.");
+
+        RuleFor(line => line.ReconcileWithMovementId)
+            .Must(id => id != Guid.Empty)
+            .When(line => line.ReconcileWithMovementId is not null)
+            .WithMessage("Lançamento para conciliação inválido.");
     }
 }

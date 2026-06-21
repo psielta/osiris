@@ -19,4 +19,5 @@ public sealed record ImportOfxLineInput(
     decimal Amount,
     FinancialAccountMovementType Type,
     string Description,
-    Guid? CategoryId);
+    Guid? CategoryId,
+    Guid? ReconcileWithMovementId);
