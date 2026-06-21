@@ -85,4 +85,40 @@ class OfxImportApiTest {
 
         assertTrue(bus.emitted.contains(DataScope.Accounts))
     }
+
+    @Test
+    fun previewOfxImport_parses_reconciliation_suggestions() = runTest {
+        val previewJson = """
+            {"accountId":"1","accountName":"Banco","totalCount":1,"newCount":1,"duplicateCount":0,"suggestedReconciliationCount":1,
+             "lines":[{"rowKey":"0","externalId":"A1","occurredOn":"2026-06-02","amount":1500.0,"type":1,"isInflow":true,"description":"Salario","isDuplicate":false,
+              "suggestedMovementId":"mov-1","candidates":[{"movementId":"mov-1","occurredOn":"2026-06-02","amount":1500.0,"isInflow":true,"description":"Salario manual","score":0.9,"isConfident":true}]}]}
+        """.trimIndent()
+        val (repo, _) = repository(previewJson) { }
+
+        val result = repo.previewOfxImport("1", "extrato.ofx", "<OFX></OFX>".encodeToByteArray())
+
+        assertTrue(result is OsirisResult.Success)
+        val preview = (result as OsirisResult.Success).value
+        assertEquals(1, preview.suggestedReconciliationCount)
+        val line = preview.lines.single()
+        assertEquals("mov-1", line.suggestedMovementId)
+        assertEquals("mov-1", line.candidates.single().movementId)
+    }
+
+    @Test
+    fun confirmOfxImport_sends_reconcile_target_and_maps_reconciled_count() = runTest {
+        var captured: HttpRequestData? = null
+        val (repo, _) = repository("""{"imported":0,"reconciled":1,"skippedDuplicates":0,"total":1}""") { captured = it }
+
+        val selections = listOf(
+            OfxImportSelection("A1", "2026-06-02", 100.0, MovementType.Income, "Salario", null, "mov-123"),
+        )
+        val result = repo.confirmOfxImport("1", selections)
+
+        assertTrue(result is OsirisResult.Success)
+        assertEquals(1, (result as OsirisResult.Success).value.reconciled)
+
+        val body = ((assertNotNull(captured)).body as TextContent).text
+        assertTrue(body.contains("\"reconcileWithMovementId\":\"mov-123\""))
+    }
 }

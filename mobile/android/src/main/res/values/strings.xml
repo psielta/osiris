@@ -116,8 +116,17 @@
     <string name="import_ofx_select_file">Selecionar arquivo</string>
     <string name="import_ofx_summary">%1$d novos · %2$d já importados</string>
     <string name="import_ofx_category_all">Categoria para todos</string>
-    <string name="import_ofx_confirm">Importar %1$d selecionado(s)</string>
+    <string name="import_ofx_confirm">Confirmar %1$d selecionado(s)</string>
     <string name="import_ofx_already_imported">Já importado</string>
+
+    <!-- Import reconciliation -->
+    <string name="import_reconcile_count">%1$d sugestão(ões) de conciliação</string>
+    <string name="import_action_label">Ação</string>
+    <string name="import_action_new">Importar como novo</string>
+    <string name="import_action_reconcile">Conciliar com existente</string>
+    <string name="import_action_ignore">Ignorar</string>
+    <string name="import_reconcile_with_label">Conciliar com</string>
+    <string name="import_reconcile_suggested">Sugestão de conciliação</string>
 
     <!-- PDF import (IA) -->
     <string name="import_pdf_title">Importar extrato PDF (IA)</string>

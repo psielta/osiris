@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -40,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -48,19 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.ui.components.OsirisDropdownField
-import com.osiris.mobile.core.format.Money
 import com.osiris.mobile.domain.model.Category
 import com.osiris.mobile.presentation.accounts.OfxImportEvent
-import com.osiris.mobile.presentation.accounts.OfxImportRow
 import com.osiris.mobile.presentation.accounts.OfxImportUiState
 import com.osiris.mobile.presentation.accounts.OfxImportViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-private val inflowColor = Color(0xFF16A34A)
-private val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,6 +144,13 @@ private fun PreviewContent(
                 text = stringResource(R.string.import_ofx_summary, state.newCount, state.duplicateCount),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            if (state.suggestedCount > 0) {
+                Text(
+                    text = stringResource(R.string.import_reconcile_count, state.suggestedCount),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             Spacer(Modifier.height(12.dp))
             OsirisDropdownField(
                 label = stringResource(R.string.import_ofx_category_all),
@@ -166,11 +163,15 @@ private fun PreviewContent(
         HorizontalDivider()
         LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(vertical = 8.dp)) {
             items(state.rows, key = { it.line.rowKey }) { row ->
-                OfxRow(
-                    row = row,
+                ImportPreviewLineRow(
+                    line = row.line,
+                    action = row.action,
+                    reconcileWithMovementId = row.reconcileWithMovementId,
+                    categoryId = row.categoryId,
                     categories = state.categories,
                     noCategoryLabel = noCategoryLabel,
-                    onToggle = { viewModel.toggleInclude(row.line.rowKey) },
+                    onAction = { viewModel.setAction(row.line.rowKey, it) },
+                    onReconcileTarget = { viewModel.setReconcileTarget(row.line.rowKey, it) },
                     onCategory = { viewModel.setCategory(row.line.rowKey, it) },
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -193,57 +194,6 @@ private fun PreviewContent(
         }
     }
 }
-
-@Composable
-private fun OfxRow(
-    row: OfxImportRow,
-    categories: List<Category>,
-    noCategoryLabel: String,
-    onToggle: () -> Unit,
-    onCategory: (String?) -> Unit,
-) {
-    val categoryOptions = remember(categories) { listOf<Category?>(null) + categories }
-    val selectedCategory = categories.find { it.id == row.categoryId }
-    val sign = if (row.line.isInflow) "+" else "−"
-    val dateLabel = if (row.line.isDuplicate) {
-        formatDate(row.line.occurredOn) + " · " + stringResource(R.string.import_ofx_already_imported)
-    } else {
-        formatDate(row.line.occurredOn)
-    }
-
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = row.include, onCheckedChange = { onToggle() })
-            Spacer(Modifier.size(8.dp))
-            Column(Modifier.weight(1f)) {
-                Text(row.line.description, style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    text = dateLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(
-                text = "$sign${Money.brl(row.line.amount)}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (row.line.isInflow) inflowColor else MaterialTheme.colorScheme.error,
-            )
-        }
-        if (row.include) {
-            Spacer(Modifier.height(8.dp))
-            OsirisDropdownField(
-                label = stringResource(R.string.movement_category_label),
-                selected = selectedCategory,
-                options = categoryOptions,
-                optionLabel = { it?.name ?: noCategoryLabel },
-                onSelect = { onCategory(it?.id) },
-            )
-        }
-    }
-}
-
-private fun formatDate(iso: String): String =
-    runCatching { LocalDate.parse(iso).format(dateFormat) }.getOrDefault(iso)
 
 private fun readOfxFile(context: Context, uri: Uri): Pair<String, ByteArray>? {
     val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return null

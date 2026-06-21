@@ -8,7 +8,6 @@ import com.osiris.mobile.domain.model.CsvAmountMode
 import com.osiris.mobile.domain.model.CsvAnalysis
 import com.osiris.mobile.domain.model.CsvImportMapping
 import com.osiris.mobile.domain.model.OfxImportLine
-import com.osiris.mobile.domain.model.OfxImportResult
 import com.osiris.mobile.domain.model.OfxImportSelection
 import com.osiris.mobile.domain.repository.AccountRepository
 import com.osiris.mobile.domain.repository.CategoryRepository
@@ -25,9 +24,12 @@ data class CsvColumnOption(val index: Int, val label: String)
 
 data class CsvImportRow(
     val line: OfxImportLine,
-    val include: Boolean,
+    val action: ImportLineAction,
+    val reconcileWithMovementId: String?,
     val categoryId: String?,
-)
+) {
+    val include: Boolean get() = action != ImportLineAction.Ignore
+}
 
 data class CsvImportUiState(
     val fileName: String? = null,
@@ -41,6 +43,7 @@ data class CsvImportUiState(
     val columns: List<CsvColumnOption> = emptyList(),
     val newCount: Int = 0,
     val duplicateCount: Int = 0,
+    val suggestedCount: Int = 0,
     val rows: List<CsvImportRow> = emptyList(),
     val categories: List<Category> = emptyList(),
 ) {
@@ -178,8 +181,14 @@ class CsvImportViewModel(
                             hasPreview = true,
                             newCount = preview.newCount,
                             duplicateCount = preview.duplicateCount,
+                            suggestedCount = preview.suggestedReconciliationCount,
                             rows = preview.lines.map { line ->
-                                CsvImportRow(line = line, include = !line.isDuplicate, categoryId = null)
+                                CsvImportRow(
+                                    line = line,
+                                    action = initialImportAction(line),
+                                    reconcileWithMovementId = line.suggestedMovementId,
+                                    categoryId = null,
+                                )
                             },
                         )
                     }
@@ -203,9 +212,15 @@ class CsvImportViewModel(
         }
     }
 
-    fun toggleInclude(rowKey: String) = _state.update { state ->
+    fun setAction(rowKey: String, action: ImportLineAction) = _state.update { state ->
         state.copy(rows = state.rows.map { row ->
-            if (row.line.rowKey == rowKey) row.copy(include = !row.include) else row
+            if (row.line.rowKey == rowKey) row.copy(action = action) else row
+        })
+    }
+
+    fun setReconcileTarget(rowKey: String, movementId: String?) = _state.update { state ->
+        state.copy(rows = state.rows.map { row ->
+            if (row.line.rowKey == rowKey) row.copy(reconcileWithMovementId = movementId) else row
         })
     }
 
@@ -230,21 +245,12 @@ class CsvImportViewModel(
 
         _state.update { it.copy(isConfirming = true) }
         viewModelScope.launch {
-            val selections = selected.map { row ->
-                OfxImportSelection(
-                    externalId = row.line.externalId,
-                    occurredOn = row.line.occurredOn,
-                    amount = row.line.amount,
-                    type = row.line.type,
-                    description = row.line.description,
-                    categoryId = row.categoryId,
-                )
-            }
+            val selections = selected.map { it.toSelection() }
 
             when (val result = accountRepository.confirmOfxImport(accountId, selections)) {
                 is OsirisResult.Success -> {
                     _state.update { it.copy(isConfirming = false) }
-                    _events.send(CsvImportEvent.Done(summaryOf(result.value)))
+                    _events.send(CsvImportEvent.Done(importSummaryOf(result.value)))
                 }
 
                 is OsirisResult.Failure -> {
@@ -254,13 +260,23 @@ class CsvImportViewModel(
             }
         }
     }
+}
 
-    private fun summaryOf(result: OfxImportResult): String =
-        if (result.skippedDuplicates > 0) {
-            "${result.imported} lançamento(s) importado(s), ${result.skippedDuplicates} ignorado(s)."
-        } else {
-            "${result.imported} lançamento(s) importado(s)."
-        }
+private fun CsvImportRow.toSelection(): OfxImportSelection {
+    val reconcileId = if (action == ImportLineAction.Reconcile) {
+        reconcileWithMovementId ?: line.candidates.firstOrNull()?.movementId
+    } else {
+        null
+    }
+    return OfxImportSelection(
+        externalId = line.externalId,
+        occurredOn = line.occurredOn,
+        amount = line.amount,
+        type = line.type,
+        description = line.description,
+        categoryId = if (reconcileId == null) categoryId else null,
+        reconcileWithMovementId = reconcileId,
+    )
 }
 
 enum class CsvColumn { Date, Description, SecondaryDescription, Amount, Credit, Debit, Type, ExternalId }

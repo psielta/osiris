@@ -19,9 +19,12 @@ import kotlinx.coroutines.launch
 
 data class OfxImportRow(
     val line: OfxImportLine,
-    val include: Boolean,
+    val action: ImportLineAction,
+    val reconcileWithMovementId: String?,
     val categoryId: String?,
-)
+) {
+    val include: Boolean get() = action != ImportLineAction.Ignore
+}
 
 data class OfxImportUiState(
     val isUploading: Boolean = false,
@@ -32,6 +35,7 @@ data class OfxImportUiState(
     val totalCount: Int = 0,
     val newCount: Int = 0,
     val duplicateCount: Int = 0,
+    val suggestedCount: Int = 0,
     val rows: List<OfxImportRow> = emptyList(),
     val categories: List<Category> = emptyList(),
 ) {
@@ -83,8 +87,14 @@ class OfxImportViewModel(
                             totalCount = preview.totalCount,
                             newCount = preview.newCount,
                             duplicateCount = preview.duplicateCount,
+                            suggestedCount = preview.suggestedReconciliationCount,
                             rows = preview.lines.map { line ->
-                                OfxImportRow(line = line, include = !line.isDuplicate, categoryId = null)
+                                OfxImportRow(
+                                    line = line,
+                                    action = initialImportAction(line),
+                                    reconcileWithMovementId = line.suggestedMovementId,
+                                    categoryId = null,
+                                )
                             },
                         )
                     }
@@ -98,9 +108,15 @@ class OfxImportViewModel(
         }
     }
 
-    fun toggleInclude(rowKey: String) = _state.update { state ->
+    fun setAction(rowKey: String, action: ImportLineAction) = _state.update { state ->
         state.copy(rows = state.rows.map { row ->
-            if (row.line.rowKey == rowKey) row.copy(include = !row.include) else row
+            if (row.line.rowKey == rowKey) row.copy(action = action) else row
+        })
+    }
+
+    fun setReconcileTarget(rowKey: String, movementId: String?) = _state.update { state ->
+        state.copy(rows = state.rows.map { row ->
+            if (row.line.rowKey == rowKey) row.copy(reconcileWithMovementId = movementId) else row
         })
     }
 
@@ -125,16 +141,7 @@ class OfxImportViewModel(
 
         _state.update { it.copy(isConfirming = true) }
         viewModelScope.launch {
-            val selections = selected.map { row ->
-                OfxImportSelection(
-                    externalId = row.line.externalId,
-                    occurredOn = row.line.occurredOn,
-                    amount = row.line.amount,
-                    type = row.line.type,
-                    description = row.line.description,
-                    categoryId = row.categoryId,
-                )
-            }
+            val selections = selected.map { it.toSelection() }
 
             when (val result = accountRepository.confirmOfxImport(accountId, selections)) {
                 is OsirisResult.Success -> {
@@ -150,10 +157,31 @@ class OfxImportViewModel(
         }
     }
 
-    private fun summaryOf(result: OfxImportResult): String =
-        if (result.skippedDuplicates > 0) {
-            "${result.imported} lançamento(s) importado(s), ${result.skippedDuplicates} ignorado(s)."
-        } else {
-            "${result.imported} lançamento(s) importado(s)."
-        }
+    private fun summaryOf(result: OfxImportResult): String = importSummaryOf(result)
+}
+
+/** A line the user kept (not ignored) mapped to a confirm selection, carrying its reconcile choice. */
+internal fun OfxImportRow.toSelection(): OfxImportSelection {
+    val reconcileId = if (action == ImportLineAction.Reconcile) {
+        reconcileWithMovementId ?: line.candidates.firstOrNull()?.movementId
+    } else {
+        null
+    }
+    return OfxImportSelection(
+        externalId = line.externalId,
+        occurredOn = line.occurredOn,
+        amount = line.amount,
+        type = line.type,
+        description = line.description,
+        categoryId = if (reconcileId == null) categoryId else null,
+        reconcileWithMovementId = reconcileId,
+    )
+}
+
+/** Shared pt-BR summary for a confirmed import (new + reconciled + skipped). */
+internal fun importSummaryOf(result: OfxImportResult): String = buildString {
+    append("${result.imported} lançamento(s) importado(s)")
+    if (result.reconciled > 0) append(", ${result.reconciled} conciliado(s)")
+    if (result.skippedDuplicates > 0) append(", ${result.skippedDuplicates} ignorado(s)")
+    append(".")
 }

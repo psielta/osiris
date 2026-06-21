@@ -14,6 +14,7 @@ import com.osiris.mobile.data.dto.OfxImportLineDto
 import com.osiris.mobile.data.dto.OfxImportPreviewDto
 import com.osiris.mobile.data.dto.OfxImportResultDto
 import com.osiris.mobile.data.dto.PreviewCsvImportRequest
+import com.osiris.mobile.data.dto.ReconciliationCandidateDto
 import com.osiris.mobile.data.dto.StatementDto
 import com.osiris.mobile.data.dto.UpdateAccountRequest
 import com.osiris.mobile.data.network.osirisCatching
@@ -33,6 +34,7 @@ import com.osiris.mobile.domain.model.OfxImportLine
 import com.osiris.mobile.domain.model.OfxImportPreview
 import com.osiris.mobile.domain.model.OfxImportResult
 import com.osiris.mobile.domain.model.OfxImportSelection
+import com.osiris.mobile.domain.model.ReconciliationCandidate
 import com.osiris.mobile.domain.model.StatementPdf
 import com.osiris.mobile.domain.repository.AccountRepository
 import kotlin.io.encoding.Base64
@@ -153,17 +155,41 @@ private fun MovementDto.toDomain() =
 private fun StatementDto.toDomain() =
     AccountStatement(id, name, AccountType.fromApi(type), initialBalance, currentBalance, isActive, movements.map { it.toDomain() })
 
+private fun ReconciliationCandidateDto.toDomain() =
+    ReconciliationCandidate(movementId, occurredOn, amount, isInflow, description)
+
 private fun OfxImportLineDto.toDomain() =
-    OfxImportLine(rowKey, externalId, occurredOn, amount, MovementType.fromApi(type), isInflow, description, isDuplicate)
+    OfxImportLine(
+        rowKey,
+        externalId,
+        occurredOn,
+        amount,
+        MovementType.fromApi(type),
+        isInflow,
+        description,
+        isDuplicate,
+        suggestedMovementId,
+        candidates.map { it.toDomain() },
+    )
 
 private fun OfxImportPreviewDto.toDomain() =
-    OfxImportPreview(accountId, accountName, periodStart, periodEnd, totalCount, newCount, duplicateCount, lines.map { it.toDomain() })
+    OfxImportPreview(
+        accountId,
+        accountName,
+        periodStart,
+        periodEnd,
+        totalCount,
+        newCount,
+        duplicateCount,
+        suggestedReconciliationCount,
+        lines.map { it.toDomain() },
+    )
 
 private fun OfxImportResultDto.toDomain() =
-    OfxImportResult(imported, skippedDuplicates, total)
+    OfxImportResult(imported, reconciled, skippedDuplicates, total)
 
 private fun OfxImportSelection.toRequest() =
-    ImportOfxLineRequest(externalId, occurredOn, amount, type.apiValue, description, categoryId)
+    ImportOfxLineRequest(externalId, occurredOn, amount, type.apiValue, description, categoryId, reconcileWithMovementId)
 
 private fun CsvAnalysisDto.toDomain() =
     CsvAnalysis(accountId, accountName, delimiter, encoding, suggestedHeaderLineIndex, sampleRows, savedMapping?.toDomain())

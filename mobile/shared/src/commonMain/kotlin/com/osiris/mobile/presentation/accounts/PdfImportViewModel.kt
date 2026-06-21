@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.osiris.mobile.core.result.OsirisResult
 import com.osiris.mobile.domain.model.Category
 import com.osiris.mobile.domain.model.OfxImportLine
-import com.osiris.mobile.domain.model.OfxImportResult
 import com.osiris.mobile.domain.model.OfxImportSelection
 import com.osiris.mobile.domain.repository.AccountRepository
 import com.osiris.mobile.domain.repository.CategoryRepository
@@ -19,9 +18,12 @@ import kotlinx.coroutines.launch
 
 data class PdfImportRow(
     val line: OfxImportLine,
-    val include: Boolean,
+    val action: ImportLineAction,
+    val reconcileWithMovementId: String?,
     val categoryId: String?,
-)
+) {
+    val include: Boolean get() = action != ImportLineAction.Ignore
+}
 
 data class PdfImportUiState(
     val isUploading: Boolean = false,
@@ -32,6 +34,7 @@ data class PdfImportUiState(
     val totalCount: Int = 0,
     val newCount: Int = 0,
     val duplicateCount: Int = 0,
+    val suggestedCount: Int = 0,
     val rows: List<PdfImportRow> = emptyList(),
     val categories: List<Category> = emptyList(),
 ) {
@@ -83,8 +86,14 @@ class PdfImportViewModel(
                             totalCount = preview.totalCount,
                             newCount = preview.newCount,
                             duplicateCount = preview.duplicateCount,
+                            suggestedCount = preview.suggestedReconciliationCount,
                             rows = preview.lines.map { line ->
-                                PdfImportRow(line = line, include = !line.isDuplicate, categoryId = null)
+                                PdfImportRow(
+                                    line = line,
+                                    action = initialImportAction(line),
+                                    reconcileWithMovementId = line.suggestedMovementId,
+                                    categoryId = null,
+                                )
                             },
                         )
                     }
@@ -98,9 +107,15 @@ class PdfImportViewModel(
         }
     }
 
-    fun toggleInclude(rowKey: String) = _state.update { state ->
+    fun setAction(rowKey: String, action: ImportLineAction) = _state.update { state ->
         state.copy(rows = state.rows.map { row ->
-            if (row.line.rowKey == rowKey) row.copy(include = !row.include) else row
+            if (row.line.rowKey == rowKey) row.copy(action = action) else row
+        })
+    }
+
+    fun setReconcileTarget(rowKey: String, movementId: String?) = _state.update { state ->
+        state.copy(rows = state.rows.map { row ->
+            if (row.line.rowKey == rowKey) row.copy(reconcileWithMovementId = movementId) else row
         })
     }
 
@@ -125,21 +140,12 @@ class PdfImportViewModel(
 
         _state.update { it.copy(isConfirming = true) }
         viewModelScope.launch {
-            val selections = selected.map { row ->
-                OfxImportSelection(
-                    externalId = row.line.externalId,
-                    occurredOn = row.line.occurredOn,
-                    amount = row.line.amount,
-                    type = row.line.type,
-                    description = row.line.description,
-                    categoryId = row.categoryId,
-                )
-            }
+            val selections = selected.map { it.toSelection() }
 
             when (val result = accountRepository.confirmOfxImport(accountId, selections)) {
                 is OsirisResult.Success -> {
                     _state.update { it.copy(isConfirming = false) }
-                    _events.send(PdfImportEvent.Done(summaryOf(result.value)))
+                    _events.send(PdfImportEvent.Done(importSummaryOf(result.value)))
                 }
 
                 is OsirisResult.Failure -> {
@@ -149,11 +155,21 @@ class PdfImportViewModel(
             }
         }
     }
+}
 
-    private fun summaryOf(result: OfxImportResult): String =
-        if (result.skippedDuplicates > 0) {
-            "${result.imported} lançamento(s) importado(s), ${result.skippedDuplicates} ignorado(s)."
-        } else {
-            "${result.imported} lançamento(s) importado(s)."
-        }
+private fun PdfImportRow.toSelection(): OfxImportSelection {
+    val reconcileId = if (action == ImportLineAction.Reconcile) {
+        reconcileWithMovementId ?: line.candidates.firstOrNull()?.movementId
+    } else {
+        null
+    }
+    return OfxImportSelection(
+        externalId = line.externalId,
+        occurredOn = line.occurredOn,
+        amount = line.amount,
+        type = line.type,
+        description = line.description,
+        categoryId = if (reconcileId == null) categoryId else null,
+        reconcileWithMovementId = reconcileId,
+    )
 }
