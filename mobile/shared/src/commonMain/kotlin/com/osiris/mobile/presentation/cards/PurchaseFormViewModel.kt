@@ -28,6 +28,7 @@ data class PurchaseFormUiState(
     val purchaseDate: String = defaultCardDate(),
     val description: String = "",
     val installments: String = "1",
+    val amountIsPerInstallment: Boolean = false,
     val categoryId: String? = null,
     val notes: String = "",
     val categories: List<Category> = emptyList(),
@@ -77,6 +78,7 @@ class PurchaseFormViewModel(
     }
 
     fun onAmountChange(value: String) = _state.update { it.copy(amount = value, amountError = null) }.also { schedulePreview() }
+    fun onAmountModeChange(perInstallment: Boolean) = _state.update { it.copy(amountIsPerInstallment = perInstallment) }.also { schedulePreview() }
     fun onPurchaseDateChange(value: String) = _state.update { it.copy(purchaseDate = value) }.also { schedulePreview() }
     fun onDescriptionChange(value: String) = _state.update { it.copy(description = value, descriptionError = null) }
     fun onInstallmentsChange(value: String) = _state.update { it.copy(installments = value, installmentsError = null) }.also { schedulePreview() }
@@ -85,7 +87,7 @@ class PurchaseFormViewModel(
 
     fun submit() {
         val current = _state.value
-        val amountError = CardValidators.positiveMoney(current.amount, "valor total")
+        val amountError = CardValidators.positiveMoney(current.amount, "valor")
         val descriptionError = CardValidators.description(current.description.trim())
         val installmentsError = CardValidators.installments(current.installments)
         val categoryError = CardValidators.category(current.categoryId)
@@ -115,7 +117,7 @@ class PurchaseFormViewModel(
                 cardId = cardId,
                 categoryId = current.categoryId.orEmpty(),
                 description = current.description.trim(),
-                totalAmount = Money.parse(current.amount) ?: 0.0,
+                totalAmount = effectiveTotal(Money.parse(current.amount) ?: 0.0, current.installments.toInt()),
                 purchaseDate = current.purchaseDate,
                 installments = current.installments.toInt(),
                 notes = current.notes.trim().ifBlank { null },
@@ -147,6 +149,15 @@ class PurchaseFormViewModel(
         }
     }
 
+    // When the user typed a per-installment value, the purchase total is value x installments. Round to 2
+    // decimals so floating-point artifacts (e.g. 33.33 * 3) don't fail the server's "max 2 decimals" rule.
+    private fun effectiveTotal(amount: Double, installments: Int): Double =
+        if (_state.value.amountIsPerInstallment) {
+            kotlin.math.round(amount * installments * 100.0) / 100.0
+        } else {
+            amount
+        }
+
     private fun schedulePreview() {
         previewJob?.cancel()
         val current = _state.value
@@ -160,7 +171,7 @@ class PurchaseFormViewModel(
         previewJob = viewModelScope.launch {
             delay(250)
             _state.update { it.copy(isPreviewLoading = true) }
-            when (val result = cardRepository.previewPurchase(cardId, amount, current.purchaseDate, installments)) {
+            when (val result = cardRepository.previewPurchase(cardId, effectiveTotal(amount, installments), current.purchaseDate, installments)) {
                 is OsirisResult.Success -> _state.update {
                     it.copy(preview = result.value, isPreviewLoading = false)
                 }

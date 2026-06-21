@@ -213,7 +213,10 @@
     <string name="purchases_title">Compras no cartao</string>
     <string name="purchase_new">Nova compra</string>
     <string name="purchase_details">Compra</string>
-    <string name="purchase_amount_label">Valor total</string>
+    <string name="purchase_amount_label">Valor</string>
+    <string name="purchase_amount_mode_label">Tipo de valor informado</string>
+    <string name="purchase_amount_mode_total">Valor total</string>
+    <string name="purchase_amount_mode_per_installment">Valor da parcela</string>
     <string name="purchase_date_label">Data da compra</string>
     <string name="purchase_description_label">Descricao</string>
     <string name="purchase_category_label">Categoria</string>
