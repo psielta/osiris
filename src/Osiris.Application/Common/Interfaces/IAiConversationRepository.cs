@@ -10,6 +10,17 @@ public interface IAiConversationRepository
 {
     Task<AiConversation?> GetAsync(Guid tenantId, string userId, Guid id, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<AiConversation>> ListAsync(
+        Guid tenantId,
+        string userId,
+        int maxConversations,
+        CancellationToken cancellationToken);
+
+    Task UpdateAsync(AiConversation conversation, CancellationToken cancellationToken);
+
+    /// <summary>Total input+output tokens charged to the tenant since the given instant (for daily budgets).</summary>
+    Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<AiMessage>> ListMessagesAsync(
         Guid tenantId,
         Guid conversationId,

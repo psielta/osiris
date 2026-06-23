@@ -46,6 +46,11 @@ public abstract class ApiControllerBase : ControllerBase
             return StatusCodes.Status404NotFound;
         }
 
+        if (errors.Any(error => error.Code == ResultErrorCodes.QuotaExceeded))
+        {
+            return StatusCodes.Status429TooManyRequests;
+        }
+
         return StatusCodes.Status400BadRequest;
     }
 

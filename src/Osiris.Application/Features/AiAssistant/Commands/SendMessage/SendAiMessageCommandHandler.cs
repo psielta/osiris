@@ -52,6 +52,20 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
         var utcNow = _dateTimeProvider.UtcNow;
         var today = DateOnly.FromDateTime(utcNow);
 
+        // Daily token budget per tenant, computed from persisted usage. Checked before any model call.
+        if (_agentOptions.DailyTokenLimitPerTenant > 0)
+        {
+            var dayStartUtc = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, DateTimeKind.Utc);
+            var usedToday = await _conversations.SumTokensSinceAsync(tenantId, dayStartUtc, cancellationToken);
+            if (usedToday >= _agentOptions.DailyTokenLimitPerTenant)
+            {
+                return Result<AiTurnDto>.Failure(new ResultError(
+                    "Limite diário de uso do assistente atingido. Tente novamente amanhã.",
+                    null,
+                    ResultErrorCodes.QuotaExceeded));
+            }
+        }
+
         AiConversation conversation;
         bool isNewConversation;
         IReadOnlyList<AiModelMessage> priorMessages;

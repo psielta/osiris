@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Osiris.Api", "src\Osiris.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Osiris.Api.IntegrationTests", "tests\Osiris.Api.IntegrationTests\Osiris.Api.IntegrationTests.csproj", "{67FA8C52-CF02-493D-BC6A-D50A9676213B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Osiris.Ai.EvaluationTests", "tests\Osiris.Ai.EvaluationTests\Osiris.Ai.EvaluationTests.csproj", "{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{67FA8C52-CF02-493D-BC6A-D50A9676213B}.Release|x64.Build.0 = Release|Any CPU
 		{67FA8C52-CF02-493D-BC6A-D50A9676213B}.Release|x86.ActiveCfg = Release|Any CPU
 		{67FA8C52-CF02-493D-BC6A-D50A9676213B}.Release|x86.Build.0 = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|x64.Build.0 = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +156,6 @@ Global
 		{3B866851-0E1B-44A9-AE10-D0220D4ADCB8} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{F0911BDD-E6D2-476D-8A48-95600BC70306} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{67FA8C52-CF02-493D-BC6A-D50A9676213B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{3AAC84B2-A837-412B-BFCE-2148EDACC8D7} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

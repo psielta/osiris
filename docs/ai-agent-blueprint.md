@@ -1,6 +1,6 @@
 # AI Agent Blueprint — Osiris + Gemini
 
-> **Status:** Fase 1 (fundação) implementada e testada — assistente somente leitura com a tool `get_financial_snapshot`, atrás de feature flag desligada por padrão.  
+> **Status:** Fases 1–2 implementadas e testadas — assistente somente leitura completo (13 tools, CQRS de conversas, API + UI Web `/assistant`, orçamento diário de tokens, evaluation suite), atrás de feature flag desligada por padrão.  
 > **Última revisão:** 23 de junho de 2026  
 > **Escopo:** `Osiris.Web`, `Osiris.Api`, aplicação mobile KMP e infraestrutura compartilhada  
 > **Princípio central:** o Gemini interpreta intenção e seleciona ferramentas; o Osiris continua sendo a única fonte de verdade e o único executor das regras financeiras.
@@ -26,6 +26,16 @@ Componentes implementados (com caminhos):
 - **Config** — `src/Osiris.Web/appsettings.json` e `src/Osiris.Api/appsettings.json` com `Features` (tudo `false`) e `AiAssistant`.
 - **Testes** — unitários em `tests/Osiris.Application.UnitTests/Features/AiAssistant/` (registry, policy, orquestrador, snapshot tool; 16 testes) + redactor e fluxo de turno/isolamento de tenant/flag-off em `tests/Osiris.Api.IntegrationTests/AiAssistant/`. `FakeAiModelClient` registrado na factory de testes (sem rede real). **Suite completa verde:** 434 unit + 69 Api + 122 Web.
 
+### 0.1.1 Fase 2 — assistente somente leitura completo (entregue em 23/06/2026)
+
+- **Tools de leitura (Seção 8.1):** além de `get_financial_snapshot`, agora há `list_financial_accounts`, `get_account_statement`, `search_account_movements`, `get_spending_summary`, `get_cash_flow_summary`, `list_credit_cards`, `get_card_statement`, `search_card_purchases`, `list_bills`, `get_upcoming_obligations`, `list_categories` e `get_financial_definition` (glossário controlado). Todas em `Features/AiAssistant/Tools/Read/`, envolvendo queries existentes, com saída compacta e fontes; helpers em `Tools/AiToolSupport.cs`. 13 tools no total, todas `ReadOnly`.
+- **CQRS de conversas:** `ListConversationsQuery` (só ativas), `GetConversationQuery` (com mensagens) e `ArchiveConversationCommand`. Repositório estendido (`ListAsync`, `UpdateAsync`, `SumTokensSinceAsync`).
+- **API:** `GET /api/v1/ai/conversations`, `GET /{id}`, `POST /{id}/archive` (atrás da flag; 404/401 corretos; isolamento por tenant testado).
+- **UI Web (`/assistant`):** `Osiris.Web/Controllers/AiAssistantController.cs` + `Views/AiAssistant/Index.cshtml` (lista de conversas, nova conversa, chat em bolhas, sugestões, envio via post-redirect-get + antiforgery, aviso de erros/indisponibilidade). Link no `_Sidebar` condicionado à flag.
+- **Orçamento de tokens:** limite diário por tenant a partir do usage persistido em `AiMessage` → `429` (`ResultErrorCodes.QuotaExceeded`).
+- **Evaluation suite:** novo projeto `tests/Osiris.Ai.EvaluationTests` (no `Osiris.sln`) com dataset JSONL versionado (`Datasets/tool-selection.jsonl`) e gates: seleção de tool, nenhuma tool proibida/escrita executada, schemas sem `tenantId`/`userId`, policy nega não-leitura.
+- **Testes:** suíte completa verde — 439 unit + 73 Api + 124 Web + 16 evaluation.
+
 ### 0.2 Desvios conscientes em relação a este blueprint
 
 - `IAiModelClient` recebe um `AiModelPurpose` (`Agent`/`Fast`); o adapter resolve nome do modelo, temperatura e `maxOutputTokens` a partir de `GeminiOptions` (Application permanece sem saber nomes de modelo).
@@ -39,17 +49,17 @@ Componentes implementados (com caminhos):
 ### 0.3 Ainda NÃO implementado (próximos passos)
 
 - **Resiliência (Seção 18):** sem Polly (retry/backoff/circuit breaker/bulkhead). Hoje há apenas timeout por request + try/catch + `AiModelException`→503.
-- **Rate limiting / quotas / orçamento por tenant (Seção 17.4):** não implementado.
+- **Rate limiting (Seção 17.4) — parcial:** orçamento diário de tokens por tenant implementado (429). Faltam limites por minuto/IP e turnos simultâneos por usuário (sugiro `Microsoft.AspNetCore.RateLimiting`).
 - **Telemetria/OTel spans e métricas (Seção 19):** há logs estruturados + redaction; faltam spans `ai.*` e métricas/contadores.
-- **Fase 2 (assistente somente leitura completo):** demais tools de leitura (Seção 8.1), CQRS de conversas (listar/obter/arquivar), endpoints `GET` da Seção 14, **UI Web** (`/assistant`), evaluation suite (Seção 22.4). Hoje só existe o endpoint interno de turno e a tool `get_financial_snapshot`.
-- **Fase 3 (escrita):** `AiActionProposalRepository`, tools `propose_*`, máquina de estados/TTL/idempotência, endpoints confirm/reject, cards de impacto.
-- **Fase 4 (mobile):** DTOs/repository KMP, tela de conversa, polling/SSE, deep links, flag própria.
-- **Fase 5 (hardening):** feedback (`SubmitFeedback` + endpoint), painel de custo, sugestão de categorias, RAG só de documentação, export/delete, runbooks, rotação de chave.
+- **UI — refinamentos:** o chat renderiza texto puro (HTML-encoded) sem markdown sanitizado, sem chips de fonte no histórico (a API retorna `sources` no turno, mas não são persistidos por mensagem) e sem streaming SSE (default da Seção 28: streaming depois do read-only).
+- **Fase 3 (escrita):** `AiActionProposalRepository`, tools `propose_*`, máquina de estados/TTL/idempotência, endpoints confirm/reject, cards de impacto. Entidade/tabela `AiActionProposal` já existem (fundação de schema).
+- **Fase 4 (mobile):** DTOs/repository KMP, tela de conversa, polling/SSE, deep links, flag própria (`AiAssistantMobile` já existe na config).
+- **Fase 5 (hardening):** feedback (`SubmitFeedback` + endpoint; entidade `AiFeedback` já existe), painel de custo, sugestão de categorias, RAG só de documentação, export/delete, runbooks, rotação de chave.
 - **Concorrência otimista nas proposals e `RowVersion` nas conversas:** colunas/lógica ainda não adicionadas.
 
 ### 0.4 Backlog (Seção 24) — situação
 
-`AI-001`..`AI-012` ✅ feitos (fundação + read tool + endpoint). `AI-013` parcial (turno persiste conversa/histórico, mas faltam queries de listar/obter/arquivar). `AI-014` parcial (endpoints de turno com 401/404; faltam os `GET`). `AI-016`/`AI-017` pendentes (rate limit, OTel). `AI-018` pendente (evaluation suite). `AI-015`, `AI-019`..`AI-023` pendentes.
+`AI-001`..`AI-013` ✅ feitos (fundação + tools de leitura + CQRS de conversas). `AI-014` ✅ (API JWT: turno + `GET`/archive, 401/404, isolamento). `AI-015` ✅ (UI Web `/assistant`). `AI-016` parcial (orçamento diário de tokens → 429; faltam limites por minuto/IP e alertas). `AI-017` parcial (redaction + logs estruturados; falta OTel). `AI-018` ✅ (evaluation suite com gates). `AI-019`..`AI-023` pendentes (escrita/propostas, confirm/reject, write tools, mobile KMP, runbooks).
 
 ## 1. Resumo executivo
 

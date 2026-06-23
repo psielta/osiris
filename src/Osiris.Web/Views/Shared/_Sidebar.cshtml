@@ -1,5 +1,8 @@
+@inject Microsoft.Extensions.Options.IOptions<Osiris.Application.Common.AI.AiFeatureOptions> AiFeatures
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isAssistantActive = string.Equals(currentController, "AiAssistant", StringComparison.OrdinalIgnoreCase);
+    var assistantEnabled = AiFeatures.Value.AiAssistant;
     var activeLinkClass = "flex items-center rounded-md border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:bg-amber-500/10 dark:text-amber-200";
     var inactiveLinkClass = "flex items-center rounded-md border-l-2 border-transparent px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100";
     var isDashboardActive = string.Equals(currentController, "Dashboard", StringComparison.OrdinalIgnoreCase);
@@ -57,6 +60,12 @@
         <a asp-controller="Reports" asp-action="Index" class="@(isReportsActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isReportsActive ? "page" : null)">
             Relatórios
         </a>
+        @if (assistantEnabled)
+        {
+            <a asp-controller="AiAssistant" asp-action="Index" class="@(isAssistantActive ? activeLinkClass : inactiveLinkClass)" aria-current="@(isAssistantActive ? "page" : null)">
+                Assistente
+            </a>
+        }
     </nav>
 
     <div class="border-t border-slate-200 px-6 py-4 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">

@@ -37,7 +37,21 @@ public static class DependencyInjection
         services.AddSingleton<IAiToolExecutionPolicy, AiToolExecutionPolicy>();
         services.AddScoped<IAiToolRegistry, AiToolRegistry>();
         services.AddScoped<IAiAgentOrchestrator, AiAgentOrchestrator>();
+
+        // Read tools (Section 8.1). Each is whitelisted; the registry/policy gate exposure and execution.
         services.AddScoped<IAiTool, GetFinancialSnapshotTool>();
+        services.AddScoped<IAiTool, ListFinancialAccountsTool>();
+        services.AddScoped<IAiTool, GetAccountStatementTool>();
+        services.AddScoped<IAiTool, SearchAccountMovementsTool>();
+        services.AddScoped<IAiTool, GetSpendingSummaryTool>();
+        services.AddScoped<IAiTool, GetCashFlowSummaryTool>();
+        services.AddScoped<IAiTool, ListCreditCardsTool>();
+        services.AddScoped<IAiTool, GetCardStatementTool>();
+        services.AddScoped<IAiTool, SearchCardPurchasesTool>();
+        services.AddScoped<IAiTool, ListBillsTool>();
+        services.AddScoped<IAiTool, GetUpcomingObligationsTool>();
+        services.AddScoped<IAiTool, ListCategoriesTool>();
+        services.AddScoped<IAiTool, GetFinancialDefinitionTool>();
 
         return services;
     }

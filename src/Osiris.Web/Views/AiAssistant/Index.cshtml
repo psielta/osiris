@@ -1,0 +1,108 @@
+@model AiAssistantIndexViewModel
+@{
+    ViewData["Title"] = "Assistente";
+    var error = TempData[Osiris.Web.Controllers.AiAssistantController.ErrorMessageKey] as string;
+    var suggestions = new[]
+    {
+        "Resuma minha situação financeira deste mês.",
+        "Quais contas vencem nos próximos 7 dias?",
+        "Quanto gastei por categoria neste mês?",
+        "Qual o saldo das minhas contas ativas?"
+    };
+}
+
+<div class="mx-auto max-w-6xl space-y-4">
+    <header>
+        <h1 class="text-xl font-semibold text-slate-950 dark:text-slate-100">Assistente financeiro</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            As respostas usam seus próprios dados e podem conter erros. Confira valores importantes antes de decidir.
+        </p>
+    </header>
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+            @error
+        </div>
+    }
+
+    <div class="grid gap-4 lg:grid-cols-[18rem_1fr]">
+        <aside class="space-y-2 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+            <a asp-action="Index"
+               class="flex items-center justify-center rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-amber-600">
+                + Nova conversa
+            </a>
+
+            <ul class="space-y-1">
+                @foreach (var conversation in Model.Conversations)
+                {
+                    var isSelected = Model.Selected?.Id == conversation.Id;
+                    <li class="group flex items-center justify-between rounded-md px-2 py-1.5 text-sm @(isSelected ? "bg-amber-50 dark:bg-amber-500/10" : "hover:bg-slate-50 dark:hover:bg-slate-800")">
+                        <a asp-action="Index" asp-route-conversation="@conversation.Id" class="min-w-0 flex-1 truncate text-slate-700 dark:text-slate-200">
+                            @conversation.Title
+                        </a>
+                        <form asp-action="Archive" asp-route-id="@conversation.Id" method="post"
+                              onsubmit="return confirm('Arquivar esta conversa?');" class="ml-2 shrink-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" title="Arquivar" class="text-slate-400 transition hover:text-red-600">✕</button>
+                        </form>
+                    </li>
+                }
+                @if (!Model.Conversations.Any())
+                {
+                    <li class="px-2 py-1.5 text-sm text-slate-400 dark:text-slate-500">Nenhuma conversa ainda.</li>
+                }
+            </ul>
+        </aside>
+
+        <section class="flex min-h-[28rem] flex-col rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex-1 space-y-3 overflow-y-auto p-4">
+                @if (Model.Selected is null)
+                {
+                    <div class="space-y-3">
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Comece perguntando, por exemplo:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var suggestion in suggestions)
+                            {
+                                <button type="button" data-suggestion="@suggestion"
+                                        onclick="const box = document.getElementById('assistant-input'); box.value = this.dataset.suggestion; box.focus();"
+                                        class="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-700 transition hover:border-amber-400 hover:text-amber-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-amber-500/50">
+                                    @suggestion
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var message in Model.Selected.Messages)
+                    {
+                        var isUser = message.Role == "user";
+                        <div class="flex @(isUser ? "justify-end" : "justify-start")">
+                            <div class="max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm @(isUser ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100")">@message.Content</div>
+                        </div>
+                    }
+                    @if (!Model.Selected.Messages.Any())
+                    {
+                        <p class="text-sm text-slate-400">Esta conversa ainda não tem mensagens.</p>
+                    }
+                }
+            </div>
+
+            <form asp-action="Send" method="post" class="border-t border-slate-200 p-3 dark:border-slate-800"
+                  onsubmit="const b = this.querySelector('button[type=submit]'); b.disabled = true; b.dataset.busy = '1'; b.querySelector('span').textContent = 'Pensando...';">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="conversationId" value="@(Model.Selected?.Id)" />
+                <div class="flex items-end gap-2">
+                    <textarea id="assistant-input" name="message" rows="2" maxlength="4000" required
+                              placeholder="Pergunte sobre suas finanças..."
+                              class="flex-1 resize-none rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"></textarea>
+                    <button type="submit"
+                            class="rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-600 disabled:opacity-60">
+                        <span>Enviar</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Domain.Entities;
+using Osiris.Domain.Enums;
 
 namespace Osiris.Infrastructure.Persistence;
 
@@ -23,6 +24,40 @@ public sealed class AiConversationRepository : IAiConversationRepository
                     && conversation.UserId == userId
                     && conversation.Id == id,
                 cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AiConversation>> ListAsync(
+        Guid tenantId,
+        string userId,
+        int maxConversations,
+        CancellationToken cancellationToken)
+    {
+        var take = maxConversations <= 0 ? 50 : maxConversations;
+
+        return await _dbContext.AiConversations
+            .Where(conversation => conversation.TenantId == tenantId
+                && conversation.UserId == userId
+                && conversation.Status == AiConversationStatus.Active)
+            .OrderByDescending(conversation => conversation.UpdatedAtUtc ?? conversation.CreatedAtUtc)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(AiConversation conversation, CancellationToken cancellationToken)
+    {
+        _dbContext.AiConversations.Update(conversation);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken)
+    {
+        var messages = _dbContext.AiMessages
+            .Where(message => message.TenantId == tenantId && message.CreatedAtUtc >= sinceUtc);
+
+        var inputTokens = await messages.SumAsync(message => (long)message.InputTokens, cancellationToken);
+        var outputTokens = await messages.SumAsync(message => (long)message.OutputTokens, cancellationToken);
+
+        return inputTokens + outputTokens;
     }
 
     public async Task<IReadOnlyList<AiMessage>> ListMessagesAsync(

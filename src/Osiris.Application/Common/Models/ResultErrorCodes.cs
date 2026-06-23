@@ -9,4 +9,6 @@ public static class ResultErrorCodes
     public const string InvalidRefreshToken = "invalid_refresh_token";
 
     public const string LockedOut = "locked_out";
+
+    public const string QuotaExceeded = "quota_exceeded";
 }

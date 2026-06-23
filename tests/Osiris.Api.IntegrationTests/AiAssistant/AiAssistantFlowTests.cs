@@ -16,6 +16,10 @@ public sealed record AiSourceResponse(string Type, string? Id, string Label);
 
 public sealed record AiTurnResponse(Guid ConversationId, AiMessageResponse Message, List<AiSourceResponse> Sources, bool UsageLimited);
 
+public sealed record AiConversationListResponse(Guid Id, string Title, string Status, DateTime? UpdatedAtUtc, DateTime CreatedAtUtc);
+
+public sealed record AiConversationDetailResponse(Guid Id, string Title, string Status, List<AiMessageResponse> Messages);
+
 [Collection(ApiIntegrationTestCollection.Name)]
 [Trait("Category", "Integration")]
 public sealed class AiAssistantFlowTests : IAsyncLifetime
@@ -79,6 +83,68 @@ public sealed class AiAssistantFlowTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task List_and_get_return_the_user_conversation_with_messages()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        var start = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Resumo de junho" });
+        start.EnsureSuccessStatusCode();
+        var conversationId = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!.ConversationId;
+
+        var list = await client.GetFromJsonAsync<List<AiConversationListResponse>>("/api/v1/ai/conversations");
+        Assert.NotNull(list);
+        Assert.Contains(list!, conversation => conversation.Id == conversationId && conversation.Status == "Active");
+
+        var detail = await client.GetFromJsonAsync<AiConversationDetailResponse>($"/api/v1/ai/conversations/{conversationId}");
+        Assert.NotNull(detail);
+        Assert.Equal(conversationId, detail!.Id);
+        Assert.Contains(detail.Messages, message => message.Role == "user");
+        Assert.Contains(detail.Messages, message => message.Role == "assistant");
+    }
+
+    [Fact]
+    public async Task Archive_hides_conversation_from_list_and_blocks_new_messages()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        var start = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Vou arquivar" });
+        start.EnsureSuccessStatusCode();
+        var conversationId = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!.ConversationId;
+
+        var archive = await client.PostAsync($"/api/v1/ai/conversations/{conversationId}/archive", content: null);
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+
+        var list = await client.GetFromJsonAsync<List<AiConversationListResponse>>("/api/v1/ai/conversations");
+        Assert.DoesNotContain(list!, conversation => conversation.Id == conversationId);
+
+        // The archived conversation is still viewable but rejects new messages.
+        var detail = await client.GetAsync($"/api/v1/ai/conversations/{conversationId}");
+        Assert.Equal(HttpStatusCode.OK, detail.StatusCode);
+
+        var follow = await client.PostAsJsonAsync(
+            $"/api/v1/ai/conversations/{conversationId}/messages",
+            new { message = "ainda dá?" });
+        Assert.Equal(HttpStatusCode.NotFound, follow.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_and_archive_of_another_tenants_conversation_return_404()
+    {
+        var clientA = await AuthenticatedClientAsync("alice2@osiris.test");
+        var start = await clientA.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Privada de A" });
+        start.EnsureSuccessStatusCode();
+        var conversationId = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!.ConversationId;
+
+        var clientB = await AuthenticatedClientAsync("bob2@osiris.test");
+
+        Assert.Equal(HttpStatusCode.NotFound, (await clientB.GetAsync($"/api/v1/ai/conversations/{conversationId}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await clientB.PostAsync($"/api/v1/ai/conversations/{conversationId}/archive", content: null)).StatusCode);
+        Assert.DoesNotContain(
+            (await clientB.GetFromJsonAsync<List<AiConversationListResponse>>("/api/v1/ai/conversations"))!,
+            conversation => conversation.Id == conversationId);
+    }
+
+    [Fact]
     public async Task Conversation_is_isolated_per_tenant()
     {
         var clientA = await AuthenticatedClientAsync("alice@osiris.test");
@@ -102,6 +168,32 @@ public sealed class AiAssistantFlowTests : IAsyncLifetime
         var response = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "" });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Exceeding_the_daily_token_budget_returns_429()
+    {
+        var limitedFactory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, configuration) =>
+            {
+                configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["AiAssistant:DailyTokenLimitPerTenant"] = "5"
+                });
+            });
+        });
+
+        var client = limitedFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var tokens = await ApiTestHelpers.RegisterAsync(client, email: "budget@osiris.test");
+        ApiTestHelpers.Authorize(client, tokens.AccessToken);
+
+        var first = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "primeira pergunta" });
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+
+        // The first turn already spent more than the tiny budget, so the next one is rejected.
+        var second = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "segunda pergunta" });
+        Assert.Equal(HttpStatusCode.TooManyRequests, second.StatusCode);
     }
 
     [Fact]
