@@ -24,6 +24,12 @@ public sealed class GeminiOptions
     /// <summary>Cheaper model for short auxiliary tasks (titles, summaries).</summary>
     public string FastModel { get; set; } = "gemini-3.1-flash-lite";
 
+    /// <summary>Realtime voice model (Live API / bidiGenerateContent). Validate the exact id before shipping.</summary>
+    public string LiveModel { get; set; } = "gemini-2.5-flash-live-preview";
+
+    /// <summary>Optional prebuilt voice name for the Live API output.</summary>
+    public string? LiveVoice { get; set; }
+
     public double Temperature { get; set; } = 0.1;
 
     public int MaxOutputTokens { get; set; } = 2048;

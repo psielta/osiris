@@ -28,7 +28,6 @@ public interface IAiLiveSession : IAsyncDisposable
 }
 
 public sealed record AiLiveSessionRequest(
-    string Model,
     string SystemPrompt,
     IReadOnlyList<AiToolDefinition> Tools,
     AiLiveAudioConfig Audio,

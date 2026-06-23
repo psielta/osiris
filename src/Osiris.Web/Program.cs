@@ -50,6 +50,9 @@ try
 
     app.UseStaticFiles();
 
+    // Realtime voice endpoint (/assistant/voice) upgrades to a WebSocket; gated by the AiAssistantVoice flag.
+    app.UseWebSockets();
+
     app.UseSerilogRequestLogging();
 
     app.UseRouting();

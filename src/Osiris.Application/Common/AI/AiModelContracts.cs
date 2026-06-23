@@ -47,8 +47,11 @@ public sealed record AiUsage(int InputTokens, int OutputTokens, int CachedTokens
 /// </summary>
 public sealed record AiModelToolCall(string Id, string Name, JsonElement Arguments, string? Signature = null);
 
-/// <summary>A tool result returned to the model, already serialized and redacted by the server.</summary>
-public sealed record AiModelToolResult(string Name, string ResultJson);
+/// <summary>
+/// A tool result returned to the model, already serialized by the server. <see cref="Id"/> correlates to
+/// the originating call's id (used by the Live API <c>functionResponse</c>); null in the text turn loop.
+/// </summary>
+public sealed record AiModelToolResult(string Name, string ResultJson, string? Id = null);
 
 /// <summary>The JSON-schema description of a tool the model is allowed to call this turn.</summary>
 public sealed record AiToolDefinition(string Name, string Description, object ParametersSchema);

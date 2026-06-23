@@ -29,7 +29,7 @@ public sealed class AiLiveToolDispatcher : IAiLiveToolDispatcher
         foreach (var call in calls)
         {
             var outcome = await _executor.ExecuteAsync(context, call, cancellationToken);
-            results.Add(outcome.ModelResult);
+            results.Add(outcome.ModelResult with { Id = call.Id });
             records.Add(outcome.Record);
             sources.AddRange(outcome.Sources);
             proposals.AddRange(outcome.Proposals);

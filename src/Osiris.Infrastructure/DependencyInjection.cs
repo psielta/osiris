@@ -104,6 +104,9 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(geminiOptions.RequestTimeoutSeconds);
         });
 
+        // Realtime voice (Gemini Live WebSocket). Stateless factory: opens a fresh socket per session.
+        services.AddSingleton<IAiLiveSessionClient, GeminiLiveSessionClient>();
+
         return services;
     }
 }

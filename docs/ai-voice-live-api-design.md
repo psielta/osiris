@@ -13,8 +13,16 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > (reusado pelo orquestrador de texto **e** pela voz — o `AiAgentOrchestrator` foi refatorado para usá-lo sem
 > mudança de comportamento); `IAiLiveToolDispatcher` (batch para a sessão de voz); contratos provider-neutros
 > `IAiLiveSessionClient`/`IAiLiveSession`/eventos (`AiLiveContracts.cs`); flag `Features:AiAssistantVoice`. 6
-> testes novos; suíte 708 verde. **Falta:** adapter Gemini Live (WebSocket) em Infrastructure, endpoint WS no
-> Web/API, áudio no cliente (passos B–D).
+> testes novos; suíte 708 verde.
+>
+> **Passo B (servidor) — 23/06/2026.** No código (flag off): adapter `GeminiLiveSessionClient`/`GeminiLiveSession`
+> (WebSocket `BidiGenerateContent`, chave server-side, sends serializados por lock, barge-in/goAway mapeados);
+> **`GeminiLiveMessageParser`** puro (wire → eventos neutros) com **6 testes**; endpoint `GET /assistant/voice`
+> no Web (`AiVoiceController`) com relay de dois pumps (cliente↔Gemini), gating de flag (**off → 404**, verificado)
+> e auth (**não-autenticado → redirect**, verificado); `UseWebSockets`; `Gemini:LiveModel` + flag
+> `Features:AiAssistantVoice`; `AiModelToolResult.Id` para correlacionar o `functionResponse`. **716 verde.**
+> **Verificável agora:** parser + gating/auth do endpoint. **Precisa de teste manual (browser+mic):** o áudio em
+> si e o relay ao vivo. **Falta:** áudio no navegador (`AudioWorklet` + botão de microfone) — passo C; mobile — passo D.
 
 ---
 
