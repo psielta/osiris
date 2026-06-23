@@ -16,7 +16,7 @@ linha de runtime muda até ser aprovado. **Não** há bump de versão (trabalho 
 ### 1.1 Objetivo
 - Conversa por **voz** (áudio↔áudio) com o assistente financeiro, em **Web e mobile**, mantendo também o
   chat de texto atual.
-- **Reaproveitar** as 37 tools (`IAiTool`), o registry/policy, o protocolo de proposta e a auditoria.
+- **Reaproveitar** as 36 tools (16 leitura + 20 escrita) (`IAiTool`), o registry/policy, o protocolo de proposta e a auditoria.
 - Preservar integralmente o modelo de segurança do blueprint (Seção 17).
 
 ### 1.2 Não-objetivos (desta entrega)
@@ -38,12 +38,18 @@ linha de runtime muda até ser aprovado. **Não** há bump de versão (trabalho 
 | Function calling | suportado na sessão; **2.5 Flash Live = async (`NON_BLOCKING`)**, **3.1 Flash Live = sequencial** |
 | Modelos live | `gemini-2.5-flash-live-preview` (primário), `gemini-2.5-flash-native-audio-preview-12-2025` (áudio nativo), `gemini-3.1-flash-live-preview` |
 | Contexto | ~32k tokens (live padrão), 128k (native audio) |
-| Sessão | duração limitada, extensível por **session resumption**; servidor emite `GoAway` antes de encerrar |
+| Sessão | conexão ~10 min e sessão áudio ~15 min; **session resumption** estende (token de resumption ~2h); servidor emite `GoAway` antes de encerrar (confirmar números na doc de session management) |
 | Conexão | **server-to-server (proxy)** ou **client-to-server** (com ephemeral tokens) |
 
-**Modelo escolhido:** `gemini-2.5-flash-live-preview` — é o que suporta **async function calling**, essencial
-para um agente com muitas tools (não trava o áudio enquanto a tool roda). `native-audio` fica como opção
-futura por qualidade de voz; `3.1-flash-live` é descartado para escrita por ser sequencial.
+**Modelo escolhido:** half-cascade com **async function calling** (não trava o áudio enquanto a tool roda),
+essencial para um agente com muitas tools. **O id exato deve ser validado via Models API/AI Studio na
+implementação** — `gemini-2.5-flash-live-preview` pode estar desatualizado; a página de modelos lista
+`gemini-2.5-flash-native-audio-preview-12-2025` para o 2.5 Flash Live. Não hardcode o id (já é config em
+`Gemini:LiveModel`). `3.1-flash-live` é descartado para escrita por ser sequencial.
+
+> **Endpoint/auth por modo (confirmar na implementação):** server-to-server usa API key em
+> `…/v1beta/…:BidiGenerateContent?key=…`; cliente-direto usa ephemeral token em
+> `…/v1alpha/…:BidiGenerateContentConstrained?access_token=…`. Como o MVP é proxy, usamos o primeiro.
 
 ---
 
@@ -75,7 +81,7 @@ Voz pode *criar* a proposta e *narrar* o impacto, mas **não executa** sem o con
 
 | Componente existente | Reuso no voz |
 |---|---|
-| `IAiTool` (37 tools) | `Name`/`Description`/`InputSchema` viram `tools.functionDeclarations` no `setup` |
+| `IAiTool` (36 tools (16 leitura + 20 escrita)) | `Name`/`Description`/`InputSchema` viram `tools.functionDeclarations` no `setup` |
 | `IAiToolRegistry.GetAllowedTools` | mesma seleção por flag de writes |
 | `IAiToolExecutionPolicy` | mesmo gating por risco |
 | `AiAgentOrchestrator.ExecuteSingleAsync` (lógica) | extrair para um `AiLiveToolDispatcher` reutilizável (find→policy→execute→redact→record→propostas) |
@@ -173,7 +179,10 @@ header server-side. Fluxo:
    `systemInstruction` (do `AiPromptBuilder`), `tools.functionDeclarations` (do registry), config de voz.
 2. **realtimeInput**: streaming de `audio` (PCM16 16kHz base64) conforme chega do cliente.
 3. **toolCall** (do servidor Gemini): vira `AiLiveToolCall` → `IAiLiveToolDispatcher.DispatchAsync` →
-   `toolResponse`/`functionResponses` de volta. Com `NON_BLOCKING`, o áudio segue enquanto a tool roda.
+   `toolResponse`/`functionResponses` de volta. `NON_BLOCKING` é **opt-in por function declaration**
+   (`behavior: NON_BLOCKING`) e a resposta carrega `scheduling` (`INTERRUPT`/`WHEN_IDLE`/`SILENT`). **Tools de
+   leitura** podem ser `NON_BLOCKING` (áudio segue enquanto roda); **tools de escrita** devem ser
+   **blocking** ou `WHEN_IDLE` — senão o modelo pode narrar a proposta antes de ela existir.
 4. **serverContent**: chunks de áudio 24kHz → `AiLiveAudioChunk`; transcrições; `turnComplete`.
 5. **session resumption** + `GoAway`: reabrir sessão preservando contexto; sinalizar `goingaway` ao cliente.
 
@@ -209,8 +218,10 @@ header server-side. Fluxo:
 "Features": { "AiAssistantVoice": false },          // desligado por padrão
 "Gemini": { "LiveModel": "gemini-2.5-flash-live-preview", "LiveVoice": "..." },
 "AiAssistant": {
-  "VoiceSessionMaxMinutes": 10,
+  "VoiceConnectMaxMinutes": 10,                       // limite de conexão (reabrir via resumption)
+  "VoiceSessionMaxMinutes": 30,                       // teto lógico da sessão (várias conexões)
   "VoiceDailyAudioSecondsPerTenant": 1800,           // orçamento de áudio separado
+  "VoiceMaxConcurrentSessionsPerUser": 1,            // uma sessão de voz por usuário
   "VoiceWritesEnabled": false                         // escrita por voz começa OFF
 }
 ```
@@ -293,3 +304,56 @@ header server-side. Fluxo:
 | Escrita indevida por voz | proposta + confirmação por toque (sem confirm só-voz no MVP) |
 | Sessão cai (GoAway) | session resumption + reconexão no cliente |
 | WS atrás do Caddy com timeout | ajustar timeouts; heartbeats/ping |
+
+---
+
+## 19. Barge-in / interrupção (novo)
+Voz precisa de política explícita de interrupção:
+- O usuário falar durante a resposta = **barge-in**: parar o playback imediatamente, **descartar o áudio
+  bufferizado** ainda não tocado e sinalizar `INTERRUPT` ao modelo.
+- Tool calls **em voo** quando há barge-in: cancelar (cancellation token) read tools; **nunca** cancelar a
+  persistência de uma proposta já criada (mas a narração pode ser interrompida).
+- Definir VAD (server-side do Gemini) vs PTT no cliente — PTT no MVP simplifica barge-in.
+
+## 20. Backpressure, capacidade e DoS (novo)
+O proxy dobra conexões/tráfego; sem limites vira superfície de DoS:
+- **Bounded channels** (System.Threading.Channels) em ambas as direções, com descarte/medição quando cheio.
+- **Max bytes por frame** e **tamanho máximo de fila**; `WebSocketOptions` com limites de buffer.
+- **Ping/pong** e timeout de idle; cancelamento ponta a ponta.
+- **Rate limit** de sessões e de segundos de áudio por **usuário/tenant/IP** (além do orçamento diário).
+- **Uma sessão de voz por usuário** (`VoiceMaxConcurrentSessionsPerUser=1`).
+- Teste de **carga** antes de ligar em produção (Kestrel + Caddy timeouts).
+
+## 21. Erro e reconexão (novo)
+- `GoAway` → reabrir com **resumption handle** preservando contexto; avisar `goingaway` ao cliente.
+- Queda do Gemini / `429` / `5xx` / áudio inválido → mensagem amigável + fallback para o chat de **texto**.
+- Reconexão do cliente (web/mobile) com backoff; idempotência de `start`.
+
+## 22. Hardening do WebSocket (detalhe — novo)
+- Autenticação **no handshake/upgrade** (cookie no Web, JWT na API); rejeitar antes do upgrade.
+- **Origin allowlist** + **nonce anti-CSRF** no Web (WS não tem o antiforgery padrão por header).
+- **Confirmação de proposta de preferência pelo endpoint REST atual** (`POST /actions/{id}/confirm`), não por
+  mensagem WS crua — reusa o antiforgery/idempotência já testados.
+- `conversationId` sempre revalidado contra tenant/user; **resumption handle nunca cru ao cliente** (escopado
+  por tenant/user/conversation e com expiração).
+- Flag-off → handshake responde como recurso inexistente.
+
+## 23. Privacidade da transcrição (novo)
+A transcrição de voz é **dado financeiro sensível**:
+- Não persistir áudio bruto por padrão; transcrição entra na retenção/exportação/exclusão já existentes.
+- Avaliar criptografia em repouso / controle de acesso para transcrições; logs mínimos (sem conteúdo).
+
+## 24. Observabilidade (novo — vira bloqueador em voz)
+Métricas mínimas para operar voz: segundos de áudio in/out, profundidade de fila, close codes, latência p95
+(captura→primeiro áudio), latência por tool, ciclo de vida de proposta e custo por sessão/tenant.
+
+---
+
+## 25. Changelog do design
+- **23/06/2026 — revisão externa (Codex CLI):** corrigida a contagem de tools (**36** = 16 leitura + 20
+  escrita, não 37); modelo live marcado para validação (não hardcodar id); limites de sessão separados
+  (conexão ~10 min vs sessão ~15 min, resumption ~2h); `NON_BLOCKING` detalhado (opt-in + `scheduling`,
+  blocking/`WHEN_IDLE` para escrita); endpoints por modo (`v1beta key` vs `v1alpha access_token`); e
+  adicionadas as seções 19–24 (barge-in, backpressure/DoS, erro/reconexão, hardening do WS, privacidade da
+  transcrição, observabilidade). Nota de implementação: `AiAgentOrchestrator.ExecuteSingleAsync` é privado —
+  **extrair** para `AiLiveToolDispatcher` reutilizável.
