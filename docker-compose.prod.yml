@@ -49,6 +49,7 @@ services:
       Gemini__ApiKey: ${GEMINI_API_KEY:-}
       Features__AiAssistant: ${AI_ASSISTANT_ENABLED:-false}
       Features__AiAssistantWrites: ${AI_ASSISTANT_WRITES:-false}
+      Features__AiAssistantVoice: ${AI_ASSISTANT_VOICE:-false}
     depends_on:
       osiris-db:
         condition: service_healthy

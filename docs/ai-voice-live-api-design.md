@@ -21,8 +21,17 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > no Web (`AiVoiceController`) com relay de dois pumps (cliente↔Gemini), gating de flag (**off → 404**, verificado)
 > e auth (**não-autenticado → redirect**, verificado); `UseWebSockets`; `Gemini:LiveModel` + flag
 > `Features:AiAssistantVoice`; `AiModelToolResult.Id` para correlacionar o `functionResponse`. **716 verde.**
-> **Verificável agora:** parser + gating/auth do endpoint. **Precisa de teste manual (browser+mic):** o áudio em
-> si e o relay ao vivo. **Falta:** áudio no navegador (`AudioWorklet` + botão de microfone) — passo C; mobile — passo D.
+> **Verificável agora:** parser + gating/auth do endpoint.
+>
+> **Passo C (áudio no navegador) — 23/06/2026 (v0.20.0).** No código (flag off): AudioWorklets
+> `capture-worklet.js` (mic→PCM16 16 kHz, contexto criado a 16 kHz) e `playback-worklet.js` (fila PCM16 24 kHz
+> com `flush` p/ barge-in); `voice-client.js` (`window.OsirisVoice.create`: abre o WS, streaming contínuo de
+> áudio, toca a resposta, repassa eventos JSON); **botão de microfone** no `_AssistantWidget` (só quando a flag
+> está on) com legenda ao vivo (transcrição) e barra de status; mapeamento de env `AI_ASSISTANT_VOICE` no
+> compose. Build verde; o widget continua renderizando com a flag off (132 testes Web verdes).
+> **Precisa de teste manual (browser+mic):** ligar `AI_ASSISTANT_VOICE=true`, abrir o chat, clicar 🎤 e falar —
+> aí valida-se o áudio/relay ao vivo e o id do modelo `LiveModel`. **Falta:** mobile (passo D), escrita por voz
+> (Fase 2), persistência da conversa de voz e hardening (orçamento de áudio, resumption, métricas).
 
 ---
 

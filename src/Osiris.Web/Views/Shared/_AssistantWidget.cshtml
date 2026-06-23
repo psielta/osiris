@@ -3,6 +3,8 @@
     Talks to the cookie-authenticated /assistant/widget/* JSON endpoints via fetch, sending the
     antiforgery token in the RequestVerificationToken header.
 *@
+@inject Microsoft.Extensions.Options.IOptions<Osiris.Application.Common.AI.AiFeatureOptions> AiFeatures
+@{ var voiceEnabled = AiFeatures.Value.AiAssistantVoice; }
 <style>
     [x-cloak]{display:none !important;}
     .assistant-md p{margin:0;}
@@ -34,6 +36,12 @@
                 <p class="text-[11px] text-slate-400">Respostas usam seus dados e podem conter erros.</p>
             </div>
             <div class="flex items-center gap-1">
+@if (voiceEnabled)
+{
+                <button type="button" x-on:click="toggleVoice()" x-bind:title="voiceActive ? 'Encerrar voz' : 'Falar com o assistente'"
+                        class="rounded p-1 transition"
+                        x-bind:class="voiceActive ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-amber-600'">🎤</button>
+}
                 <button type="button" x-on:click="reset()" title="Nova conversa"
                         class="rounded p-1 text-slate-400 transition hover:text-amber-600">＋</button>
                 <button type="button" x-on:click="open = false" title="Fechar"
@@ -70,7 +78,23 @@
             <div x-show="sending" class="flex justify-start">
                 <div class="rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-500 dark:bg-slate-800">Pensando…</div>
             </div>
+
+            <template x-if="voiceUser">
+                <div class="flex justify-end">
+                    <div class="max-w-[85%] rounded-2xl bg-amber-400/80 px-3 py-2 text-sm text-white" x-text="voiceUser"></div>
+                </div>
+            </template>
+            <template x-if="voiceAssistant">
+                <div class="flex justify-start">
+                    <div class="max-w-[85%] rounded-2xl bg-slate-100 px-3 py-2 text-sm italic text-slate-600 dark:bg-slate-800 dark:text-slate-300" x-text="voiceAssistant"></div>
+                </div>
+            </template>
         </div>
+
+        <template x-if="voiceActive">
+            <div class="border-t border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10"
+                 x-text="voiceStatusLabel()"></div>
+        </template>
 
         <form x-on:submit.prevent="send()" class="border-t border-slate-200 p-2 dark:border-slate-700">
             <div class="flex items-end gap-2">
@@ -93,6 +117,11 @@
             conversationId: null,
             messages: [],
             proposals: [],
+            voiceActive: false,
+            voiceStatus: 'idle',
+            voiceUser: '',
+            voiceAssistant: '',
+            voiceClient: null,
             token() {
                 return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
             },
@@ -216,7 +245,65 @@
                 } catch (e) { /* ignore */ }
                 this.proposals = this.proposals.filter(p => p.id !== id);
                 this.scrollDown();
+            },
+            voiceStatusLabel() {
+                const labels = {
+                    connecting: 'Conectando…',
+                    listening: '🎙️ Ouvindo — pode falar',
+                    interrupted: '🎙️ Ouvindo — pode falar',
+                    goingaway: 'Reconectando…',
+                    error: 'Erro na voz',
+                    closed: 'Voz encerrada'
+                };
+                return labels[this.voiceStatus] || 'Voz ativa';
+            },
+            async toggleVoice() {
+                if (this.voiceActive) { this.stopVoice(); return; }
+                if (!window.OsirisVoice) { return; }
+                this.open = true;
+                this.voiceActive = true;
+                this.voiceStatus = 'connecting';
+                this.voiceUser = '';
+                this.voiceAssistant = '';
+                this.voiceClient = await window.OsirisVoice.create({
+                    onEvent: (evt) => this.onVoiceEvent(evt),
+                    onError: (msg) => {
+                        this.messages.push({ role: 'assistant', content: msg });
+                        this.stopVoice();
+                    }
+                });
+            },
+            onVoiceEvent(evt) {
+                if (evt.type === 'status') {
+                    if (evt.value === 'closed') { this.stopVoice(); return; }
+                    if (evt.value === 'idle') { this.flushVoiceTurn(); return; }
+                    if (evt.value === 'interrupted') { this.voiceAssistant = ''; }
+                    this.voiceStatus = evt.value;
+                } else if (evt.type === 'transcript') {
+                    if (evt.role === 'user') { this.voiceUser += evt.text; }
+                    else { this.voiceAssistant += evt.text; }
+                    this.scrollDown();
+                } else if (evt.type === 'proposal' && evt.proposal) {
+                    this.proposals.push(evt.proposal);
+                }
+            },
+            flushVoiceTurn() {
+                if (this.voiceUser.trim()) { this.messages.push({ role: 'user', content: this.voiceUser.trim() }); }
+                if (this.voiceAssistant.trim()) { this.messages.push({ role: 'assistant', content: this.voiceAssistant.trim() }); }
+                this.voiceUser = '';
+                this.voiceAssistant = '';
+                this.scrollDown();
+            },
+            stopVoice() {
+                if (this.voiceClient) { try { this.voiceClient.stop(); } catch (e) {} this.voiceClient = null; }
+                this.flushVoiceTurn();
+                this.voiceActive = false;
+                this.voiceStatus = 'idle';
             }
         };
     }
 </script>
+@if (voiceEnabled)
+{
+    <script src="~/js/voice/voice-client.js" asp-append-version="true"></script>
+}
