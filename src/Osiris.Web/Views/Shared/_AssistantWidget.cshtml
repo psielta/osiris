@@ -92,8 +92,11 @@
         </div>
 
         <template x-if="voiceActive">
-            <div class="border-t border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10"
-                 x-text="voiceStatusLabel()"></div>
+            <div class="flex items-center justify-between gap-2 border-t border-amber-200 bg-amber-50 px-3 py-1.5 dark:border-amber-500/30 dark:bg-amber-500/10">
+                <span class="text-[11px] font-medium text-amber-700 dark:text-amber-300" x-text="voiceStatusLabel()"></span>
+                <button type="button" x-on:click="stopVoice()"
+                        class="rounded-md bg-red-500 px-2 py-0.5 text-[11px] font-medium text-white transition hover:bg-red-600">Encerrar voz</button>
+            </div>
         </template>
 
         <form x-on:submit.prevent="send()" class="border-t border-slate-200 p-2 dark:border-slate-700">
@@ -288,8 +291,11 @@
                 }
             },
             flushVoiceTurn() {
-                if (this.voiceUser.trim()) { this.messages.push({ role: 'user', content: this.voiceUser.trim() }); }
-                if (this.voiceAssistant.trim()) { this.messages.push({ role: 'assistant', content: this.voiceAssistant.trim() }); }
+                const user = this.voiceUser.trim();
+                const assistant = this.voiceAssistant.trim();
+                // Skip transcripts that are just punctuation/noise (e.g. a lone ".").
+                if (/[\p{L}\p{N}]/u.test(user)) { this.messages.push({ role: 'user', content: user }); }
+                if (/[\p{L}\p{N}]/u.test(assistant)) { this.messages.push({ role: 'assistant', content: assistant }); }
                 this.voiceUser = '';
                 this.voiceAssistant = '';
                 this.scrollDown();

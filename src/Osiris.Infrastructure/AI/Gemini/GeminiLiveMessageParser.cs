@@ -43,18 +43,14 @@ public static class GeminiLiveMessageParser
         {
             foreach (var part in parts.EnumerateArray())
             {
+                // Only audio. In AUDIO response mode the model's text parts are its (often English) thinking
+                // trace, not the answer — the spoken answer is transcribed separately via outputTranscription.
                 if (part.TryGetProperty("inlineData", out var inlineData)
                     && inlineData.TryGetProperty("data", out var dataEl)
                     && dataEl.ValueKind == JsonValueKind.String
                     && dataEl.GetString() is { Length: > 0 } base64)
                 {
                     events.Add(new AiLiveAudioChunk(Convert.FromBase64String(base64)));
-                }
-                else if (part.TryGetProperty("text", out var textEl)
-                    && textEl.ValueKind == JsonValueKind.String
-                    && textEl.GetString() is { Length: > 0 } text)
-                {
-                    events.Add(new AiLiveTranscript(text, IsUser: false, Final: false));
                 }
             }
         }
