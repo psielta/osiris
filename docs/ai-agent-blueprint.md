@@ -9,6 +9,8 @@
 
 > Esta seção é o **ponto de retomada**. Foi escrita em 23/06/2026 após a primeira PR de código. Leia-a antes de continuar: ela diz o que já existe, onde está, quais desvios conscientes foram feitos em relação a este blueprint e o que falta por fase.
 
+> **Verificado ao vivo (23/06/2026):** smoke test ponta a ponta no Web contra o Gemini real (`gemini-3.5-flash`) — leitura (`get_financial_snapshot`), escrita por proposta (`propose_bill_creation`) e confirmação criando a conta a pagar no banco. Correção necessária descoberta no teste ao vivo: o adapter precisa capturar e reenviar o **`thoughtSignature`** do `functionCall` (exigência do Gemini 3.x) — feito em `AiModelToolCall.Signature` + `GeminiAiModelClient`. **UI Web migrou para um widget flutuante** (`_AssistantWidget.cshtml` no layout autenticado, via fetch + antiforgery por header) em vez da página cheia; a página `/assistant` continua existindo mas não é mais linkada no menu.
+
 ### 0.1 Entregue nesta etapa (Fase 0 + Fase 1 + 1ª tool de leitura)
 
 Decisões tomadas com o usuário:

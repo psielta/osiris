@@ -201,4 +201,82 @@ public sealed class AiAssistantController : AppController
             ? RedirectToAction(nameof(Index), new { conversation = id })
             : RedirectToAction(nameof(Index));
     }
+
+    // ----- Floating widget (JSON) -----
+
+    [HttpPost("widget/send")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WidgetSend([FromBody] AssistantWidgetSendRequest request, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Message))
+        {
+            return BadRequest(new { error = "Digite uma mensagem." });
+        }
+
+        try
+        {
+            var result = await _mediator.Send(new SendAiMessageCommand(request.ConversationId, request.Message), cancellationToken);
+            if (result.IsFailure)
+            {
+                var status = result.Errors.Any(error => error.Code == "quota_exceeded")
+                    ? StatusCodes.Status429TooManyRequests
+                    : StatusCodes.Status400BadRequest;
+                return StatusCode(status, new { error = result.Errors.FirstOrDefault()?.Message ?? "Não foi possível responder." });
+            }
+
+            var turn = result.Value!;
+            return Ok(new
+            {
+                conversationId = turn.ConversationId,
+                reply = turn.Message.Content,
+                proposals = turn.Proposals.Select(proposal => new
+                {
+                    id = proposal.Id,
+                    displaySummary = proposal.DisplaySummary,
+                    impactSummary = proposal.ImpactSummary
+                })
+            });
+        }
+        catch (ValidationException exception)
+        {
+            return BadRequest(new { error = exception.Errors.FirstOrDefault()?.ErrorMessage ?? "Mensagem inválida." });
+        }
+        catch (AiModelException exception)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { error = exception.Message });
+        }
+    }
+
+    [HttpPost("widget/actions/{id:guid}/confirm")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WidgetConfirm(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new ConfirmActionCommand(id), cancellationToken);
+        return result.IsSuccess
+            ? Ok(new { status = result.Value!.Status })
+            : StatusCode(StatusCodes.Status409Conflict, new { error = result.Errors.FirstOrDefault()?.Message ?? "Não foi possível confirmar." });
+    }
+
+    [HttpPost("widget/actions/{id:guid}/reject")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> WidgetReject(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        await _mediator.Send(new RejectActionCommand(id), cancellationToken);
+        return Ok(new { ok = true });
+    }
 }

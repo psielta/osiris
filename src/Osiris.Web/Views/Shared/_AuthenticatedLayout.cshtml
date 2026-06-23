@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Options.IOptions<Osiris.Application.Common.AI.AiFeatureOptions> AiFeatures
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -22,6 +23,11 @@
             </main>
         </div>
     </div>
+
+    @if (AiFeatures.Value.AiAssistant)
+    {
+        <partial name="_AssistantWidget" />
+    }
 
     <script src="~/lib/alpinejs/cdn.min.js" defer asp-append-version="true"></script>
     <script src="~/lib/htmx/htmx.min.js" asp-append-version="true"></script>

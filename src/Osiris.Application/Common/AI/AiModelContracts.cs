@@ -40,8 +40,12 @@ public sealed record AiUsage(int InputTokens, int OutputTokens, int CachedTokens
     public static AiUsage Empty { get; } = new(0, 0, 0);
 }
 
-/// <summary>A single tool-call request emitted by the model. <see cref="Id"/> may be empty for providers (such as Gemini) that match responses by name/order.</summary>
-public sealed record AiModelToolCall(string Id, string Name, JsonElement Arguments);
+/// <summary>
+/// A single tool-call request emitted by the model. <see cref="Id"/> may be empty for providers (such
+/// as Gemini) that match responses by name/order. <see cref="Signature"/> is an opaque provider token
+/// (Gemini's <c>thoughtSignature</c>) that must be echoed back with the call on the next turn.
+/// </summary>
+public sealed record AiModelToolCall(string Id, string Name, JsonElement Arguments, string? Signature = null);
 
 /// <summary>A tool result returned to the model, already serialized and redacted by the server.</summary>
 public sealed record AiModelToolResult(string Name, string ResultJson);

@@ -12,3 +12,6 @@ public sealed class AiAssistantIndexViewModel
     public IReadOnlyCollection<AiActionProposalDto> Proposals { get; init; } =
         Array.Empty<AiActionProposalDto>();
 }
+
+/// <summary>Body posted by the floating assistant widget (JSON fetch).</summary>
+public sealed record AssistantWidgetSendRequest(Guid? ConversationId, string? Message);

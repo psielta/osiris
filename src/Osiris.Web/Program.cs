@@ -28,6 +28,8 @@ try
     });
 
     builder.Services.AddControllersWithViews();
+    // Allow the floating assistant widget to send the antiforgery token via a request header (fetch).
+    builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddHttpContextAccessor();

@@ -127,14 +127,22 @@ public sealed class GeminiAiModelClient : IAiModelClient
                     var callParts = new JsonArray();
                     foreach (var call in message.ToolCalls)
                     {
-                        callParts.Add(new JsonObject
+                        var callPart = new JsonObject
                         {
                             ["functionCall"] = new JsonObject
                             {
                                 ["name"] = call.Name,
                                 ["args"] = ElementToNode(call.Arguments)
                             }
-                        });
+                        };
+
+                        // Gemini 3.x requires echoing the thoughtSignature it returned with the call.
+                        if (!string.IsNullOrEmpty(call.Signature))
+                        {
+                            callPart["thoughtSignature"] = call.Signature;
+                        }
+
+                        callParts.Add(callPart);
                     }
 
                     contents.Add(new JsonObject { ["role"] = "model", ["parts"] = callParts });
@@ -240,7 +248,7 @@ public sealed class GeminiAiModelClient : IAiModelClient
                 var arguments = part.FunctionCall.Args is { } args && args.ValueKind != JsonValueKind.Undefined
                     ? args.Clone()
                     : EmptyArguments;
-                toolCalls.Add(new AiModelToolCall(string.Empty, name, arguments));
+                toolCalls.Add(new AiModelToolCall(string.Empty, name, arguments, part.ThoughtSignature));
             }
         }
 
@@ -281,7 +289,7 @@ public sealed class GeminiAiModelClient : IAiModelClient
 
     private sealed record GeminiContent(List<GeminiPart>? Parts, string? Role);
 
-    private sealed record GeminiPart(string? Text, GeminiFunctionCall? FunctionCall);
+    private sealed record GeminiPart(string? Text, GeminiFunctionCall? FunctionCall, string? ThoughtSignature);
 
     private sealed record GeminiFunctionCall(string? Name, JsonElement? Args);
 

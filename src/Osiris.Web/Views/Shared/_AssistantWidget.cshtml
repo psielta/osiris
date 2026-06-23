@@ -1,0 +1,151 @@
+@*
+    Floating assistant widget: a fixed bottom-right button that opens a chat panel over the layout.
+    Talks to the cookie-authenticated /assistant/widget/* JSON endpoints via fetch, sending the
+    antiforgery token in the RequestVerificationToken header.
+*@
+<style>[x-cloak]{display:none !important;}</style>
+
+<div x-data="assistantWidget()" x-cloak>
+    @Html.AntiForgeryToken()
+
+    <button type="button" x-show="!open" x-on:click="open = true"
+            class="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500 text-2xl text-white shadow-lg transition hover:bg-amber-600"
+            title="Assistente financeiro" aria-label="Abrir assistente">💬</button>
+
+    <div x-show="open" x-cloak
+         class="fixed bottom-5 right-5 z-50 flex h-[34rem] max-h-[85vh] w-[22rem] max-w-[92vw] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+        <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+            <div>
+                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Assistente financeiro</p>
+                <p class="text-[11px] text-slate-400">Respostas usam seus dados e podem conter erros.</p>
+            </div>
+            <div class="flex items-center gap-1">
+                <button type="button" x-on:click="reset()" title="Nova conversa"
+                        class="rounded p-1 text-slate-400 transition hover:text-amber-600">＋</button>
+                <button type="button" x-on:click="open = false" title="Fechar"
+                        class="rounded p-1 text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200">✕</button>
+            </div>
+        </header>
+
+        <div x-ref="scroll" class="flex-1 space-y-3 overflow-y-auto p-4">
+            <template x-if="messages.length === 0">
+                <p class="text-sm text-slate-400">Pergunte sobre suas finanças. Ex.: "Resuma minha situação deste mês".</p>
+            </template>
+
+            <template x-for="(m, i) in messages" x-bind:key="i">
+                <div class="flex" x-bind:class="m.role === 'user' ? 'justify-end' : 'justify-start'">
+                    <div class="max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm"
+                         x-bind:class="m.role === 'user' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100'"
+                         x-text="m.content"></div>
+                </div>
+            </template>
+
+            <template x-for="p in proposals" x-bind:key="p.id">
+                <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                    <p class="text-sm font-medium text-slate-900 dark:text-slate-100" x-text="p.displaySummary"></p>
+                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-300" x-text="p.impactSummary"></p>
+                    <div class="mt-2 flex gap-2">
+                        <button type="button" x-on:click="confirm(p.id)"
+                                class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-emerald-700">Confirmar</button>
+                        <button type="button" x-on:click="reject(p.id)"
+                                class="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200">Rejeitar</button>
+                    </div>
+                </div>
+            </template>
+
+            <div x-show="sending" class="flex justify-start">
+                <div class="rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-500 dark:bg-slate-800">Pensando…</div>
+            </div>
+        </div>
+
+        <form x-on:submit.prevent="send()" class="border-t border-slate-200 p-2 dark:border-slate-700">
+            <div class="flex items-end gap-2">
+                <textarea x-model="input" rows="1" maxlength="4000" placeholder="Mensagem…"
+                          x-on:keydown.enter.prevent="send()"
+                          class="flex-1 resize-none rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"></textarea>
+                <button type="submit" x-bind:disabled="sending"
+                        class="rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-amber-600 disabled:opacity-60">➤</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function assistantWidget() {
+        return {
+            open: false,
+            input: '',
+            sending: false,
+            conversationId: null,
+            messages: [],
+            proposals: [],
+            token() {
+                return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            },
+            reset() {
+                this.conversationId = null;
+                this.messages = [];
+                this.proposals = [];
+                this.input = '';
+            },
+            scrollDown() {
+                this.$nextTick(() => { const el = this.$refs.scroll; if (el) el.scrollTop = el.scrollHeight; });
+            },
+            async send() {
+                const text = this.input.trim();
+                if (!text || this.sending) return;
+                this.messages.push({ role: 'user', content: text });
+                this.input = '';
+                this.sending = true;
+                this.scrollDown();
+                try {
+                    const res = await fetch('/assistant/widget/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.token() },
+                        body: JSON.stringify({ conversationId: this.conversationId, message: text })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        this.messages.push({ role: 'assistant', content: err.error || 'Não foi possível responder agora.' });
+                    } else {
+                        const data = await res.json();
+                        this.conversationId = data.conversationId;
+                        this.messages.push({ role: 'assistant', content: data.reply });
+                        this.proposals = data.proposals || [];
+                    }
+                } catch (e) {
+                    this.messages.push({ role: 'assistant', content: 'Falha de conexão com o assistente.' });
+                } finally {
+                    this.sending = false;
+                    this.scrollDown();
+                }
+            },
+            async confirm(id) {
+                try {
+                    const res = await fetch(`/assistant/widget/actions/${id}/confirm`, {
+                        method: 'POST', headers: { 'RequestVerificationToken': this.token() }
+                    });
+                    if (res.ok) {
+                        this.proposals = this.proposals.filter(p => p.id !== id);
+                        this.messages.push({ role: 'assistant', content: 'Pronto! Registrei para você.' });
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        this.messages.push({ role: 'assistant', content: err.error || 'Não foi possível confirmar.' });
+                    }
+                } catch (e) {
+                    this.messages.push({ role: 'assistant', content: 'Falha ao confirmar.' });
+                }
+                this.scrollDown();
+            },
+            async reject(id) {
+                try {
+                    await fetch(`/assistant/widget/actions/${id}/reject`, {
+                        method: 'POST', headers: { 'RequestVerificationToken': this.token() }
+                    });
+                } catch (e) { /* ignore */ }
+                this.proposals = this.proposals.filter(p => p.id !== id);
+                this.scrollDown();
+            }
+        };
+    }
+</script>
