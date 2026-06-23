@@ -29,9 +29,13 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > áudio, toca a resposta, repassa eventos JSON); **botão de microfone** no `_AssistantWidget` (só quando a flag
 > está on) com legenda ao vivo (transcrição) e barra de status; mapeamento de env `AI_ASSISTANT_VOICE` no
 > compose. Build verde; o widget continua renderizando com a flag off (132 testes Web verdes).
-> **Precisa de teste manual (browser+mic):** ligar `AI_ASSISTANT_VOICE=true`, abrir o chat, clicar 🎤 e falar —
-> aí valida-se o áudio/relay ao vivo e o id do modelo `LiveModel`. **Falta:** mobile (passo D), escrita por voz
-> (Fase 2), persistência da conversa de voz e hardening (orçamento de áudio, resumption, métricas).
+> **Modelo live validado ao vivo (23/06/2026, v0.20.1).** Smoke test dirigindo `GeminiLiveSessionClient` contra
+> o Gemini real provou que os ids `*-flash-live-preview` (incl. o default antigo) **não respondem**; o que
+> funciona é **`gemini-2.5-flash-native-audio-preview-12-2025`** (retornou áudio + transcrição "tudo certo" +
+> turnComplete). Default corrigido em `GeminiOptions`/appsettings; override por env `GEMINI_LIVE_MODEL` no
+> compose. **Confirmado server→Gemini:** conexão, setup, function declarations aceitas, parser de áudio/transcrição.
+> Falta só o teste de **áudio no navegador** (mic) pelo usuário. **Falta na trilha:** mobile (passo D), escrita
+> por voz (Fase 2), persistência da conversa de voz e hardening (orçamento de áudio, resumption, métricas).
 
 ---
 

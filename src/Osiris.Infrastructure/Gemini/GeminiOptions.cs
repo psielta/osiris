@@ -24,8 +24,11 @@ public sealed class GeminiOptions
     /// <summary>Cheaper model for short auxiliary tasks (titles, summaries).</summary>
     public string FastModel { get; set; } = "gemini-3.1-flash-lite";
 
-    /// <summary>Realtime voice model (Live API / bidiGenerateContent). Validate the exact id before shipping.</summary>
-    public string LiveModel { get; set; } = "gemini-2.5-flash-live-preview";
+    /// <summary>
+    /// Realtime voice model (Live API / bidiGenerateContent). Verified working 23/06/2026 via live smoke test:
+    /// the half-cascade "*-live-preview" ids returned nothing; this native-audio id streams audio + transcript.
+    /// </summary>
+    public string LiveModel { get; set; } = "gemini-2.5-flash-native-audio-preview-12-2025";
 
     /// <summary>Optional prebuilt voice name for the Live API output.</summary>
     public string? LiveVoice { get; set; }
