@@ -16,4 +16,7 @@ public sealed class AiFeatureOptions
 
     /// <summary>Separate switch for the mobile surface, independent from the web one.</summary>
     public bool AiAssistantMobile { get; set; }
+
+    /// <summary>Realtime voice agent (Gemini Live API). Off by default; requires <see cref="AiAssistant"/>.</summary>
+    public bool AiAssistantVoice { get; set; }
 }

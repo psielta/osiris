@@ -37,6 +37,9 @@ public static class DependencyInjection
         services.AddSingleton<IAiPromptBuilder, AiPromptBuilder>();
         services.AddSingleton<IAiToolExecutionPolicy, AiToolExecutionPolicy>();
         services.AddScoped<IAiToolRegistry, AiToolRegistry>();
+        // Shared single-tool executor (reused by the text turn loop and the realtime voice dispatcher).
+        services.AddScoped<IAiToolCallExecutor, AiToolCallExecutor>();
+        services.AddScoped<IAiLiveToolDispatcher, AiLiveToolDispatcher>();
         services.AddScoped<IAiAgentOrchestrator, AiAgentOrchestrator>();
 
         // Read tools (Section 8.1). Each is whitelisted; the registry/policy gate exposure and execution.

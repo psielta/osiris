@@ -13,12 +13,14 @@ internal static class EvaluationHarness
     public static AiAgentOrchestrator CreateOrchestrator(IAiModelClient modelClient, params IAiTool[] tools)
     {
         var options = Options.Create(new AiAgentOptions());
+        var registry = new AiToolRegistry(tools);
+        var executor = new AiToolCallExecutor(
+            registry, new AiToolExecutionPolicy(), new NoOpRedactor(), NullLogger<AiToolCallExecutor>.Instance);
         return new AiAgentOrchestrator(
             modelClient,
-            new AiToolRegistry(tools),
-            new AiToolExecutionPolicy(),
+            registry,
+            executor,
             new AiPromptBuilder(options),
-            new NoOpRedactor(),
             options,
             NullLogger<AiAgentOrchestrator>.Instance);
     }

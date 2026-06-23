@@ -15,12 +15,14 @@ public sealed class AiAgentOrchestratorTests
     private static AiAgentOrchestrator CreateOrchestrator(FakeAiModelClient model, params IAiTool[] tools)
     {
         var options = Options.Create(new AiAgentOptions());
+        var registry = new AiToolRegistry(tools);
+        var executor = new AiToolCallExecutor(
+            registry, new AiToolExecutionPolicy(), new NoOpAiDataRedactor(), NullLogger<AiToolCallExecutor>.Instance);
         return new AiAgentOrchestrator(
             model,
-            new AiToolRegistry(tools),
-            new AiToolExecutionPolicy(),
+            registry,
+            executor,
             new AiPromptBuilder(options),
-            new NoOpAiDataRedactor(),
             options,
             NullLogger<AiAgentOrchestrator>.Instance);
     }

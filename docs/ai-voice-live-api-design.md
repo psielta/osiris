@@ -6,8 +6,15 @@
 > **Princípio mantido:** o agente roda no backend; chave/SDK/prompt nunca vão ao cliente; tools executam
 > server-side isoladas por tenant; escrita só por proposta confirmável.
 
-Este documento define contratos, protocolo, segurança, custo, infraestrutura, testes e fases. Nenhuma
-linha de runtime muda até ser aprovado. **Não** há bump de versão (trabalho interno).
+Este documento define contratos, protocolo, segurança, custo, infraestrutura, testes e fases.
+
+> **Implementação — Fase 1, passo A (fundação) — 23/06/2026.** Já no código (atrás da flag `AiAssistantVoice`,
+> desligada; sem efeito no runtime atual): núcleo de execução de tool extraído para `IAiToolCallExecutor`
+> (reusado pelo orquestrador de texto **e** pela voz — o `AiAgentOrchestrator` foi refatorado para usá-lo sem
+> mudança de comportamento); `IAiLiveToolDispatcher` (batch para a sessão de voz); contratos provider-neutros
+> `IAiLiveSessionClient`/`IAiLiveSession`/eventos (`AiLiveContracts.cs`); flag `Features:AiAssistantVoice`. 6
+> testes novos; suíte 708 verde. **Falta:** adapter Gemini Live (WebSocket) em Infrastructure, endpoint WS no
+> Web/API, áudio no cliente (passos B–D).
 
 ---
 
