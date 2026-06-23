@@ -23,6 +23,7 @@ public sealed record AiTurnResult(
     string AssistantText,
     IReadOnlyList<AiToolCallRecord> ExecutedToolCalls,
     IReadOnlyList<AiSource> Sources,
+    IReadOnlyList<AiProposalReference> Proposals,
     AiUsage Usage,
     AiFinishReason FinishReason,
     string ModelName,

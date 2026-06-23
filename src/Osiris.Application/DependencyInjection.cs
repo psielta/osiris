@@ -7,6 +7,7 @@ using Osiris.Application.Common.Csv;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Ofx;
 using Osiris.Application.Features.AiAssistant.Services;
+using Osiris.Application.Features.AiAssistant.Tools.Proposals;
 using Osiris.Application.Features.AiAssistant.Tools.Read;
 using Osiris.Application.Features.Categories.Services;
 using Osiris.Application.Features.CreditCardStatements.Services;
@@ -52,6 +53,10 @@ public static class DependencyInjection
         services.AddScoped<IAiTool, GetUpcomingObligationsTool>();
         services.AddScoped<IAiTool, ListCategoriesTool>();
         services.AddScoped<IAiTool, GetFinancialDefinitionTool>();
+
+        // Write proposal tools (Section 8.2). Offered only when the writes feature is on; they create a
+        // confirmable AiActionProposal and never execute the financial command during the turn.
+        services.AddScoped<IAiTool, ProposeManualMovementTool>();
 
         return services;
     }

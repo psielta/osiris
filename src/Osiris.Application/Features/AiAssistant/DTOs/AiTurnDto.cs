@@ -4,9 +4,19 @@ public sealed record AiMessageDto(Guid Id, string Role, string Content, DateTime
 
 public sealed record AiSourceDto(string Type, string? Id, string Label);
 
+public sealed record AiProposalDto(
+    Guid Id,
+    string ActionType,
+    string DisplaySummary,
+    string ImpactSummary,
+    string RiskLevel,
+    string Status,
+    DateTime ExpiresAtUtc);
+
 /// <summary>The result of one assistant turn returned to the transport layer.</summary>
 public sealed record AiTurnDto(
     Guid ConversationId,
     AiMessageDto Message,
     IReadOnlyList<AiSourceDto> Sources,
+    IReadOnlyList<AiProposalDto> Proposals,
     bool UsageLimited);

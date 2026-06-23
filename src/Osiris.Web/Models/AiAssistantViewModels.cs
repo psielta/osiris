@@ -8,4 +8,7 @@ public sealed class AiAssistantIndexViewModel
         Array.Empty<AiConversationListItemDto>();
 
     public AiConversationDetailDto? Selected { get; init; }
+
+    public IReadOnlyCollection<AiActionProposalDto> Proposals { get; init; } =
+        Array.Empty<AiActionProposalDto>();
 }

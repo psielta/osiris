@@ -49,6 +49,12 @@ public sealed class AiConversationRepository : IAiConversationRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task AddAsync(AiConversation conversation, CancellationToken cancellationToken)
+    {
+        await _dbContext.AiConversations.AddAsync(conversation, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken)
     {
         var messages = _dbContext.AiMessages
@@ -81,19 +87,11 @@ public sealed class AiConversationRepository : IAiConversationRepository
 
     public async Task SaveTurnAsync(
         AiConversation conversation,
-        bool isNewConversation,
         IReadOnlyList<AiMessage> newMessages,
         IReadOnlyList<AiToolCall> toolCalls,
         CancellationToken cancellationToken)
     {
-        if (isNewConversation)
-        {
-            await _dbContext.AiConversations.AddAsync(conversation, cancellationToken);
-        }
-        else
-        {
-            _dbContext.AiConversations.Update(conversation);
-        }
+        _dbContext.AiConversations.Update(conversation);
 
         if (newMessages.Count > 0)
         {

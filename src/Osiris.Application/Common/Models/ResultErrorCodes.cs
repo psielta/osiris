@@ -11,4 +11,6 @@ public static class ResultErrorCodes
     public const string LockedOut = "locked_out";
 
     public const string QuotaExceeded = "quota_exceeded";
+
+    public const string Conflict = "conflict";
 }

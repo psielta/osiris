@@ -6,9 +6,12 @@ using Microsoft.Extensions.Options;
 using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Exceptions;
 using Osiris.Application.Features.AiAssistant.Commands.ArchiveConversation;
+using Osiris.Application.Features.AiAssistant.Commands.ConfirmAction;
+using Osiris.Application.Features.AiAssistant.Commands.RejectAction;
 using Osiris.Application.Features.AiAssistant.Commands.SendMessage;
 using Osiris.Application.Features.AiAssistant.DTOs;
 using Osiris.Application.Features.AiAssistant.Queries.GetConversation;
+using Osiris.Application.Features.AiAssistant.Queries.ListConversationProposals;
 using Osiris.Application.Features.AiAssistant.Queries.ListConversations;
 using Osiris.Web.Models;
 
@@ -45,15 +48,21 @@ public sealed class AiAssistantController : AppController
         var conversations = await _mediator.Send(new ListConversationsQuery(), cancellationToken);
 
         AiConversationDetailDto? selected = null;
+        IReadOnlyCollection<AiActionProposalDto> proposals = Array.Empty<AiActionProposalDto>();
         if (conversation is { } conversationId)
         {
             selected = await _mediator.Send(new GetConversationQuery(conversationId), cancellationToken);
+            if (selected is not null)
+            {
+                proposals = await _mediator.Send(new ListConversationProposalsQuery(selected.Id), cancellationToken);
+            }
         }
 
         return View(new AiAssistantIndexViewModel
         {
             Conversations = conversations,
-            Selected = selected
+            Selected = selected,
+            Proposals = proposals
         });
     }
 
@@ -109,6 +118,43 @@ public sealed class AiAssistantController : AppController
 
         await _mediator.Send(new ArchiveConversationCommand(id), cancellationToken);
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("actions/{id:guid}/confirm")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmAction(
+        Guid id,
+        [FromForm] Guid? conversationId,
+        CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new ConfirmActionCommand(id), cancellationToken);
+        if (result.IsFailure)
+        {
+            TempData[ErrorMessageKey] = result.Errors.FirstOrDefault()?.Message ?? "Não foi possível confirmar.";
+        }
+
+        return RedirectToConversation(conversationId);
+    }
+
+    [HttpPost("actions/{id:guid}/reject")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RejectAction(
+        Guid id,
+        [FromForm] Guid? conversationId,
+        CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        await _mediator.Send(new RejectActionCommand(id), cancellationToken);
+        return RedirectToConversation(conversationId);
     }
 
     private IActionResult RedirectToConversation(Guid? conversationId)

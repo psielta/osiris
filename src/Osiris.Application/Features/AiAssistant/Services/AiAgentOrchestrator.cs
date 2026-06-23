@@ -62,6 +62,7 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
         var messages = new List<AiModelMessage>(priorMessages) { AiModelMessage.FromUser(userMessage) };
         var executed = new List<AiToolCallRecord>();
         var sources = new List<AiSource>();
+        var proposals = new List<AiProposalReference>();
         var usage = AiUsage.Empty;
         var finishReason = AiFinishReason.Other;
         var modelName = string.Empty;
@@ -109,10 +110,11 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
                     continue;
                 }
 
-                var (modelResult, record, callSources) = await ExecuteSingleAsync(context, call, cancellationToken);
+                var (modelResult, record, callSources, callProposals) = await ExecuteSingleAsync(context, call, cancellationToken);
                 toolResults.Add(modelResult);
                 executed.Add(record);
                 sources.AddRange(callSources);
+                proposals.AddRange(callProposals);
             }
 
             messages.Add(AiModelMessage.FromToolResults(toolResults));
@@ -133,6 +135,7 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
             finalText,
             executed,
             DistinctSources(sources),
+            proposals,
             usage,
             finishReason,
             string.IsNullOrEmpty(modelName) ? "unknown" : modelName,
@@ -141,7 +144,7 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
             (int)stopwatch.ElapsedMilliseconds);
     }
 
-    private async Task<(AiModelToolResult ModelResult, AiToolCallRecord Record, IReadOnlyList<AiSource> Sources)>
+    private async Task<(AiModelToolResult ModelResult, AiToolCallRecord Record, IReadOnlyList<AiSource> Sources, IReadOnlyList<AiProposalReference> Proposals)>
         ExecuteSingleAsync(AiAgentContext context, AiModelToolCall call, CancellationToken cancellationToken)
     {
         var tool = _toolRegistry.Find(call.Name);
@@ -151,7 +154,8 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
             return (
                 new AiModelToolResult(call.Name, UnknownToolJson),
                 RejectedRecord(call.Name, AiToolRisk.Forbidden, call.Arguments, "unknown_tool"),
-                Array.Empty<AiSource>());
+                Array.Empty<AiSource>(),
+                Array.Empty<AiProposalReference>());
         }
 
         var decision = _policy.Evaluate(context, tool);
@@ -162,7 +166,8 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
             return (
                 new AiModelToolResult(tool.Name, deniedJson),
                 RejectedRecord(tool.Name, tool.Risk, call.Arguments, "policy_denied"),
-                Array.Empty<AiSource>());
+                Array.Empty<AiSource>(),
+                Array.Empty<AiProposalReference>());
         }
 
         var sw = Stopwatch.StartNew();
@@ -196,7 +201,8 @@ public sealed class AiAgentOrchestrator : IAiAgentOrchestrator
         return (
             new AiModelToolResult(tool.Name, toolResult.ResultJson),
             record,
-            toolResult.Sources ?? Array.Empty<AiSource>());
+            toolResult.Sources ?? Array.Empty<AiSource>(),
+            toolResult.Proposals ?? Array.Empty<AiProposalReference>());
     }
 
     private AiToolCallRecord RejectedRecord(string toolName, AiToolRisk risk, JsonElement arguments, string errorCode) =>

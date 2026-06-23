@@ -51,6 +51,11 @@ public abstract class ApiControllerBase : ControllerBase
             return StatusCodes.Status429TooManyRequests;
         }
 
+        if (errors.Any(error => error.Code == ResultErrorCodes.Conflict))
+        {
+            return StatusCodes.Status409Conflict;
+        }
+
         return StatusCodes.Status400BadRequest;
     }
 

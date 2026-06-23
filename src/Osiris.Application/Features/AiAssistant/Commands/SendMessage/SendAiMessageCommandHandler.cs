@@ -67,7 +67,6 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
         }
 
         AiConversation conversation;
-        bool isNewConversation;
         IReadOnlyList<AiModelMessage> priorMessages;
 
         if (request.ConversationId is { } conversationId)
@@ -80,7 +79,6 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
             }
 
             conversation = existing;
-            isNewConversation = false;
             var history = await _conversations.ListMessagesAsync(
                 tenantId,
                 conversation.Id,
@@ -95,7 +93,10 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
                 userId,
                 BuildTitle(request.Message),
                 _agentOptions.PromptVersion);
-            isNewConversation = true;
+
+            // Persist the new conversation before the turn so rows created during it (write proposals)
+            // have a valid foreign key target.
+            await _conversations.AddAsync(conversation, cancellationToken);
             priorMessages = Array.Empty<AiModelMessage>();
         }
 
@@ -144,7 +145,6 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
 
         await _conversations.SaveTurnAsync(
             conversation,
-            isNewConversation,
             new[] { userMessage, assistantMessage },
             toolCalls,
             cancellationToken);
@@ -153,6 +153,14 @@ public sealed class SendAiMessageCommandHandler : IRequestHandler<SendAiMessageC
             conversation.Id,
             new AiMessageDto(assistantMessage.Id, "assistant", assistantMessage.Content, assistantMessage.CreatedAtUtc),
             turn.Sources.Select(source => new AiSourceDto(source.Type, source.Id, source.Label)).ToList(),
+            turn.Proposals.Select(proposal => new AiProposalDto(
+                proposal.Id,
+                proposal.ActionType,
+                proposal.DisplaySummary,
+                proposal.ImpactSummary,
+                proposal.RiskLevel,
+                "Pending",
+                proposal.ExpiresAtUtc)).ToList(),
             UsageLimited: false);
 
         return Result<AiTurnDto>.Success(dto);

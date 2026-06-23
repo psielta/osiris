@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<ICreditCardStatementPaymentRepository, CreditCardStatementPaymentRepository>();
         services.AddScoped<IBillRepository, BillRepository>();
         services.AddScoped<IAiConversationRepository, AiConversationRepository>();
+        services.AddScoped<IAiActionProposalRepository, AiActionProposalRepository>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
         services.AddSingleton<IFinancialAccountStatementPdfRenderer, FinancialAccountStatementPdfRenderer>();

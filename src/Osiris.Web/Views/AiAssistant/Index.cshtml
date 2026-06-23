@@ -89,6 +89,32 @@
                 }
             </div>
 
+            @if (Model.Selected is not null && Model.Proposals.Any())
+            {
+                <div class="space-y-2 border-t border-slate-200 p-4 dark:border-slate-800">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Propostas aguardando confirmação</p>
+                    @foreach (var proposal in Model.Proposals)
+                    {
+                        <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                            <p class="text-sm font-medium text-slate-900 dark:text-slate-100">@proposal.DisplaySummary</p>
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">@proposal.ImpactSummary</p>
+                            <div class="mt-2 flex gap-2">
+                                <form asp-action="ConfirmAction" asp-route-id="@proposal.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="conversationId" value="@Model.Selected.Id" />
+                                    <button type="submit" class="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700">Confirmar</button>
+                                </form>
+                                <form asp-action="RejectAction" asp-route-id="@proposal.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="conversationId" value="@Model.Selected.Id" />
+                                    <button type="submit" class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Rejeitar</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
             <form asp-action="Send" method="post" class="border-t border-slate-200 p-3 dark:border-slate-800"
                   onsubmit="const b = this.querySelector('button[type=submit]'); b.disabled = true; b.dataset.busy = '1'; b.querySelector('span').textContent = 'Pensando...';">
                 @Html.AntiForgeryToken()

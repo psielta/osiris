@@ -14,7 +14,23 @@ public sealed record AiMessageResponse(Guid Id, string Role, string Content, Dat
 
 public sealed record AiSourceResponse(string Type, string? Id, string Label);
 
-public sealed record AiTurnResponse(Guid ConversationId, AiMessageResponse Message, List<AiSourceResponse> Sources, bool UsageLimited);
+public sealed record AiProposalResponse(
+    Guid Id,
+    string ActionType,
+    string DisplaySummary,
+    string ImpactSummary,
+    string RiskLevel,
+    string Status,
+    DateTime ExpiresAtUtc);
+
+public sealed record AiTurnResponse(
+    Guid ConversationId,
+    AiMessageResponse Message,
+    List<AiSourceResponse> Sources,
+    List<AiProposalResponse> Proposals,
+    bool UsageLimited);
+
+public sealed record AiActionResultResponse(Guid ProposalId, string Status, string? ResultEntityType, Guid? ResultEntityId);
 
 public sealed record AiConversationListResponse(Guid Id, string Title, string Status, DateTime? UpdatedAtUtc, DateTime CreatedAtUtc);
 

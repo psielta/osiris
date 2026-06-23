@@ -18,6 +18,12 @@ public interface IAiConversationRepository
 
     Task UpdateAsync(AiConversation conversation, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Inserts a new conversation up front (before the turn runs) so rows created during the turn —
+    /// such as write proposals that reference the conversation — have a valid foreign key target.
+    /// </summary>
+    Task AddAsync(AiConversation conversation, CancellationToken cancellationToken);
+
     /// <summary>Total input+output tokens charged to the tenant since the given instant (for daily budgets).</summary>
     Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken);
 
@@ -27,13 +33,9 @@ public interface IAiConversationRepository
         int maxMessages,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Persists a completed turn in one unit of work: inserts the conversation when new (otherwise
-    /// touches it) and adds the new messages and tool-call audit rows together.
-    /// </summary>
+    /// <summary>Persists a completed turn in one unit of work: touches the conversation and adds the new messages and tool-call audit rows.</summary>
     Task SaveTurnAsync(
         AiConversation conversation,
-        bool isNewConversation,
         IReadOnlyList<AiMessage> newMessages,
         IReadOnlyList<AiToolCall> toolCalls,
         CancellationToken cancellationToken);

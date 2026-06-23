@@ -6,7 +6,10 @@ using Osiris.Api.Contracts;
 using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Exceptions;
 using Osiris.Application.Features.AiAssistant.Commands.ArchiveConversation;
+using Osiris.Application.Features.AiAssistant.Commands.ConfirmAction;
+using Osiris.Application.Features.AiAssistant.Commands.RejectAction;
 using Osiris.Application.Features.AiAssistant.Commands.SendMessage;
+using Osiris.Application.Features.AiAssistant.Queries.GetActionProposal;
 using Osiris.Application.Features.AiAssistant.Queries.GetConversation;
 using Osiris.Application.Features.AiAssistant.Queries.ListConversations;
 
@@ -70,6 +73,42 @@ public sealed class AiAssistantController : ApiControllerBase
         }
 
         var result = await _mediator.Send(new ArchiveConversationCommand(id), cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result);
+    }
+
+    [HttpGet("actions/{id:guid}")]
+    public async Task<IActionResult> GetAction(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var proposal = await _mediator.Send(new GetActionProposalQuery(id), cancellationToken);
+        return proposal is null ? NotFound() : Ok(proposal);
+    }
+
+    [HttpPost("actions/{id:guid}/confirm")]
+    public async Task<IActionResult> ConfirmAction(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new ConfirmActionCommand(id), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : Problem(result);
+    }
+
+    [HttpPost("actions/{id:guid}/reject")]
+    public async Task<IActionResult> RejectAction(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new RejectActionCommand(id), cancellationToken);
         return result.IsSuccess ? NoContent() : Problem(result);
     }
 
