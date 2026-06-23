@@ -25,7 +25,7 @@ public sealed class SearchAccountMovementsTool : IAiTool
 
     public string Description =>
         "Busca lançamentos de uma conta por período, categoria, texto na descrição e valor mínimo. "
-        + "Informe o accountId (de list_financial_accounts).";
+        + "Use onlyUncategorized=true para achar lançamentos SEM categoria. Informe o accountId (de list_financial_accounts).";
 
     public AiToolRisk Risk => AiToolRisk.ReadOnly;
 
@@ -38,6 +38,7 @@ public sealed class SearchAccountMovementsTool : IAiTool
             from = new { type = "string", description = "Início do período, ISO yyyy-MM-dd. Opcional." },
             to = new { type = "string", description = "Fim do período, ISO yyyy-MM-dd. Opcional." },
             categoryId = new { type = "string", description = "Filtra por categoria (GUID). Opcional." },
+            onlyUncategorized = new { type = "boolean", description = "Trazer apenas lançamentos sem categoria. Padrão: false." },
             text = new { type = "string", description = "Texto contido na descrição. Opcional." },
             minAmount = new { type = "number", description = "Valor mínimo (absoluto). Opcional." }
         },
@@ -60,6 +61,7 @@ public sealed class SearchAccountMovementsTool : IAiTool
         var from = AiToolArguments.GetDate(arguments, "from");
         var to = AiToolArguments.GetDate(arguments, "to");
         var categoryId = AiToolArguments.GetGuid(arguments, "categoryId");
+        var onlyUncategorized = AiToolArguments.GetBool(arguments, "onlyUncategorized");
         var text = AiToolArguments.GetString(arguments, "text");
         var minAmount = AiToolArguments.GetDecimal(arguments, "minAmount");
 
@@ -67,6 +69,7 @@ public sealed class SearchAccountMovementsTool : IAiTool
             .Where(movement => (from is null || movement.OccurredOn >= from)
                 && (to is null || movement.OccurredOn <= to)
                 && (categoryId is null || movement.CategoryId == categoryId)
+                && (!onlyUncategorized || movement.CategoryId is null)
                 && (minAmount is null || movement.Amount >= minAmount)
                 && (string.IsNullOrWhiteSpace(text)
                     || movement.Description.Contains(text, StringComparison.OrdinalIgnoreCase)))
@@ -79,7 +82,9 @@ public sealed class SearchAccountMovementsTool : IAiTool
                 movement.Description,
                 movement.Amount,
                 type = movement.Type.ToString(),
-                movement.IsInflow
+                movement.IsInflow,
+                movement.CategoryId,
+                hasCategory = movement.CategoryId is not null
             })
             .ToList();
 

@@ -49,7 +49,9 @@ public static class DependencyInjection
         services.AddScoped<IAiTool, ListCreditCardsTool>();
         services.AddScoped<IAiTool, GetCardStatementTool>();
         services.AddScoped<IAiTool, GetStatementsOverviewTool>();
+        services.AddScoped<IAiTool, GetCardStatementDetailsTool>();
         services.AddScoped<IAiTool, SearchCardPurchasesTool>();
+        services.AddScoped<IAiTool, GetCardPurchaseDetailsTool>();
         services.AddScoped<IAiTool, ListBillsTool>();
         services.AddScoped<IAiTool, GetUpcomingObligationsTool>();
         services.AddScoped<IAiTool, ListCategoriesTool>();

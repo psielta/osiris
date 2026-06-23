@@ -2,7 +2,9 @@ using System.Text.Json;
 using Osiris.Application.Common.AI;
 using Osiris.Application.Features.AiAssistant.Tools.Read;
 using Osiris.Application.Features.Bills.DTOs;
+using Osiris.Application.Features.CreditCardPurchases.DTOs;
 using Osiris.Application.Features.CreditCardStatements.DTOs;
+using Osiris.Application.Features.FinancialAccountMovements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.DTOs;
 using Osiris.Application.UnitTests.Features.AiAssistant.Support;
 using Osiris.Domain.Enums;
@@ -94,6 +96,73 @@ public sealed class ReadToolsTests
 
         using var document = JsonDocument.Parse(result.ResultJson);
         Assert.Equal(2, document.RootElement.GetProperty("statementCount").GetInt32());
+    }
+
+    [Fact]
+    public async Task GetCardPurchaseDetails_returnsInstallmentPlan()
+    {
+        var installments = new[]
+        {
+            new CreditCardPurchaseInstallmentDto(Guid.NewGuid(), 1, 3, 100m, new DateOnly(2026, 7, 7), Guid.NewGuid(), 7, 2026),
+            new CreditCardPurchaseInstallmentDto(Guid.NewGuid(), 2, 3, 100m, new DateOnly(2026, 8, 7), Guid.NewGuid(), 8, 2026),
+            new CreditCardPurchaseInstallmentDto(Guid.NewGuid(), 3, 3, 100m, new DateOnly(2026, 9, 7), Guid.NewGuid(), 9, 2026)
+        };
+        var details = new CreditCardPurchaseDetailsDto(
+            Guid.NewGuid(), Guid.NewGuid(), "Inter", "Eletrônicos", Guid.NewGuid(), "Notebook", 300m,
+            new DateOnly(2026, 6, 18), 3, null, installments);
+        var tool = new GetCardPurchaseDetailsTool(new FakeSender(details));
+
+        var result = await tool.ExecuteAsync(Args($"{{\"creditCardPurchaseId\":\"{details.Id}\"}}"), Context(), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        using var document = JsonDocument.Parse(result.ResultJson);
+        Assert.Equal(3, document.RootElement.GetProperty("purchase").GetProperty("installmentItems").GetArrayLength());
+        Assert.Single(result.Sources!);
+    }
+
+    [Fact]
+    public async Task GetCardStatementDetails_returnsItemsAndPayments()
+    {
+        var items = new[]
+        {
+            new CreditCardStatementInstallmentItemDto(Guid.NewGuid(), Guid.NewGuid(), "Notebook", 1, 3, 100m),
+            new CreditCardStatementInstallmentItemDto(Guid.NewGuid(), Guid.NewGuid(), "Mercado", 1, 1, 50m)
+        };
+        var payments = new[]
+        {
+            new CreditCardStatementPaymentItemDto(Guid.NewGuid(), 80m, new DateOnly(2026, 7, 9), Guid.NewGuid(), "Conta", null)
+        };
+        var details = new CreditCardStatementDetailsDto(
+            Guid.NewGuid(), Guid.NewGuid(), "Inter", 7, 2026, new DateOnly(2026, 7, 1), new DateOnly(2026, 7, 7),
+            CreditCardStatementStatus.Open, 150m, 80m, 70m, items, payments);
+        var tool = new GetCardStatementDetailsTool(new FakeSender(details));
+
+        var result = await tool.ExecuteAsync(Args($"{{\"statementId\":\"{details.Id}\"}}"), Context(), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        using var document = JsonDocument.Parse(result.ResultJson);
+        var statement = document.RootElement.GetProperty("statement");
+        Assert.Equal(2, statement.GetProperty("items").GetArrayLength());
+        Assert.Equal(1, statement.GetProperty("payments").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task SearchAccountMovements_withOnlyUncategorized_keepsMovementsWithoutCategory()
+    {
+        var categoryId = Guid.NewGuid();
+        IReadOnlyCollection<MovementListItemDto> movements = new[]
+        {
+            new MovementListItemDto(Guid.NewGuid(), FinancialAccountMovementType.Expense, 50m, false, new DateOnly(2026, 6, 10), "Sem categoria", null, null),
+            new MovementListItemDto(Guid.NewGuid(), FinancialAccountMovementType.Expense, 80m, false, new DateOnly(2026, 6, 12), "Com categoria", categoryId, null)
+        };
+        var tool = new SearchAccountMovementsTool(new FakeSender(movements));
+
+        var result = await tool.ExecuteAsync(
+            Args($"{{\"accountId\":\"{Guid.NewGuid()}\",\"onlyUncategorized\":true}}"), Context(), CancellationToken.None);
+
+        using var document = JsonDocument.Parse(result.ResultJson);
+        Assert.Equal(1, document.RootElement.GetProperty("movementCount").GetInt32());
+        Assert.False(document.RootElement.GetProperty("movements")[0].GetProperty("hasCategory").GetBoolean());
     }
 
     [Fact]
