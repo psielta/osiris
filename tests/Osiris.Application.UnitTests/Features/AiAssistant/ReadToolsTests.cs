@@ -2,6 +2,7 @@ using System.Text.Json;
 using Osiris.Application.Common.AI;
 using Osiris.Application.Features.AiAssistant.Tools.Read;
 using Osiris.Application.Features.Bills.DTOs;
+using Osiris.Application.Features.CreditCardStatements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.DTOs;
 using Osiris.Application.UnitTests.Features.AiAssistant.Support;
 using Osiris.Domain.Enums;
@@ -52,6 +53,47 @@ public sealed class ReadToolsTests
         using var document = JsonDocument.Parse(result.ResultJson);
         Assert.Equal(1, document.RootElement.GetProperty("billCount").GetInt32());
         Assert.Equal(1200m, document.RootElement.GetProperty("openTotal").GetDecimal());
+    }
+
+    [Fact]
+    public async Task GetStatementsOverview_byDefault_keepsOnlyOpen_andTotalsOpenBalance()
+    {
+        IReadOnlyCollection<CreditCardStatementOverviewDto> statements = new[]
+        {
+            new CreditCardStatementOverviewDto(Guid.NewGuid(), Guid.NewGuid(), "Inter", 6, 2026,
+                new DateOnly(2026, 6, 26), new DateOnly(2026, 7, 13), CreditCardStatementStatus.Open, 800m, 0m, 800m),
+            new CreditCardStatementOverviewDto(Guid.NewGuid(), Guid.NewGuid(), "BB", 6, 2026,
+                new DateOnly(2026, 6, 29), new DateOnly(2026, 7, 9), CreditCardStatementStatus.PartiallyPaid, 500m, 200m, 300m),
+            new CreditCardStatementOverviewDto(Guid.NewGuid(), Guid.NewGuid(), "Nubank", 5, 2026,
+                new DateOnly(2026, 5, 26), new DateOnly(2026, 6, 13), CreditCardStatementStatus.Paid, 400m, 400m, 0m)
+        };
+        var tool = new GetStatementsOverviewTool(new FakeSender(statements));
+
+        var result = await tool.ExecuteAsync(Args("{}"), Context(), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        using var document = JsonDocument.Parse(result.ResultJson);
+        Assert.Equal(2, document.RootElement.GetProperty("statementCount").GetInt32());
+        Assert.Equal(1100m, document.RootElement.GetProperty("totalOpenBalance").GetDecimal());
+        Assert.Equal(2, result.Sources!.Count);
+    }
+
+    [Fact]
+    public async Task GetStatementsOverview_withOnlyOpenFalse_keepsAllStatements()
+    {
+        IReadOnlyCollection<CreditCardStatementOverviewDto> statements = new[]
+        {
+            new CreditCardStatementOverviewDto(Guid.NewGuid(), Guid.NewGuid(), "Inter", 6, 2026,
+                new DateOnly(2026, 6, 26), new DateOnly(2026, 7, 13), CreditCardStatementStatus.Open, 800m, 0m, 800m),
+            new CreditCardStatementOverviewDto(Guid.NewGuid(), Guid.NewGuid(), "Nubank", 5, 2026,
+                new DateOnly(2026, 5, 26), new DateOnly(2026, 6, 13), CreditCardStatementStatus.Paid, 400m, 400m, 0m)
+        };
+        var tool = new GetStatementsOverviewTool(new FakeSender(statements));
+
+        var result = await tool.ExecuteAsync(Args("{\"onlyOpen\":false}"), Context(), CancellationToken.None);
+
+        using var document = JsonDocument.Parse(result.ResultJson);
+        Assert.Equal(2, document.RootElement.GetProperty("statementCount").GetInt32());
     }
 
     [Fact]

@@ -99,7 +99,7 @@ public sealed class AiAgentOrchestratorTests
 
         Assert.False(string.IsNullOrWhiteSpace(result.AssistantText));
         Assert.Equal(AiFinishReason.Other, result.FinishReason);
-        // The loop is bounded by AiAgentOptions.MaxToolIterations (default 5).
-        Assert.Equal(5, model.Requests.Count);
+        // The loop is bounded by AiAgentOptions.MaxToolIterations (default 8).
+        Assert.Equal(8, model.Requests.Count);
     }
 }

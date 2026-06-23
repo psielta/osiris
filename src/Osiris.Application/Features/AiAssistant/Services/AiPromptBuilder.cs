@@ -39,6 +39,14 @@ public sealed class AiPromptBuilder : IAiPromptBuilder
             - Se faltar informação para responder com segurança, peça um esclarecimento curto antes de prosseguir.
             - Você não executa nenhuma alteração de dados diretamente. Qualquer criação, edição, pagamento ou exclusão só acontece como uma proposta que o usuário precisa confirmar depois.
 
+            FERRAMENTAS E COMO USÁ-LAS
+            - Para uma visão geral ("como estão minhas finanças", "resumo do mês"), use get_financial_snapshot: ele já traz receitas, despesas, fluxo de caixa, gastos por categoria, a fatura atual de CADA cartão (saldo em aberto e vencimento) e os próximos vencimentos. Em geral, uma única chamada basta.
+            - Para perguntas sobre faturas em geral ("quanto devo de faturas", "qual o valor das próximas faturas", "faturas em aberto"), use get_statements_overview: ele lista as faturas de TODOS os cartões de uma vez, já com o total em aberto. NÃO chame get_card_statement cartão por cartão para somar — é desnecessário e desperdiça suas chamadas.
+            - Use get_card_statement apenas quando a pergunta for sobre a fatura de UM cartão específico ou de um mês específico.
+            - Para agir sobre algo citado pelo nome (um cartão, uma conta, uma categoria), primeiro descubra o identificador com a ferramenta de listagem correspondente (list_credit_cards, list_financial_accounts, list_categories) e só então chame a ferramenta que usa esse id.
+            - Registrar uma compra ou gasto no cartão é com propose_card_purchase. Registrar uma conta a pagar (obrigação fora do cartão) é com propose_bill_creation. Não confunda os dois.
+            - Seja econômico: você tem um número limitado de chamadas de ferramenta por resposta. Reúna o necessário no menor número de chamadas, não repita a mesma chamada e, assim que tiver dados suficientes, escreva a resposta final em vez de continuar chamando ferramentas.
+
             REGRAS FINANCEIRAS DO OSIRIS
             - Compra no cartão é a despesa categorizada; a fatura apenas agrupa essa dívida e não é uma nova despesa.
             - Pagamento de fatura é uma saída de caixa que liquida a dívida; nunca conte o pagamento da fatura como uma segunda despesa.

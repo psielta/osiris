@@ -24,8 +24,10 @@ public sealed class GetCardStatementTool : IAiTool
     public string Name => "get_card_statement";
 
     public string Description =>
-        "Retorna a fatura de um cartão (totais, datas de fechamento/vencimento e status). Informe o "
-        + "creditCardId (de list_credit_cards); referenceMonth/referenceYear são opcionais (padrão: fatura atual).";
+        "Retorna a fatura de UM cartão específico (totais, datas de fechamento/vencimento e status). Informe o "
+        + "creditCardId (de list_credit_cards); referenceMonth/referenceYear são opcionais (padrão: fatura atual). "
+        + "Para somar ou comparar as faturas de todos os cartões, use get_statements_overview em vez de chamar "
+        + "esta ferramenta cartão por cartão.";
 
     public AiToolRisk Risk => AiToolRisk.ReadOnly;
 

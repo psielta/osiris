@@ -8,11 +8,11 @@ public sealed class AiAgentOptions
 {
     public const string SectionName = "AiAssistant";
 
-    public string PromptVersion { get; set; } = "osiris-agent-v1.0.0";
+    public string PromptVersion { get; set; } = "osiris-agent-v1.1.0";
 
-    public int MaxToolIterations { get; set; } = 5;
+    public int MaxToolIterations { get; set; } = 8;
 
-    public int MaxToolCallsPerTurn { get; set; } = 8;
+    public int MaxToolCallsPerTurn { get; set; } = 16;
 
     public int MaxMessageCharacters { get; set; } = 4000;
 
