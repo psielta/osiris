@@ -12,6 +12,7 @@ object Routes {
     const val DocsDetailsPattern = "docs/{docSlug}"
     const val DocSlugArg = "docSlug"
     const val Reports = "reports"
+    const val Assistant = "assistant"
     const val CategoriesList = "categories"
     const val CategoryForm = "category-form"
     const val CategoryFormPattern = "category-form?categoryId={categoryId}"

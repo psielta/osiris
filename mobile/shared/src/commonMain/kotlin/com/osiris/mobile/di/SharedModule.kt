@@ -1,6 +1,7 @@
 package com.osiris.mobile.di
 
 import com.osiris.mobile.data.remote.AccountApi
+import com.osiris.mobile.data.remote.AssistantApi
 import com.osiris.mobile.data.remote.AuthApi
 import com.osiris.mobile.data.remote.BillApi
 import com.osiris.mobile.data.remote.CardApi
@@ -10,6 +11,7 @@ import com.osiris.mobile.data.remote.ReportApi
 import com.osiris.mobile.data.remote.buildAuthClient
 import com.osiris.mobile.data.remote.buildPlainClient
 import com.osiris.mobile.data.repository.AccountRepositoryImpl
+import com.osiris.mobile.data.repository.AssistantRepositoryImpl
 import com.osiris.mobile.data.repository.AuthRepositoryImpl
 import com.osiris.mobile.data.repository.BillRepositoryImpl
 import com.osiris.mobile.data.repository.CardRepositoryImpl
@@ -20,6 +22,7 @@ import com.osiris.mobile.data.session.SessionManager
 import com.osiris.mobile.data.sync.DataChangeBus
 import com.osiris.mobile.data.sync.DefaultDataChangeBus
 import com.osiris.mobile.domain.repository.AccountRepository
+import com.osiris.mobile.domain.repository.AssistantRepository
 import com.osiris.mobile.domain.repository.AuthRepository
 import com.osiris.mobile.domain.repository.BillRepository
 import com.osiris.mobile.domain.repository.CardRepository
@@ -53,4 +56,6 @@ val sharedModule = module {
     single<DashboardRepository> { DashboardRepositoryImpl(get()) }
     single { ReportApi(get(named("auth")), get()) }
     single<ReportRepository> { ReportRepositoryImpl(get()) }
+    single { AssistantApi(get(named("auth")), get()) }
+    single<AssistantRepository> { AssistantRepositoryImpl(get(), get()) }
 }

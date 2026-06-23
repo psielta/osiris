@@ -5,6 +5,7 @@ import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.data.session.DataStoreTokenStore
 import com.osiris.mobile.data.session.TokenStore
 import com.osiris.mobile.presentation.accounts.AccountFormViewModel
+import com.osiris.mobile.presentation.assistant.AssistantViewModel
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import com.osiris.mobile.presentation.accounts.AccountsListViewModel
 import com.osiris.mobile.presentation.accounts.CsvImportViewModel
@@ -69,4 +70,5 @@ val appModule = module {
     viewModelOf(::AllPurchasesViewModel)
     viewModelOf(::AllStatementsViewModel)
     viewModelOf(::ReportsViewModel)
+    viewModelOf(::AssistantViewModel)
 }

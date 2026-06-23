@@ -1,6 +1,6 @@
 # AI Agent Blueprint — Osiris + Gemini
 
-> **Status:** Fases 1–3 implementadas e testadas — leitura completa + escrita por proposta/confirmação (`propose_manual_movement`, confirm/reject idempotentes, detecção de stale/TTL), atrás de feature flags desligadas por padrão.  
+> **Status:** Fases 1–4 implementadas e testadas — leitura + escrita por proposta/confirmação no backend (API + UI Web) e o app **mobile KMP** consumindo o assistente (chat, propostas, confirmar/rejeitar), atrás de feature flags.  
 > **Última revisão:** 23 de junho de 2026  
 > **Escopo:** `Osiris.Web`, `Osiris.Api`, aplicação mobile KMP e infraestrutura compartilhada  
 > **Princípio central:** o Gemini interpreta intenção e seleciona ferramentas; o Osiris continua sendo a única fonte de verdade e o único executor das regras financeiras.
@@ -46,6 +46,13 @@ Componentes implementados (com caminhos):
 - **UI Web:** cards de proposta com impacto e botões Confirmar/Rejeitar (antiforgery) na conversa selecionada.
 - **Testes:** unit (proposta não executa; confirm executa uma vez + idempotente; stale; expired; reject) + integração de API (propose→GET→sem movimento→confirm cria 1 movimento→idempotente; reject bloqueia; writes off não gera proposta; isolamento por tenant). Suíte completa verde: 447 unit + 77 Api + 124 Web + 16 evaluation.
 
+### 0.1.3 Fase 4 — mobile KMP (entregue em 23/06/2026)
+
+- **Camada shared** (`mobile/shared/src/commonMain`): DTOs `AssistantDtos.kt`, `AssistantApi` (Ktor, reusa o client `auth` com refresh automático), domain models, `AssistantRepository`(+impl com `osirisCatching`/`DataChangeBus`), `AssistantViewModel` (UI state + eventos via `Channel`). Registro no `SharedModule`.
+- **UI** (`mobile/android/.../feature/assistant/AssistantScreen.kt`): chat em bolhas, troca/criação de conversas, cards de proposta com Confirmar/Rejeitar, input com estado de envio. Rota em `Routes`/`OsirisNavHost`, entrada no hub "More" (`HomeScreen`) condicionada à flag client-side `AssistantFeature.Enabled`. ViewModel registrado no `AppModule`.
+- **Testes** (`commonTest`): `AssistantRepositoryTest` (MockEngine: mapeia conversas/turno/proposta e conflito 409) e `AssistantViewModelTest` (fake repo: carga inicial, send surfaceia proposta + histórico, confirm remove a proposta). `:shared:testDebugUnitTest` e `:android:compileDebugKotlin` verdes.
+- **Escopo:** Android apenas (iOS é milestone futuro do projeto). Sem SSE — o turno é síncrono (request/response). Sem deep links (o app não os usa). As propostas aparecem a partir do turno; reabrir conversa não recarrega pendentes (a API tem a query, falta um endpoint mobile).
+
 ### 0.2 Desvios conscientes em relação a este blueprint
 
 - `IAiModelClient` recebe um `AiModelPurpose` (`Agent`/`Fast`); o adapter resolve nome do modelo, temperatura e `maxOutputTokens` a partir de `GeminiOptions` (Application permanece sem saber nomes de modelo).
@@ -63,13 +70,13 @@ Componentes implementados (com caminhos):
 - **Telemetria/OTel spans e métricas (Seção 19):** há logs estruturados + redaction; faltam spans `ai.*` e métricas/contadores.
 - **UI — refinamentos:** o chat renderiza texto puro (HTML-encoded) sem markdown sanitizado, sem chips de fonte no histórico (a API retorna `sources` no turno, mas não são persistidos por mensagem) e sem streaming SSE (default da Seção 28: streaming depois do read-only).
 - **Demais write tools (Seção 8.2):** só `propose_manual_movement` foi implementada. Faltam `propose_bill_creation`, `propose_card_purchase`, `propose_bill_payment`, `propose_statement_payment` e `propose_category_change` (mesmo protocolo; cada uma liberada por flag).
-- **Fase 4 (mobile):** DTOs/repository KMP, tela de conversa, polling/SSE, deep links, flag própria (`AiAssistantMobile` já existe na config).
+- **Mobile — refinamentos:** Android apenas (sem iOS), sem SSE/streaming, sem deep links, e sem recarregar propostas pendentes ao reabrir conversa (falta um endpoint mobile de propostas por conversa).
 - **Fase 5 (hardening):** feedback (`SubmitFeedback` + endpoint; entidade `AiFeedback` já existe), painel de custo, sugestão de categorias, RAG só de documentação, export/delete, runbooks, rotação de chave.
 - **Concorrência otimista nas proposals e `RowVersion` nas conversas:** colunas/lógica ainda não adicionadas.
 
 ### 0.4 Backlog (Seção 24) — situação
 
-`AI-001`..`AI-013` ✅ feitos (fundação + tools de leitura + CQRS de conversas). `AI-014` ✅ (API JWT: turno + `GET`/archive/actions, 401/404/409, isolamento). `AI-015` ✅ (UI Web `/assistant` + cards de proposta). `AI-016` parcial (orçamento diário de tokens → 429; faltam limites por minuto/IP e alertas). `AI-017` parcial (redaction + logs estruturados; falta OTel). `AI-018` ✅ (evaluation suite com gates). `AI-019` ✅ (action proposals + state machine). `AI-020` ✅ (confirm/reject idempotentes + stale). `AI-021` parcial (só `propose_manual_movement`). `AI-022`/`AI-023` pendentes (mobile KMP, runbooks).
+`AI-001`..`AI-013` ✅ feitos (fundação + tools de leitura + CQRS de conversas). `AI-014` ✅ (API JWT: turno + `GET`/archive/actions, 401/404/409, isolamento). `AI-015` ✅ (UI Web `/assistant` + cards de proposta). `AI-016` parcial (orçamento diário de tokens → 429; faltam limites por minuto/IP e alertas). `AI-017` parcial (redaction + logs estruturados; falta OTel). `AI-018` ✅ (evaluation suite com gates). `AI-019` ✅ (action proposals + state machine). `AI-020` ✅ (confirm/reject idempotentes + stale). `AI-021` parcial (só `propose_manual_movement`). `AI-022` ✅ (mobile KMP consumindo a API, sem SDK Google). `AI-023` pendente (runbooks/rollout).
 
 ## 1. Resumo executivo
 

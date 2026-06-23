@@ -14,6 +14,7 @@ enum class DataScope {
     Bills,
     Dashboard,
     Reports,
+    Assistant,
 }
 
 interface DataChangeBus {

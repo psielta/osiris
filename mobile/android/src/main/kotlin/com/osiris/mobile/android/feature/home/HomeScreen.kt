@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.ui.components.OsirisLogo
+import com.osiris.mobile.core.config.AssistantFeature
 import com.osiris.mobile.presentation.home.HomeEvent
 import com.osiris.mobile.presentation.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -47,6 +49,7 @@ fun HomeScreen(
     onNavigateCategories: () -> Unit,
     onNavigateReports: () -> Unit,
     onNavigateDocs: () -> Unit,
+    onNavigateAssistant: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -112,6 +115,15 @@ fun HomeScreen(
                 icon = Icons.AutoMirrored.Filled.List,
                 onClick = onNavigateCategories,
             )
+            if (AssistantFeature.Enabled) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                MoreActionRow(
+                    title = "Assistente",
+                    subtitle = "Converse sobre suas finanças com a IA",
+                    icon = Icons.AutoMirrored.Filled.Send,
+                    onClick = onNavigateAssistant,
+                )
+            }
 
             Spacer(Modifier.height(28.dp))
             Button(

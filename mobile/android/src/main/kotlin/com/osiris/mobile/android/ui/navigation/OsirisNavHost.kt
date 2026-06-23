@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.osiris.mobile.android.R
 import com.osiris.mobile.android.feature.accounts.AccountFormScreen
+import com.osiris.mobile.android.feature.assistant.AssistantScreen
 import com.osiris.mobile.android.feature.accounts.AccountStatementScreen
 import com.osiris.mobile.android.feature.accounts.AccountsListScreen
 import com.osiris.mobile.android.feature.accounts.CsvImportScreen
@@ -143,7 +144,11 @@ fun OsirisNavHost() {
                     onNavigateCategories = { navController.navigate(Routes.CategoriesList) },
                     onNavigateReports = { navController.navigate(Routes.Reports) },
                     onNavigateDocs = { navController.navigate(Routes.DocsList) },
+                    onNavigateAssistant = { navController.navigate(Routes.Assistant) },
                 )
+            }
+            composable(Routes.Assistant) {
+                AssistantScreen(onNavigateBack = { navController.popBackStack() })
             }
             composable(Routes.Dashboard) {
                 DashboardScreen(onNavigateBack = { navController.popBackStack() }, showBackButton = false)
