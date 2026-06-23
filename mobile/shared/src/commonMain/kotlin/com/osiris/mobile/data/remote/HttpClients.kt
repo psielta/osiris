@@ -8,6 +8,7 @@ import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
 
 /** Anonymous client (no bearer) used for login/register/refresh. */
@@ -39,4 +40,13 @@ internal fun buildAuthClient(session: SessionManager): HttpClient = HttpClient(o
             }
         }
     }
+}
+
+/**
+ * Bare client with only the WebSockets plugin, used by the realtime voice relay. It carries no Bearer
+ * plugin: the JWT is attached as an explicit Authorization header on each handshake (see VoiceClient),
+ * because a 401 during a WebSocket upgrade cannot be transparently retried the way a request can.
+ */
+internal fun buildWebSocketClient(): HttpClient = HttpClient(osirisHttpEngine()) {
+    install(WebSockets)
 }

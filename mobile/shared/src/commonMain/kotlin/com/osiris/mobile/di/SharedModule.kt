@@ -10,6 +10,7 @@ import com.osiris.mobile.data.remote.DashboardApi
 import com.osiris.mobile.data.remote.ReportApi
 import com.osiris.mobile.data.remote.buildAuthClient
 import com.osiris.mobile.data.remote.buildPlainClient
+import com.osiris.mobile.data.remote.buildWebSocketClient
 import com.osiris.mobile.data.repository.AccountRepositoryImpl
 import com.osiris.mobile.data.repository.AssistantRepositoryImpl
 import com.osiris.mobile.data.repository.AuthRepositoryImpl
@@ -29,6 +30,7 @@ import com.osiris.mobile.domain.repository.CardRepository
 import com.osiris.mobile.domain.repository.CategoryRepository
 import com.osiris.mobile.domain.repository.DashboardRepository
 import com.osiris.mobile.domain.repository.ReportRepository
+import com.osiris.mobile.voice.VoiceClient
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -58,4 +60,6 @@ val sharedModule = module {
     single<ReportRepository> { ReportRepositoryImpl(get()) }
     single { AssistantApi(get(named("auth")), get()) }
     single<AssistantRepository> { AssistantRepositoryImpl(get(), get()) }
+    single<HttpClient>(named("ws")) { buildWebSocketClient() }
+    single { VoiceClient(get(named("ws")), get(), get()) }
 }

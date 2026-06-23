@@ -6,6 +6,7 @@ import com.osiris.mobile.data.session.DataStoreTokenStore
 import com.osiris.mobile.data.session.TokenStore
 import com.osiris.mobile.presentation.accounts.AccountFormViewModel
 import com.osiris.mobile.presentation.assistant.AssistantViewModel
+import com.osiris.mobile.presentation.assistant.VoiceViewModel
 import com.osiris.mobile.presentation.accounts.AccountStatementViewModel
 import com.osiris.mobile.presentation.accounts.AccountsListViewModel
 import com.osiris.mobile.presentation.accounts.CsvImportViewModel
@@ -33,6 +34,8 @@ import com.osiris.mobile.presentation.login.LoginViewModel
 import com.osiris.mobile.presentation.register.RegisterViewModel
 import com.osiris.mobile.presentation.reports.ReportsViewModel
 import com.osiris.mobile.presentation.splash.SplashViewModel
+import com.osiris.mobile.voice.VoiceAudioCapture
+import com.osiris.mobile.voice.VoiceAudioPlayback
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -71,4 +74,8 @@ val appModule = module {
     viewModelOf(::AllStatementsViewModel)
     viewModelOf(::ReportsViewModel)
     viewModelOf(::AssistantViewModel)
+
+    factory { VoiceAudioCapture() }
+    factory { VoiceAudioPlayback() }
+    viewModelOf(::VoiceViewModel)
 }

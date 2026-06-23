@@ -44,6 +44,19 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > verdes; suíte 718. **Falta a parte 2 (app Android):** captura/playback de PCM via `expect/actual`
 > (`AudioRecord`/`AudioTrack`) + WebSocket do Ktor (Bearer no handshake) + ViewModel de voz + botão de microfone
 > na `AssistantScreen` — precisa de device para validar o áudio.
+>
+> **Passo D, parte 2 (app Android) — 23/06/2026.** Implementado o cliente de voz no KMP:
+> `expect/actual` `VoiceAudioCapture` (`AudioRecord`, VOICE_COMMUNICATION 16 kHz PCM16 + AEC/NS/AGC) e
+> `VoiceAudioPlayback` (`AudioTrack` 24 kHz, fila + worker, `flush` no barge-in); `VoiceClient`/`VoiceConnection`
+> (Ktor `WebSockets`, Bearer no handshake, refresh-e-retry, deriva `wss://…/api/v1/ai/voice` do `ApiConfig`);
+> `VoiceViewModel` (streaming contínuo com VAD do servidor, mute = parar de enviar, "Encerrar" = fechar sessão,
+> transcrições incrementais por papel, barge-in dá flush). UI: botão 🎤 na `AssistantScreen` + `VoiceBar`
+> (status, transcrições, ligar/desligar microfone, Encerrar) + permissão `RECORD_AUDIO` em runtime. DI:
+> client `ws` + `VoiceClient` no `SharedModule`; áudio + `VoiceViewModel` no `AppModule`. `versionCode 14` /
+> `versionName 0.12.0`. **Build debug + testes do shared verdes** (novo `VoiceClientTest` cobre parse de evento e
+> derivação da URL). **Falta:** validar áudio em **device físico** e gerar o **APK release** (a parte de pipeline de
+> áudio/echo não é verificável neste ambiente). Pendências futuras: escrita por voz (Fase 2), persistência da
+> conversa de voz, hardening (orçamento de áudio, session resumption, métricas).
 
 ---
 

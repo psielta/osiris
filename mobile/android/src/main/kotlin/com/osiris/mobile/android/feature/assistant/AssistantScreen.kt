@@ -42,15 +42,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.Manifest
+import android.content.pm.PackageManager
 import com.osiris.mobile.domain.model.AiMessage
 import com.osiris.mobile.domain.model.AiProposal
 import com.osiris.mobile.presentation.assistant.AssistantEvent
 import com.osiris.mobile.presentation.assistant.AssistantViewModel
+import com.osiris.mobile.presentation.assistant.VoiceUiState
+import com.osiris.mobile.presentation.assistant.VoiceViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,17 +68,49 @@ import org.koin.androidx.compose.koinViewModel
 fun AssistantScreen(
     onNavigateBack: () -> Unit,
     viewModel: AssistantViewModel = koinViewModel(),
+    voiceViewModel: VoiceViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val voice by voiceViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var input by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
+
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            voiceViewModel.start()
+        } else {
+            scope.launch { snackbarHostState.showSnackbar("Permissão de microfone negada.") }
+        }
+    }
+
+    fun toggleVoice() {
+        if (voice.active || voice.connecting) {
+            voiceViewModel.stop()
+        } else if (
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            voiceViewModel.start()
+        } else {
+            micPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is AssistantEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
             }
+        }
+    }
+
+    LaunchedEffect(voice.error) {
+        voice.error?.let {
+            snackbarHostState.showSnackbar(it)
+            voiceViewModel.clearError()
         }
     }
 
@@ -82,6 +124,12 @@ fun AssistantScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { toggleVoice() }) {
+                        Text(
+                            text = if (voice.active || voice.connecting) "🔴" else "🎤",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                     IconButton(onClick = {
                         viewModel.newConversation()
                         input = ""
@@ -150,6 +198,14 @@ fun AssistantScreen(
                 }
             }
 
+            if (voice.active || voice.connecting) {
+                VoiceBar(
+                    state = voice,
+                    onToggleMute = voiceViewModel::toggleMute,
+                    onStop = voiceViewModel::stop,
+                )
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,6 +237,57 @@ fun AssistantScreen(
             }
         }
     }
+}
+
+@Composable
+private fun VoiceBar(
+    state: VoiceUiState,
+    onToggleMute: () -> Unit,
+    onStop: () -> Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                text = voiceStatusLabel(state),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            if (state.userText.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Você: ${state.userText}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (state.assistantText.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = state.assistantText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(onClick = onToggleMute, enabled = state.active) {
+                    Text(if (state.muted) "Ligar microfone" else "Desligar microfone")
+                }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = onStop) { Text("Encerrar") }
+            }
+        }
+    }
+}
+
+private fun voiceStatusLabel(state: VoiceUiState): String = when {
+    state.connecting -> "Conectando…"
+    state.muted -> "Microfone desligado"
+    state.status == "speaking" -> "Falando…"
+    else -> "Ouvindo…"
 }
 
 @Composable
