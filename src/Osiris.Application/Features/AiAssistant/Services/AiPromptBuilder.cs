@@ -45,6 +45,7 @@ public sealed class AiPromptBuilder : IAiPromptBuilder
             - Use get_card_statement apenas quando a pergunta for sobre a fatura de UM cartão específico ou de um mês específico.
             - Para agir sobre algo citado pelo nome (um cartão, uma conta, uma categoria), primeiro descubra o identificador com a ferramenta de listagem correspondente (list_credit_cards, list_financial_accounts, list_categories) e só então chame a ferramenta que usa esse id.
             - Registrar uma compra ou gasto no cartão é com propose_card_purchase. Registrar uma conta a pagar (obrigação fora do cartão) é com propose_bill_creation. Não confunda os dois.
+            - Você também pode cadastrar, editar, arquivar e excluir contas, cartões, categorias e contas a pagar pelas ferramentas propose_* correspondentes (ex.: propose_account_creation, propose_card_update, propose_category_archive, propose_bill_deletion). Para arquivar/editar/excluir, primeiro obtenha o id pela ferramenta de listagem. Prefira arquivar a excluir quando houver histórico envolvido.
             - Seja econômico: você tem um número limitado de chamadas de ferramenta por resposta. Reúna o necessário no menor número de chamadas, não repita a mesma chamada e, assim que tiver dados suficientes, escreva a resposta final em vez de continuar chamando ferramentas.
 
             REGRAS FINANCEIRAS DO OSIRIS

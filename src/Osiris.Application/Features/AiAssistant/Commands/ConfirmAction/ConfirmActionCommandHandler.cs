@@ -6,8 +6,13 @@ using Osiris.Application.Common.Models;
 using Osiris.Application.Features.AiAssistant.DTOs;
 using Osiris.Application.Features.AiAssistant.Proposals;
 using Osiris.Application.Features.Bills.Commands.CreateBill;
+using Osiris.Application.Features.Bills.Commands.DeleteBill;
 using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
+using Osiris.Application.Features.Bills.Commands.MarkBillAsPending;
+using Osiris.Application.Features.Bills.Commands.UpdateBill;
 using Osiris.Application.Features.Bills.Queries.GetBillDetails;
+using Osiris.Application.Features.Bills.Queries.GetBillForEdit;
+using Osiris.Application.Features.CreditCardPurchases.Commands.DeleteCreditCardPurchase;
 using Osiris.Application.Features.Categories.Commands.ArchiveCategory;
 using Osiris.Application.Features.Categories.Commands.CreateCategory;
 using Osiris.Application.Features.Categories.Commands.DeleteCategory;
@@ -16,10 +21,19 @@ using Osiris.Application.Features.Categories.Queries.ListCategories;
 using Osiris.Application.Features.CreditCardPurchases.Commands.ChangeCreditCardPurchaseCategory;
 using Osiris.Application.Features.CreditCardPurchases.Commands.CreateCreditCardPurchase;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
+using Osiris.Application.Features.CreditCards.Commands.ArchiveCreditCard;
+using Osiris.Application.Features.CreditCards.Commands.CreateCreditCard;
+using Osiris.Application.Features.CreditCards.Commands.UpdateCreditCard;
+using Osiris.Application.Features.CreditCards.Queries.GetCreditCardForEdit;
+using Osiris.Application.Features.CreditCards.Queries.ListCreditCards;
 using Osiris.Application.Features.CreditCardStatementPayments.Commands.RegisterCreditCardStatementPayment;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCreditCardStatementDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
+using Osiris.Application.Features.FinancialAccounts.Commands.ArchiveFinancialAccount;
+using Osiris.Application.Features.FinancialAccounts.Commands.CreateFinancialAccount;
+using Osiris.Application.Features.FinancialAccounts.Commands.UpdateFinancialAccount;
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountDetails;
+using Osiris.Application.Features.FinancialAccounts.Queries.ListFinancialAccounts;
 using Osiris.Domain.Entities;
 using Osiris.Domain.Enums;
 
@@ -119,12 +133,21 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
         {
             AiActionTypes.ManualMovement => RevalidateManualMovementAsync(proposal, cancellationToken),
             AiActionTypes.BillCreation or AiActionTypes.CardPurchase or AiActionTypes.CategoryCreation
+                or AiActionTypes.AccountCreation or AiActionTypes.CardCreation
                 => Task.FromResult(RevalidateCreation(proposal)),
             AiActionTypes.BillPayment => RevalidateBillPaymentAsync(proposal, cancellationToken),
             AiActionTypes.StatementPayment => RevalidateStatementPaymentAsync(proposal, cancellationToken),
             AiActionTypes.CategoryChange => RevalidateCategoryChangeAsync(proposal, cancellationToken),
             AiActionTypes.CategoryUpdate => RevalidateCategoryUpdateAsync(proposal, cancellationToken),
             AiActionTypes.CategoryArchive or AiActionTypes.CategoryDeletion => RevalidateCategoryRefAsync(proposal, cancellationToken),
+            AiActionTypes.AccountUpdate => RevalidateAccountUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.AccountArchive => RevalidateAccountRefAsync(proposal, cancellationToken),
+            AiActionTypes.CardUpdate => RevalidateCardUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.CardArchive => RevalidateCardArchiveAsync(proposal, cancellationToken),
+            AiActionTypes.BillUpdate => RevalidateBillUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.BillDeletion => RevalidateBillDeletionAsync(proposal, cancellationToken),
+            AiActionTypes.BillUnpay => RevalidateBillUnpayAsync(proposal, cancellationToken),
+            AiActionTypes.PurchaseDeletion => RevalidatePurchaseDeletionAsync(proposal, cancellationToken),
             _ => Task.FromResult<string?>("Tipo de ação não suportado.")
         };
 
@@ -143,6 +166,16 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
             AiActionTypes.CategoryUpdate => ExecuteCategoryUpdateAsync(proposal, cancellationToken),
             AiActionTypes.CategoryArchive => ExecuteCategoryArchiveAsync(proposal, cancellationToken),
             AiActionTypes.CategoryDeletion => ExecuteCategoryDeletionAsync(proposal, cancellationToken),
+            AiActionTypes.AccountCreation => ExecuteAccountCreationAsync(proposal, cancellationToken),
+            AiActionTypes.AccountUpdate => ExecuteAccountUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.AccountArchive => ExecuteAccountArchiveAsync(proposal, cancellationToken),
+            AiActionTypes.CardCreation => ExecuteCardCreationAsync(proposal, cancellationToken),
+            AiActionTypes.CardUpdate => ExecuteCardUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.CardArchive => ExecuteCardArchiveAsync(proposal, cancellationToken),
+            AiActionTypes.BillUpdate => ExecuteBillUpdateAsync(proposal, cancellationToken),
+            AiActionTypes.BillDeletion => ExecuteBillDeletionAsync(proposal, cancellationToken),
+            AiActionTypes.BillUnpay => ExecuteBillUnpayAsync(proposal, cancellationToken),
+            AiActionTypes.PurchaseDeletion => ExecutePurchaseDeletionAsync(proposal, cancellationToken),
             _ => Task.FromResult<(string?, Guid?, string?)>((null, null, "Tipo de ação não suportado."))
         };
 
@@ -249,6 +282,138 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
         return ProposalState.CategoryHash(category.Name, category.Type, category.Color, category.IsActive) == stateHash
             ? null
             : StaleMessage;
+    }
+
+    private Task<string?> RevalidateAccountUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<AccountUpdatePayload>(proposal.PayloadJson);
+        return payload is null
+            ? Task.FromResult<string?>(UnreadableMessage)
+            : CheckAccountProfileHashAsync(payload.AccountId, proposal.StateHash, cancellationToken);
+    }
+
+    private Task<string?> RevalidateAccountRefAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<AccountRefPayload>(proposal.PayloadJson);
+        return payload is null
+            ? Task.FromResult<string?>(UnreadableMessage)
+            : CheckAccountProfileHashAsync(payload.AccountId, proposal.StateHash, cancellationToken);
+    }
+
+    private async Task<string?> CheckAccountProfileHashAsync(Guid accountId, string stateHash, CancellationToken cancellationToken)
+    {
+        var accounts = await _sender.Send(new ListFinancialAccountsQuery(IncludeArchived: true), cancellationToken);
+        var account = accounts.FirstOrDefault(item => item.Id == accountId);
+        if (account is null)
+        {
+            return "A conta não está mais disponível.";
+        }
+
+        return ProposalState.AccountProfileHash(account.Name, account.Type, account.IsActive) == stateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private async Task<string?> RevalidateCardUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardUpdatePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var card = await _sender.Send(new GetCreditCardForEditQuery(payload.CardId), cancellationToken);
+        if (card is null)
+        {
+            return "O cartão não está mais disponível.";
+        }
+
+        return ProposalState.CardHash(card.Name, card.Limit, card.ClosingDay, card.DueDay) == proposal.StateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private async Task<string?> RevalidateCardArchiveAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var cards = await _sender.Send(new ListCreditCardsQuery(IncludeArchived: true), cancellationToken);
+        var card = cards.FirstOrDefault(item => item.Id == payload.CardId);
+        if (card is null)
+        {
+            return "O cartão não está mais disponível.";
+        }
+
+        return ProposalState.CardHash(card.Name, card.Limit, card.ClosingDay, card.DueDay) == proposal.StateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private Task<string?> RevalidateBillUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillUpdatePayload>(proposal.PayloadJson);
+        return payload is null
+            ? Task.FromResult<string?>(UnreadableMessage)
+            : CheckBillEditHashAsync(payload.BillId, proposal.StateHash, cancellationToken);
+    }
+
+    private Task<string?> RevalidateBillDeletionAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillRefPayload>(proposal.PayloadJson);
+        return payload is null
+            ? Task.FromResult<string?>(UnreadableMessage)
+            : CheckBillEditHashAsync(payload.BillId, proposal.StateHash, cancellationToken);
+    }
+
+    private async Task<string?> CheckBillEditHashAsync(Guid billId, string stateHash, CancellationToken cancellationToken)
+    {
+        var bill = await _sender.Send(new GetBillForEditQuery(billId), cancellationToken);
+        if (bill is null)
+        {
+            return "A conta a pagar não está mais disponível.";
+        }
+
+        return ProposalState.BillEditHash(bill.Description, bill.Amount, bill.DueDate, bill.CategoryId, bill.IsPaid) == stateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private async Task<string?> RevalidateBillUnpayAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var bill = await _sender.Send(new GetBillDetailsQuery(payload.BillId), cancellationToken);
+        if (bill is null)
+        {
+            return "A conta a pagar não está mais disponível.";
+        }
+
+        return ProposalState.BillHash(bill.PaidAt, bill.Amount) == proposal.StateHash ? null : StaleMessage;
+    }
+
+    private async Task<string?> RevalidatePurchaseDeletionAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<PurchaseRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var purchase = await _sender.Send(new GetCreditCardPurchaseDetailsQuery(payload.PurchaseId), cancellationToken);
+        if (purchase is null)
+        {
+            return "A compra não está mais disponível.";
+        }
+
+        return ProposalState.PurchaseHash(purchase.TotalAmount) == proposal.StateHash ? null : StaleMessage;
     }
 
     private async Task<(string?, Guid?, string?)> ExecuteManualMovementAsync(AiActionProposal proposal, CancellationToken cancellationToken)
@@ -403,6 +568,150 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
             () => _sender.Send(new DeleteCategoryCommand(payload.CategoryId), cancellationToken),
             "FinancialCategory",
             payload.CategoryId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteAccountCreationAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<AccountCreationPayload>(proposal.PayloadJson);
+        if (payload is null || !Enum.TryParse<FinancialAccountType>(payload.Type, out var type))
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(new CreateFinancialAccountCommand(payload.Name, type, payload.InitialBalance), cancellationToken),
+            "FinancialAccount");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteAccountUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<AccountUpdatePayload>(proposal.PayloadJson);
+        if (payload is null || !Enum.TryParse<FinancialAccountType>(payload.Type, out var type))
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new UpdateFinancialAccountCommand(payload.AccountId, payload.Name, type), cancellationToken),
+            "FinancialAccount",
+            payload.AccountId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteAccountArchiveAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<AccountRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new ArchiveFinancialAccountCommand(payload.AccountId), cancellationToken),
+            "FinancialAccount",
+            payload.AccountId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteCardCreationAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardCreationPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(
+                new CreateCreditCardCommand(payload.Name, payload.Limit, payload.ClosingDay, payload.DueDay, payload.PaymentAccountId),
+                cancellationToken),
+            "CreditCard");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteCardUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardUpdatePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(
+                new UpdateCreditCardCommand(payload.CardId, payload.Name, payload.Limit, payload.ClosingDay, payload.DueDay, payload.PaymentAccountId),
+                cancellationToken),
+            "CreditCard",
+            payload.CardId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteCardArchiveAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new ArchiveCreditCardCommand(payload.CardId), cancellationToken),
+            "CreditCard",
+            payload.CardId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteBillUpdateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillUpdatePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(
+                new UpdateBillCommand(payload.BillId, payload.Description, payload.Amount, payload.DueDate, payload.CategoryId, payload.PaymentAccountId, payload.Notes),
+                cancellationToken),
+            "Bill",
+            payload.BillId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteBillDeletionAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new DeleteBillCommand(payload.BillId), cancellationToken),
+            "Bill",
+            payload.BillId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteBillUnpayAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new MarkBillAsPendingCommand(payload.BillId), cancellationToken),
+            "Bill",
+            payload.BillId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecutePurchaseDeletionAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<PurchaseRefPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(new DeleteCreditCardPurchaseCommand(payload.PurchaseId), cancellationToken),
+            "CreditCardPurchase",
+            payload.PurchaseId);
     }
 
     private static async Task<(string?, Guid?, string?)> SendAsync(Func<Task<Result<Guid>>> send, string entityType)

@@ -8,6 +8,8 @@ using Osiris.Application.Features.Bills.DTOs;
 using Osiris.Application.Features.Bills.Queries.GetBillDetails;
 using Osiris.Application.Features.Categories.Commands.CreateCategory;
 using Osiris.Application.Features.CreditCardPurchases.Commands.ChangeCreditCardPurchaseCategory;
+using Osiris.Application.Features.CreditCardPurchases.Commands.DeleteCreditCardPurchase;
+using Osiris.Application.Features.CreditCards.Commands.CreateCreditCard;
 using Osiris.Application.Features.CreditCardPurchases.DTOs;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
@@ -232,6 +234,50 @@ public sealed class ConfirmActionCommandHandlerTests
         Assert.Equal("Executed", result.Value!.Status);
         Assert.Equal(categoryId, result.Value.ResultEntityId);
         Assert.Equal(1, sender.Invocations<CreateCategoryCommand>());
+    }
+
+    [Fact]
+    public async Task Confirm_card_creation_executes_create_once()
+    {
+        var payload = new CardCreationPayload("Inter", 3000m, 1, 7, null);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var proposal = new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.CardCreation, payloadJson,
+            "Criar cartão", "Impacto", AiToolRisk.WriteProposal, "idem-card",
+            ProposalState.PayloadHash(payloadJson), Now, Now.AddMinutes(15));
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var cardId = Guid.NewGuid();
+        var sender = new MapSender().On<CreateCreditCardCommand>(_ => Result<Guid>.Success(cardId));
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(cardId, result.Value!.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<CreateCreditCardCommand>());
+    }
+
+    [Fact]
+    public async Task Confirm_purchase_deletion_executes_delete_once()
+    {
+        var purchaseId = Guid.NewGuid();
+        var payload = new PurchaseRefPayload(purchaseId);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var proposal = new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.PurchaseDeletion, payloadJson,
+            "Excluir compra", "Impacto", AiToolRisk.WriteProposal, "idem-del",
+            ProposalState.PurchaseHash(80m), Now, Now.AddMinutes(15));
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var sender = new MapSender()
+            .On<GetCreditCardPurchaseDetailsQuery>(_ => PurchaseDetails(purchaseId, Guid.NewGuid()))
+            .On<DeleteCreditCardPurchaseCommand>(_ => Result.Success());
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(purchaseId, result.Value!.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<DeleteCreditCardPurchaseCommand>());
     }
 
     [Fact]

@@ -64,6 +64,20 @@ public static class DependencyInjection
         services.AddScoped<IAiTool, ProposeBillPaymentTool>();
         services.AddScoped<IAiTool, ProposeStatementPaymentTool>();
         services.AddScoped<IAiTool, ProposeCategoryChangeTool>();
+        services.AddScoped<IAiTool, ProposeCategoryCreationTool>();
+        services.AddScoped<IAiTool, ProposeCategoryUpdateTool>();
+        services.AddScoped<IAiTool, ProposeCategoryArchiveTool>();
+        services.AddScoped<IAiTool, ProposeCategoryDeletionTool>();
+        services.AddScoped<IAiTool, ProposeAccountCreationTool>();
+        services.AddScoped<IAiTool, ProposeAccountUpdateTool>();
+        services.AddScoped<IAiTool, ProposeAccountArchiveTool>();
+        services.AddScoped<IAiTool, ProposeCardCreationTool>();
+        services.AddScoped<IAiTool, ProposeCardUpdateTool>();
+        services.AddScoped<IAiTool, ProposeCardArchiveTool>();
+        services.AddScoped<IAiTool, ProposeBillUpdateTool>();
+        services.AddScoped<IAiTool, ProposeBillDeletionTool>();
+        services.AddScoped<IAiTool, ProposeBillUnpayTool>();
+        services.AddScoped<IAiTool, ProposePurchaseDeletionTool>();
 
         return services;
     }
