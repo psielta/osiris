@@ -197,12 +197,21 @@ private fun MessageBubble(message: AiMessage) {
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.widthIn(max = 300.dp),
         ) {
-            Text(
-                text = message.content,
-                modifier = Modifier.padding(10.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-            )
+            if (isUser) {
+                Text(
+                    text = message.content,
+                    modifier = Modifier.padding(10.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            } else {
+                MarkdownText(
+                    text = message.content,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(10.dp),
+                )
+            }
         }
     }
 }

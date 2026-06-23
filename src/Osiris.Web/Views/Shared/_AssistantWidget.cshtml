@@ -3,7 +3,21 @@
     Talks to the cookie-authenticated /assistant/widget/* JSON endpoints via fetch, sending the
     antiforgery token in the RequestVerificationToken header.
 *@
-<style>[x-cloak]{display:none !important;}</style>
+<style>
+    [x-cloak]{display:none !important;}
+    .assistant-md p{margin:0;}
+    .assistant-md p + p{margin-top:.4rem;}
+    .assistant-md ul,.assistant-md ol{margin:.25rem 0;padding-left:1.15rem;}
+    .assistant-md ul{list-style:disc;}
+    .assistant-md ol{list-style:decimal;}
+    .assistant-md li{margin:.1rem 0;}
+    .assistant-md li::marker{color:inherit;}
+    .assistant-md strong{font-weight:600;}
+    .assistant-md em{font-style:italic;}
+    .assistant-md a{text-decoration:underline;}
+    .assistant-md code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;background:rgba(128,128,128,.22);padding:.05rem .25rem;border-radius:.25rem;}
+    .assistant-md .md-h{font-weight:600;margin:.2rem 0 .1rem;}
+</style>
 
 <div x-data="assistantWidget()" x-cloak>
     @Html.AntiForgeryToken()
@@ -34,9 +48,9 @@
 
             <template x-for="(m, i) in messages" x-bind:key="i">
                 <div class="flex" x-bind:class="m.role === 'user' ? 'justify-end' : 'justify-start'">
-                    <div class="max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm"
-                         x-bind:class="m.role === 'user' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100'"
-                         x-text="m.content"></div>
+                    <div class="assistant-md max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed"
+                         x-bind:class="m.role === 'user' ? 'whitespace-pre-wrap bg-amber-500 text-white' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100'"
+                         x-html="render(m)"></div>
                 </div>
             </template>
 
@@ -81,6 +95,63 @@
             proposals: [],
             token() {
                 return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            },
+            esc(s) {
+                return String(s ?? '')
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            },
+            // Renders a safe subset of markdown. Text is HTML-escaped first, then only a fixed set of
+            // tags is introduced, so the result cannot inject scripts or arbitrary HTML.
+            inlineMd(t) {
+                t = this.esc(t);
+                t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+                t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                t = t.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+                t = t.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+                t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+                    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+                return t;
+            },
+            renderMd(src) {
+                const lines = String(src ?? '').replace(/\r\n?/g, '\n').split('\n');
+                let html = '';
+                let i = 0;
+                while (i < lines.length) {
+                    if (/^\s*$/.test(lines[i])) { i++; continue; }
+                    const h = lines[i].match(/^\s*#{1,6}\s+(.*)$/);
+                    if (h) { html += '<p class="md-h">' + this.inlineMd(h[1]) + '</p>'; i++; continue; }
+                    if (/^\s*[-*+]\s+/.test(lines[i])) {
+                        html += '<ul>';
+                        while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
+                            html += '<li>' + this.inlineMd(lines[i].replace(/^\s*[-*+]\s+/, '')) + '</li>';
+                            i++;
+                        }
+                        html += '</ul>';
+                        continue;
+                    }
+                    if (/^\s*\d+[.)]\s+/.test(lines[i])) {
+                        html += '<ol>';
+                        while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) {
+                            html += '<li>' + this.inlineMd(lines[i].replace(/^\s*\d+[.)]\s+/, '')) + '</li>';
+                            i++;
+                        }
+                        html += '</ol>';
+                        continue;
+                    }
+                    const buf = [];
+                    while (i < lines.length && !/^\s*$/.test(lines[i])
+                        && !/^\s*[-*+]\s+/.test(lines[i]) && !/^\s*\d+[.)]\s+/.test(lines[i])
+                        && !/^\s*#{1,6}\s+/.test(lines[i])) {
+                        buf.push(lines[i]); i++;
+                    }
+                    html += '<p>' + this.inlineMd(buf.join('\n')).replace(/\n/g, '<br>') + '</p>';
+                }
+                return html;
+            },
+            render(m) {
+                if (m.role === 'user') return this.esc(m.content).replace(/\n/g, '<br>');
+                return this.renderMd(m.content);
             },
             reset() {
                 this.conversationId = null;
