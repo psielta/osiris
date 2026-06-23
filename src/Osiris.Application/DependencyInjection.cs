@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IAiTool, ProposeCardPurchaseTool>();
         services.AddScoped<IAiTool, ProposeBillPaymentTool>();
         services.AddScoped<IAiTool, ProposeStatementPaymentTool>();
+        services.AddScoped<IAiTool, ProposeCategoryChangeTool>();
 
         return services;
     }

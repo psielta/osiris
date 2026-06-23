@@ -8,7 +8,9 @@ using Osiris.Application.Features.AiAssistant.Proposals;
 using Osiris.Application.Features.Bills.Commands.CreateBill;
 using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
 using Osiris.Application.Features.Bills.Queries.GetBillDetails;
+using Osiris.Application.Features.CreditCardPurchases.Commands.ChangeCreditCardPurchaseCategory;
 using Osiris.Application.Features.CreditCardPurchases.Commands.CreateCreditCardPurchase;
+using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
 using Osiris.Application.Features.CreditCardStatementPayments.Commands.RegisterCreditCardStatementPayment;
 using Osiris.Application.Features.CreditCardStatements.Queries.GetCreditCardStatementDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
@@ -114,6 +116,7 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
             AiActionTypes.BillCreation or AiActionTypes.CardPurchase => Task.FromResult(RevalidateCreation(proposal)),
             AiActionTypes.BillPayment => RevalidateBillPaymentAsync(proposal, cancellationToken),
             AiActionTypes.StatementPayment => RevalidateStatementPaymentAsync(proposal, cancellationToken),
+            AiActionTypes.CategoryChange => RevalidateCategoryChangeAsync(proposal, cancellationToken),
             _ => Task.FromResult<string?>("Tipo de ação não suportado.")
         };
 
@@ -127,6 +130,7 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
             AiActionTypes.CardPurchase => ExecuteCardPurchaseAsync(proposal, cancellationToken),
             AiActionTypes.BillPayment => ExecuteBillPaymentAsync(proposal, cancellationToken),
             AiActionTypes.StatementPayment => ExecuteStatementPaymentAsync(proposal, cancellationToken),
+            AiActionTypes.CategoryChange => ExecuteCategoryChangeAsync(proposal, cancellationToken),
             _ => Task.FromResult<(string?, Guid?, string?)>((null, null, "Tipo de ação não suportado."))
         };
 
@@ -186,6 +190,23 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
         return ProposalState.StatementHash(statement.OpenBalance, statement.Status) == proposal.StateHash
             ? null
             : StaleMessage;
+    }
+
+    private async Task<string?> RevalidateCategoryChangeAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CategoryChangePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var purchase = await _sender.Send(new GetCreditCardPurchaseDetailsQuery(payload.PurchaseId), cancellationToken);
+        if (purchase is null)
+        {
+            return "A compra não está mais disponível.";
+        }
+
+        return ProposalState.PurchaseCategoryHash(purchase.CategoryId) == proposal.StateHash ? null : StaleMessage;
     }
 
     private async Task<(string?, Guid?, string?)> ExecuteManualMovementAsync(AiActionProposal proposal, CancellationToken cancellationToken)
@@ -269,6 +290,22 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
                     payload.StatementId, payload.Amount, payload.PaidAt, payload.FinancialAccountId, payload.Notes),
                 cancellationToken),
             "CreditCardStatementPayment");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteCategoryChangeAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CategoryChangePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(
+                new ChangeCreditCardPurchaseCategoryCommand(payload.PurchaseId, payload.CategoryId),
+                cancellationToken),
+            "CreditCardPurchase",
+            payload.PurchaseId);
     }
 
     private static async Task<(string?, Guid?, string?)> SendAsync(Func<Task<Result<Guid>>> send, string entityType)

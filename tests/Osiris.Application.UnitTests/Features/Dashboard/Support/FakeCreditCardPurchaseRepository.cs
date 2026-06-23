@@ -23,6 +23,12 @@ internal sealed class FakeCreditCardPurchaseRepository : ICreditCardPurchaseRepo
             purchase.TenantId == tenantId && purchase.Id == id));
     }
 
+    public Task UpdateAsync(CreditCardPurchase purchase, CancellationToken cancellationToken)
+    {
+        // The entity is tracked by reference; in-place mutations are already reflected.
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<CreditCardPurchase>> ListByCardAsync(
         Guid tenantId,
         Guid creditCardId,

@@ -33,6 +33,12 @@ public sealed class CreditCardPurchaseRepository : ICreditCardPurchaseRepository
                 cancellationToken);
     }
 
+    public async Task UpdateAsync(CreditCardPurchase purchase, CancellationToken cancellationToken)
+    {
+        _dbContext.CreditCardPurchases.Update(purchase);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<CreditCardPurchase>> ListByCardAsync(
         Guid tenantId,
         Guid creditCardId,

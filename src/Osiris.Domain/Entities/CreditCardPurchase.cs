@@ -61,6 +61,21 @@ public sealed class CreditCardPurchase : BaseEntity
     public string? Notes { get; private set; }
     public DateTime? UpdatedAtUtc { get; private set; }
 
+    /// <summary>
+    /// Reclassifies the purchase under a different expense category. This only changes how the purchase
+    /// is grouped in spending reports; it does not touch amounts, installments or statements.
+    /// </summary>
+    public void ChangeCategory(Guid categoryId, DateTime utcNow)
+    {
+        if (categoryId == Guid.Empty)
+        {
+            throw new ArgumentException("Category id is required.", nameof(categoryId));
+        }
+
+        CategoryId = categoryId;
+        UpdatedAtUtc = utcNow;
+    }
+
     private static string NormalizeRequiredDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))

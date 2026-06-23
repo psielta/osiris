@@ -15,6 +15,7 @@ public sealed record CreditCardPurchaseDetailsDto(
     Guid CreditCardId,
     string CreditCardName,
     string? CategoryName,
+    Guid CategoryId,
     string Description,
     decimal TotalAmount,
     DateOnly PurchaseDate,

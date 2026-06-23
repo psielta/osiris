@@ -75,6 +75,7 @@ public sealed class GetCreditCardPurchaseDetailsQueryHandler
             purchase.CreditCardId,
             card?.Name ?? string.Empty,
             category?.Name,
+            purchase.CategoryId,
             purchase.Description,
             purchase.TotalAmount,
             purchase.PurchaseDate,

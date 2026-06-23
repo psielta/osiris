@@ -16,6 +16,12 @@ public interface ICreditCardPurchaseRepository
 
     Task<CreditCardPurchase?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Persists changes to an existing purchase (e.g. a category reclassification). Does not touch
+    /// installments or statements, since those are unaffected by metadata-only edits.
+    /// </summary>
+    Task UpdateAsync(CreditCardPurchase purchase, CancellationToken cancellationToken);
+
     Task<IReadOnlyCollection<CreditCardPurchase>> ListByCardAsync(
         Guid tenantId,
         Guid creditCardId,

@@ -6,6 +6,9 @@ using Osiris.Application.Features.Bills.Commands.CreateBill;
 using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
 using Osiris.Application.Features.Bills.DTOs;
 using Osiris.Application.Features.Bills.Queries.GetBillDetails;
+using Osiris.Application.Features.CreditCardPurchases.Commands.ChangeCreditCardPurchaseCategory;
+using Osiris.Application.Features.CreditCardPurchases.DTOs;
+using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
 using Osiris.Application.Features.FinancialAccountMovements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.DTOs;
@@ -155,6 +158,58 @@ public sealed class ConfirmActionCommandHandlerTests
         Assert.Equal(billId, result.Value.ResultEntityId);
         Assert.Equal(1, sender.Invocations<MarkBillAsPaidCommand>());
     }
+
+    [Fact]
+    public async Task Confirm_category_change_executes_change_command_once()
+    {
+        var purchaseId = Guid.NewGuid();
+        var currentCategoryId = Guid.NewGuid();
+        var proposal = BuildCategoryChangeProposal(purchaseId, currentCategoryId, Guid.NewGuid());
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var sender = new MapSender()
+            .On<GetCreditCardPurchaseDetailsQuery>(_ => PurchaseDetails(purchaseId, currentCategoryId))
+            .On<ChangeCreditCardPurchaseCategoryCommand>(_ => Result.Success());
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Executed", result.Value!.Status);
+        Assert.Equal(purchaseId, result.Value.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<ChangeCreditCardPurchaseCategoryCommand>());
+    }
+
+    [Fact]
+    public async Task Confirm_category_change_is_stale_when_category_already_changed()
+    {
+        var purchaseId = Guid.NewGuid();
+        var proposal = BuildCategoryChangeProposal(purchaseId, Guid.NewGuid(), Guid.NewGuid());
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var sender = new MapSender()
+            .On<GetCreditCardPurchaseDetailsQuery>(_ => PurchaseDetails(purchaseId, Guid.NewGuid())); // category moved
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Contains(result.Errors, error => error.Code == ResultErrorCodes.Conflict);
+        Assert.Equal(AiActionProposalStatus.Stale, proposal.Status);
+        Assert.Equal(0, sender.Invocations<ChangeCreditCardPurchaseCategoryCommand>());
+    }
+
+    private AiActionProposal BuildCategoryChangeProposal(Guid purchaseId, Guid currentCategoryId, Guid newCategoryId)
+    {
+        var payload = new CategoryChangePayload(purchaseId, newCategoryId);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        return new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.CategoryChange, payloadJson,
+            "Mudar categoria", "Impacto", AiToolRisk.WriteProposal, "idem-cc",
+            ProposalState.PurchaseCategoryHash(currentCategoryId), Now, Now.AddMinutes(15));
+    }
+
+    private static CreditCardPurchaseDetailsDto PurchaseDetails(Guid id, Guid categoryId) =>
+        new(id, Guid.NewGuid(), "Inter", "Mercado", categoryId, "Farmácia", 80m,
+            new DateOnly(2026, 6, 18), 1, null, Array.Empty<CreditCardPurchaseInstallmentDto>());
 
     [Fact]
     public async Task Confirm_of_unknown_proposal_returns_not_found()

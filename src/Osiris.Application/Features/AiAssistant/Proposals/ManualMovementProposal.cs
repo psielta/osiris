@@ -13,6 +13,7 @@ public static class AiActionTypes
     public const string CardPurchase = "card_purchase";
     public const string BillPayment = "bill_payment";
     public const string StatementPayment = "statement_payment";
+    public const string CategoryChange = "category_change";
 }
 
 /// <summary>The validated payload of a manual-movement proposal, serialized into the proposal row.</summary>
@@ -54,6 +55,10 @@ public sealed record StatementPaymentPayload(
     Guid? FinancialAccountId,
     string? Notes);
 
+public sealed record CategoryChangePayload(
+    Guid PurchaseId,
+    Guid CategoryId);
+
 /// <summary>
 /// Computes the base-state hash used to detect a stale proposal: if the snapshot the proposal was based
 /// on changes between proposing and confirming, confirmation is refused. Creation actions hash the
@@ -72,6 +77,9 @@ public static class ProposalState
 
     public static string StatementHash(decimal openBalance, CreditCardStatementStatus status) =>
         Hash(string.Create(CultureInfo.InvariantCulture, $"stmt|{openBalance}|{(int)status}"));
+
+    public static string PurchaseCategoryHash(Guid currentCategoryId) =>
+        Hash($"purchase-category|{currentCategoryId}");
 
     private static string Hash(string seed)
     {
