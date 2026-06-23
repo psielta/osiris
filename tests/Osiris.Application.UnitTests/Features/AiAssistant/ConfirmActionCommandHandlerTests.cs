@@ -6,6 +6,7 @@ using Osiris.Application.Features.Bills.Commands.CreateBill;
 using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
 using Osiris.Application.Features.Bills.DTOs;
 using Osiris.Application.Features.Bills.Queries.GetBillDetails;
+using Osiris.Application.Features.Categories.Commands.CreateCategory;
 using Osiris.Application.Features.CreditCardPurchases.Commands.ChangeCreditCardPurchaseCategory;
 using Osiris.Application.Features.CreditCardPurchases.DTOs;
 using Osiris.Application.Features.CreditCardPurchases.Queries.GetCreditCardPurchaseDetails;
@@ -210,6 +211,28 @@ public sealed class ConfirmActionCommandHandlerTests
     private static CreditCardPurchaseDetailsDto PurchaseDetails(Guid id, Guid categoryId) =>
         new(id, Guid.NewGuid(), "Inter", "Mercado", categoryId, "Farmácia", 80m,
             new DateOnly(2026, 6, 18), 1, null, Array.Empty<CreditCardPurchaseInstallmentDto>());
+
+    [Fact]
+    public async Task Confirm_category_creation_executes_create_once()
+    {
+        var payload = new CategoryCreationPayload("Pets", "Expense", null);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var proposal = new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.CategoryCreation, payloadJson,
+            "Criar categoria", "Impacto", AiToolRisk.WriteProposal, "idem-cat",
+            ProposalState.PayloadHash(payloadJson), Now, Now.AddMinutes(15));
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var categoryId = Guid.NewGuid();
+        var sender = new MapSender().On<CreateCategoryCommand>(_ => Result<Guid>.Success(categoryId));
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Executed", result.Value!.Status);
+        Assert.Equal(categoryId, result.Value.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<CreateCategoryCommand>());
+    }
 
     [Fact]
     public async Task Confirm_of_unknown_proposal_returns_not_found()

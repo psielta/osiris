@@ -14,6 +14,10 @@ public static class AiActionTypes
     public const string BillPayment = "bill_payment";
     public const string StatementPayment = "statement_payment";
     public const string CategoryChange = "category_change";
+    public const string CategoryCreation = "category_creation";
+    public const string CategoryUpdate = "category_update";
+    public const string CategoryArchive = "category_archive";
+    public const string CategoryDeletion = "category_deletion";
 }
 
 /// <summary>The validated payload of a manual-movement proposal, serialized into the proposal row.</summary>
@@ -59,6 +63,19 @@ public sealed record CategoryChangePayload(
     Guid PurchaseId,
     Guid CategoryId);
 
+public sealed record CategoryCreationPayload(
+    string Name,
+    string Type,
+    string? Color);
+
+public sealed record CategoryUpdatePayload(
+    Guid CategoryId,
+    string Name,
+    string Type,
+    string? Color);
+
+public sealed record CategoryRefPayload(Guid CategoryId);
+
 /// <summary>
 /// Computes the base-state hash used to detect a stale proposal: if the snapshot the proposal was based
 /// on changes between proposing and confirming, confirmation is refused. Creation actions hash the
@@ -80,6 +97,9 @@ public static class ProposalState
 
     public static string PurchaseCategoryHash(Guid currentCategoryId) =>
         Hash($"purchase-category|{currentCategoryId}");
+
+    public static string CategoryHash(string name, CategoryType type, string? color, bool isActive) =>
+        Hash(string.Create(CultureInfo.InvariantCulture, $"category|{name}|{(int)type}|{color}|{isActive}"));
 
     private static string Hash(string seed)
     {
