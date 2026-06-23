@@ -41,11 +41,18 @@
                         <a asp-action="Index" asp-route-conversation="@conversation.Id" class="min-w-0 flex-1 truncate text-slate-700 dark:text-slate-200">
                             @conversation.Title
                         </a>
-                        <form asp-action="Archive" asp-route-id="@conversation.Id" method="post"
-                              onsubmit="return confirm('Arquivar esta conversa?');" class="ml-2 shrink-0">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" title="Arquivar" class="text-slate-400 transition hover:text-red-600">✕</button>
-                        </form>
+                        <div class="ml-2 flex shrink-0 gap-1">
+                            <form asp-action="Archive" asp-route-id="@conversation.Id" method="post"
+                                  onsubmit="return confirm('Arquivar esta conversa?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" title="Arquivar" class="text-slate-400 transition hover:text-amber-600">🗄️</button>
+                            </form>
+                            <form asp-action="Delete" asp-route-id="@conversation.Id" method="post"
+                                  onsubmit="return confirm('Excluir esta conversa permanentemente?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" title="Excluir" class="text-slate-400 transition hover:text-red-600">🗑️</button>
+                            </form>
+                        </div>
                     </li>
                 }
                 @if (!Model.Conversations.Any())
@@ -78,8 +85,25 @@
                     @foreach (var message in Model.Selected.Messages)
                     {
                         var isUser = message.Role == "user";
-                        <div class="flex @(isUser ? "justify-end" : "justify-start")">
+                        <div class="flex flex-col @(isUser ? "items-end" : "items-start")">
                             <div class="max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm @(isUser ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100")">@message.Content</div>
+                            @if (!isUser)
+                            {
+                                <div class="mt-1 flex gap-2">
+                                    <form asp-action="Feedback" asp-route-id="@message.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="conversationId" value="@Model.Selected.Id" />
+                                        <input type="hidden" name="rating" value="1" />
+                                        <button type="submit" title="Resposta útil" class="text-xs text-slate-400 transition hover:text-emerald-600">👍</button>
+                                    </form>
+                                    <form asp-action="Feedback" asp-route-id="@message.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="conversationId" value="@Model.Selected.Id" />
+                                        <input type="hidden" name="rating" value="-1" />
+                                        <button type="submit" title="Resposta não útil" class="text-xs text-slate-400 transition hover:text-red-600">👎</button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     }
                     @if (!Model.Selected.Messages.Any())

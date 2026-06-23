@@ -1,6 +1,6 @@
 # AI Agent Blueprint — Osiris + Gemini
 
-> **Status:** Fases 1–4 implementadas e testadas — leitura + escrita por proposta/confirmação no backend (API + UI Web) e o app **mobile KMP** consumindo o assistente (chat, propostas, confirmar/rejeitar), atrás de feature flags.  
+> **Status:** Fases 1–5 implementadas e testadas — MVP do assistente completo (leitura, escrita por proposta/confirmação, mobile KMP, feedback, exclusão/exportação, runbook), atrás de feature flags desligadas por padrão. Extras de hardening (RAG, painel de custo, sugestão de categorias, OTel) ficam como futuro documentado.  
 > **Última revisão:** 23 de junho de 2026  
 > **Escopo:** `Osiris.Web`, `Osiris.Api`, aplicação mobile KMP e infraestrutura compartilhada  
 > **Princípio central:** o Gemini interpreta intenção e seleciona ferramentas; o Osiris continua sendo a única fonte de verdade e o único executor das regras financeiras.
@@ -53,6 +53,13 @@ Componentes implementados (com caminhos):
 - **Testes** (`commonTest`): `AssistantRepositoryTest` (MockEngine: mapeia conversas/turno/proposta e conflito 409) e `AssistantViewModelTest` (fake repo: carga inicial, send surfaceia proposta + histórico, confirm remove a proposta). `:shared:testDebugUnitTest` e `:android:compileDebugKotlin` verdes.
 - **Escopo:** Android apenas (iOS é milestone futuro do projeto). Sem SSE — o turno é síncrono (request/response). Sem deep links (o app não os usa). As propostas aparecem a partir do turno; reabrir conversa não recarrega pendentes (a API tem a query, falta um endpoint mobile).
 
+### 0.1.4 Fase 5 — hardening (entregue em 23/06/2026)
+
+- **Feedback:** `SubmitFeedbackCommand` + `IAiFeedbackRepository`(+impl); endpoint `POST /api/v1/ai/messages/{id}/feedback` (404 se a mensagem não for do usuário). Thumbs 👍/👎 nas mensagens do assistente na UI Web. A entidade `AiFeedback` (Fase 1) agora é usada.
+- **Exclusão e exportação:** `DeleteConversationCommand` + `IAiConversationRepository.DeleteAsync` (remove propostas — FK Restrict — depois a conversa; mensagens/tool calls em cascata); endpoint `DELETE /api/v1/ai/conversations/{id}` e botão 🗑️ na UI Web. Exportação = o `GET` da conversa (JSON). Arquivar (ocultar) continua disponível.
+- **Runbook:** `docs/ai-agent-runbook.md` — flags, segredos/rotação de chave, quotas/custo, retenção/exportação/exclusão, propostas, sintomas→resposta, observabilidade e checklist de release.
+- **Testes:** unit (`SubmitFeedbackCommandHandlerTests`) + integração de API (feedback registrado / 404; delete remove conversa+mensagens; isolamento por tenant). Suíte completa verde: 449 unit + 81 Api + 124 Web + 16 evaluation.
+
 ### 0.2 Desvios conscientes em relação a este blueprint
 
 - `IAiModelClient` recebe um `AiModelPurpose` (`Agent`/`Fast`); o adapter resolve nome do modelo, temperatura e `maxOutputTokens` a partir de `GeminiOptions` (Application permanece sem saber nomes de modelo).
@@ -71,12 +78,12 @@ Componentes implementados (com caminhos):
 - **UI — refinamentos:** o chat renderiza texto puro (HTML-encoded) sem markdown sanitizado, sem chips de fonte no histórico (a API retorna `sources` no turno, mas não são persistidos por mensagem) e sem streaming SSE (default da Seção 28: streaming depois do read-only).
 - **Demais write tools (Seção 8.2):** só `propose_manual_movement` foi implementada. Faltam `propose_bill_creation`, `propose_card_purchase`, `propose_bill_payment`, `propose_statement_payment` e `propose_category_change` (mesmo protocolo; cada uma liberada por flag).
 - **Mobile — refinamentos:** Android apenas (sem iOS), sem SSE/streaming, sem deep links, e sem recarregar propostas pendentes ao reabrir conversa (falta um endpoint mobile de propostas por conversa).
-- **Fase 5 (hardening):** feedback (`SubmitFeedback` + endpoint; entidade `AiFeedback` já existe), painel de custo, sugestão de categorias, RAG só de documentação, export/delete, runbooks, rotação de chave.
+- **Hardening — extras futuros (Seção 23, Fase 5):** painel de custo/uso, sugestão de categorias por IA, RAG só de documentação, rotação automatizada de chave e purge automático de retenção. O blueprint trata vários como futuros (Seção 13: embeddings não são necessários no MVP); feedback, exportação/exclusão e runbook já foram entregues.
 - **Concorrência otimista nas proposals e `RowVersion` nas conversas:** colunas/lógica ainda não adicionadas.
 
 ### 0.4 Backlog (Seção 24) — situação
 
-`AI-001`..`AI-013` ✅ feitos (fundação + tools de leitura + CQRS de conversas). `AI-014` ✅ (API JWT: turno + `GET`/archive/actions, 401/404/409, isolamento). `AI-015` ✅ (UI Web `/assistant` + cards de proposta). `AI-016` parcial (orçamento diário de tokens → 429; faltam limites por minuto/IP e alertas). `AI-017` parcial (redaction + logs estruturados; falta OTel). `AI-018` ✅ (evaluation suite com gates). `AI-019` ✅ (action proposals + state machine). `AI-020` ✅ (confirm/reject idempotentes + stale). `AI-021` parcial (só `propose_manual_movement`). `AI-022` ✅ (mobile KMP consumindo a API, sem SDK Google). `AI-023` pendente (runbooks/rollout).
+`AI-001`..`AI-013` ✅ feitos (fundação + tools de leitura + CQRS de conversas). `AI-014` ✅ (API JWT: turno + `GET`/archive/actions, 401/404/409, isolamento). `AI-015` ✅ (UI Web `/assistant` + cards de proposta). `AI-016` parcial (orçamento diário de tokens → 429; faltam limites por minuto/IP e alertas). `AI-017` parcial (redaction + logs estruturados; falta OTel). `AI-018` ✅ (evaluation suite com gates). `AI-019` ✅ (action proposals + state machine). `AI-020` ✅ (confirm/reject idempotentes + stale). `AI-021` parcial (só `propose_manual_movement`). `AI-022` ✅ (mobile KMP consumindo a API, sem SDK Google). `AI-023` ✅ (runbook operacional em `docs/ai-agent-runbook.md`).
 
 ## 1. Resumo executivo
 

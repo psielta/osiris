@@ -161,6 +161,68 @@ public sealed class AiAssistantFlowTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Feedback_on_an_assistant_message_is_recorded()
+    {
+        var client = await AuthenticatedClientAsync();
+        var start = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Olá" });
+        start.EnsureSuccessStatusCode();
+        var turn = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!;
+
+        var feedback = await client.PostAsJsonAsync(
+            $"/api/v1/ai/messages/{turn.Message.Id}/feedback",
+            new { rating = 1, reasonCode = "helpful", comment = "Boa resposta" });
+
+        Assert.Equal(HttpStatusCode.NoContent, feedback.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        Assert.True(await dbContext.AiFeedbacks.AnyAsync(row => row.MessageId == turn.Message.Id));
+    }
+
+    [Fact]
+    public async Task Feedback_on_an_unknown_message_returns_404()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        var feedback = await client.PostAsJsonAsync(
+            $"/api/v1/ai/messages/{Guid.NewGuid()}/feedback",
+            new { rating = -1, reasonCode = (string?)null, comment = (string?)null });
+
+        Assert.Equal(HttpStatusCode.NotFound, feedback.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_removes_the_conversation_and_its_messages()
+    {
+        var client = await AuthenticatedClientAsync();
+        var start = await client.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Para excluir" });
+        start.EnsureSuccessStatusCode();
+        var conversationId = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!.ConversationId;
+
+        var delete = await client.DeleteAsync($"/api/v1/ai/conversations/{conversationId}");
+        Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/ai/conversations/{conversationId}")).StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        Assert.Equal(0, await dbContext.AiMessages.CountAsync(message => message.ConversationId == conversationId));
+    }
+
+    [Fact]
+    public async Task Delete_of_another_tenants_conversation_returns_404()
+    {
+        var clientA = await AuthenticatedClientAsync("del-a@osiris.test");
+        var start = await clientA.PostAsJsonAsync("/api/v1/ai/conversations", new { message = "Minha" });
+        start.EnsureSuccessStatusCode();
+        var conversationId = (await start.Content.ReadFromJsonAsync<AiTurnResponse>())!.ConversationId;
+
+        var clientB = await AuthenticatedClientAsync("del-b@osiris.test");
+
+        Assert.Equal(HttpStatusCode.NotFound, (await clientB.DeleteAsync($"/api/v1/ai/conversations/{conversationId}")).StatusCode);
+    }
+
+    [Fact]
     public async Task Conversation_is_isolated_per_tenant()
     {
         var clientA = await AuthenticatedClientAsync("alice@osiris.test");

@@ -55,6 +55,18 @@ public sealed class AiConversationRepository : IAiConversationRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task DeleteAsync(AiConversation conversation, CancellationToken cancellationToken)
+    {
+        // Proposals reference the conversation with a Restrict FK, so remove them first; messages and
+        // tool calls cascade when the conversation row is deleted.
+        await _dbContext.AiActionProposals
+            .Where(proposal => proposal.ConversationId == conversation.Id)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        _dbContext.AiConversations.Remove(conversation);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken)
     {
         var messages = _dbContext.AiMessages

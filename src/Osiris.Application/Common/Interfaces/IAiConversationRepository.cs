@@ -18,6 +18,9 @@ public interface IAiConversationRepository
 
     Task UpdateAsync(AiConversation conversation, CancellationToken cancellationToken);
 
+    /// <summary>Permanently deletes a conversation and everything it owns (messages, tool calls, proposals).</summary>
+    Task DeleteAsync(AiConversation conversation, CancellationToken cancellationToken);
+
     /// <summary>
     /// Inserts a new conversation up front (before the turn runs) so rows created during the turn —
     /// such as write proposals that reference the conversation — have a valid foreign key target.

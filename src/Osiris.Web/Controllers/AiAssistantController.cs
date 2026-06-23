@@ -7,8 +7,10 @@ using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Exceptions;
 using Osiris.Application.Features.AiAssistant.Commands.ArchiveConversation;
 using Osiris.Application.Features.AiAssistant.Commands.ConfirmAction;
+using Osiris.Application.Features.AiAssistant.Commands.DeleteConversation;
 using Osiris.Application.Features.AiAssistant.Commands.RejectAction;
 using Osiris.Application.Features.AiAssistant.Commands.SendMessage;
+using Osiris.Application.Features.AiAssistant.Commands.SubmitFeedback;
 using Osiris.Application.Features.AiAssistant.DTOs;
 using Osiris.Application.Features.AiAssistant.Queries.GetConversation;
 using Osiris.Application.Features.AiAssistant.Queries.ListConversationProposals;
@@ -118,6 +120,42 @@ public sealed class AiAssistantController : AppController
 
         await _mediator.Send(new ArchiveConversationCommand(id), cancellationToken);
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("{id:guid}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        await _mediator.Send(new DeleteConversationCommand(id), cancellationToken);
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("messages/{id:guid}/feedback")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Feedback(
+        Guid id,
+        [FromForm] int rating,
+        [FromForm] Guid? conversationId,
+        CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new SubmitFeedbackCommand(id, rating, null, null), cancellationToken);
+        if (result.IsFailure)
+        {
+            TempData[ErrorMessageKey] = result.Errors.FirstOrDefault()?.Message
+                ?? "Não foi possível registrar o feedback.";
+        }
+
+        return RedirectToConversation(conversationId);
     }
 
     [HttpPost("actions/{id:guid}/confirm")]

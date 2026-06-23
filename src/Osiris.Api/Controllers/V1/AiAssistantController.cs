@@ -7,8 +7,10 @@ using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Exceptions;
 using Osiris.Application.Features.AiAssistant.Commands.ArchiveConversation;
 using Osiris.Application.Features.AiAssistant.Commands.ConfirmAction;
+using Osiris.Application.Features.AiAssistant.Commands.DeleteConversation;
 using Osiris.Application.Features.AiAssistant.Commands.RejectAction;
 using Osiris.Application.Features.AiAssistant.Commands.SendMessage;
+using Osiris.Application.Features.AiAssistant.Commands.SubmitFeedback;
 using Osiris.Application.Features.AiAssistant.Queries.GetActionProposal;
 using Osiris.Application.Features.AiAssistant.Queries.GetConversation;
 using Osiris.Application.Features.AiAssistant.Queries.ListConversations;
@@ -73,6 +75,33 @@ public sealed class AiAssistantController : ApiControllerBase
         }
 
         var result = await _mediator.Send(new ArchiveConversationCommand(id), cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result);
+    }
+
+    [HttpDelete("conversations/{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(new DeleteConversationCommand(id), cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result);
+    }
+
+    [HttpPost("messages/{id:guid}/feedback")]
+    public async Task<IActionResult> Feedback(Guid id, AiFeedbackRequest request, CancellationToken cancellationToken)
+    {
+        if (!_features.AiAssistant)
+        {
+            return NotFound();
+        }
+
+        var result = await _mediator.Send(
+            new SubmitFeedbackCommand(id, request.Rating, request.ReasonCode, request.Comment),
+            cancellationToken);
+
         return result.IsSuccess ? NoContent() : Problem(result);
     }
 
