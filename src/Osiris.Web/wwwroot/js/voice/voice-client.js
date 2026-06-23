@@ -10,6 +10,7 @@
         const onError = options.onError || function () {};
 
         let stopped = false;
+        let muted = false;
         let micStream = null;
         let captureCtx = null;
         let playbackCtx = null;
@@ -63,7 +64,7 @@
             const source = captureCtx.createMediaStreamSource(micStream);
             const captureNode = new AudioWorkletNode(captureCtx, 'osiris-capture');
             captureNode.port.onmessage = (e) => {
-                if (socket && socket.readyState === WebSocket.OPEN) {
+                if (!muted && socket && socket.readyState === WebSocket.OPEN) {
                     socket.send(e.data);
                 }
             };
@@ -80,10 +81,16 @@
             onError(error && error.name === 'NotAllowedError'
                 ? 'Permissão de microfone negada.'
                 : 'Não foi possível iniciar a voz.');
-            return { stop: function () {} };
+            return { stop: function () {}, setMuted: function () {} };
         }
 
-        return { stop: cleanup };
+        function setMuted(value) {
+            muted = value;
+            // Also flip the track so the browser shows the mic as muted at the source.
+            try { if (micStream) micStream.getAudioTracks().forEach(t => { t.enabled = !value; }); } catch (e) {}
+        }
+
+        return { stop: cleanup, setMuted };
     }
 
     window.OsirisVoice = { create };
