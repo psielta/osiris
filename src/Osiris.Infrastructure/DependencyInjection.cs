@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Pdf;
+using Osiris.Infrastructure.AI.Gemini;
+using Osiris.Infrastructure.AI.Telemetry;
 using Osiris.Infrastructure.Common;
 using Osiris.Infrastructure.Email;
 using Osiris.Infrastructure.Gemini;
@@ -71,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<ICreditCardStatementRepository, CreditCardStatementRepository>();
         services.AddScoped<ICreditCardStatementPaymentRepository, CreditCardStatementPaymentRepository>();
         services.AddScoped<IBillRepository, BillRepository>();
+        services.AddScoped<IAiConversationRepository, AiConversationRepository>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<IEmailSender, NoOpEmailSender>();
         services.AddSingleton<IFinancialAccountStatementPdfRenderer, FinancialAccountStatementPdfRenderer>();
@@ -84,6 +88,18 @@ public static class DependencyInjection
             var geminiOptions = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
             client.BaseAddress = new Uri(geminiOptions.BaseUrl);
             client.Timeout = TimeSpan.FromSeconds(geminiOptions.TimeoutSeconds);
+        });
+
+        // AI assistant: Application-owned options/flags bound here, plus the redactor and the Gemini
+        // conversational model client (separate HTTP client/timeout from PDF extraction).
+        services.Configure<AiAgentOptions>(configuration.GetSection(AiAgentOptions.SectionName));
+        services.Configure<AiFeatureOptions>(configuration.GetSection(AiFeatureOptions.SectionName));
+        services.AddSingleton<IAiDataRedactor, AiDataRedactor>();
+        services.AddHttpClient<IAiModelClient, GeminiAiModelClient>((serviceProvider, client) =>
+        {
+            var geminiOptions = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
+            client.BaseAddress = new Uri(geminiOptions.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(geminiOptions.RequestTimeoutSeconds);
         });
 
         return services;

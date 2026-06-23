@@ -36,6 +36,16 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<AiConversation> AiConversations => Set<AiConversation>();
+
+    public DbSet<AiMessage> AiMessages => Set<AiMessage>();
+
+    public DbSet<AiToolCall> AiToolCalls => Set<AiToolCall>();
+
+    public DbSet<AiActionProposal> AiActionProposals => Set<AiActionProposal>();
+
+    public DbSet<AiFeedback> AiFeedbacks => Set<AiFeedback>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

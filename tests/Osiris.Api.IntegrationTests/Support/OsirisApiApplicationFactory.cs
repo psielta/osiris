@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Pdf;
 using Osiris.Infrastructure.Persistence;
 using Testcontainers.PostgreSql;
@@ -72,15 +73,21 @@ public sealed class OsirisApiApplicationFactory : WebApplicationFactory<Program>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:DefaultConnection"] = _connectionString
-                    ?? throw new InvalidOperationException("PostgreSQL test container has not started.")
+                    ?? throw new InvalidOperationException("PostgreSQL test container has not started."),
+
+                // Enable the assistant by default so its flow can be tested; the "disabled" case overrides this.
+                ["Features:AiAssistant"] = "true"
             });
         });
 
-        // Replace the real Gemini AI extractor with a deterministic fake so tests never call the API.
+        // Replace the real Gemini clients with deterministic fakes so tests never call the API.
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<IPdfStatementExtractor>();
             services.AddSingleton<IPdfStatementExtractor, FakePdfStatementExtractor>();
+
+            services.RemoveAll<IAiModelClient>();
+            services.AddSingleton<IAiModelClient, FakeAiModelClient>();
         });
     }
 

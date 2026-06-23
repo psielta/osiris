@@ -1,9 +1,55 @@
 # AI Agent Blueprint — Osiris + Gemini
 
-> **Status:** proposta de implementação  
-> **Última revisão:** 22 de junho de 2026  
+> **Status:** Fase 1 (fundação) implementada e testada — assistente somente leitura com a tool `get_financial_snapshot`, atrás de feature flag desligada por padrão.  
+> **Última revisão:** 23 de junho de 2026  
 > **Escopo:** `Osiris.Web`, `Osiris.Api`, aplicação mobile KMP e infraestrutura compartilhada  
 > **Princípio central:** o Gemini interpreta intenção e seleciona ferramentas; o Osiris continua sendo a única fonte de verdade e o único executor das regras financeiras.
+
+## 0. Status de implementação
+
+> Esta seção é o **ponto de retomada**. Foi escrita em 23/06/2026 após a primeira PR de código. Leia-a antes de continuar: ela diz o que já existe, onde está, quais desvios conscientes foram feitos em relação a este blueprint e o que falta por fase.
+
+### 0.1 Entregue nesta etapa (Fase 0 + Fase 1 + 1ª tool de leitura)
+
+Decisões tomadas com o usuário:
+
+- **Escopo:** "Fundação + 1ª tool" — Fase 1 completa mais uma única tool de leitura (`get_financial_snapshot`) end-to-end.
+- **Cliente de IA:** adapter **REST** por trás de `IAiModelClient` reaproveitando o `HttpClient` já existente (estendido para chat + function calling). O SDK oficial `Google.GenAI` **não** foi adotado nesta etapa (a abstração permite trocar depois sem ripple).
+- **Feature flag:** tudo desligado por padrão (`Features:AiAssistant=false`). Versão do app **não** foi bumpada (trabalho interno, sem UI visível ainda).
+
+Componentes implementados (com caminhos):
+
+- **Domain** — enums `AiToolRisk`, `AiConversationStatus`, `AiMessageRole`, `AiToolCallStatus`, `AiActionProposalStatus`; entidades `AiConversation`, `AiMessage`, `AiToolCall`, `AiActionProposal`, `AiFeedback` (`src/Osiris.Domain/Enums`, `src/Osiris.Domain/Entities`).
+- **Application** — contratos em `src/Osiris.Application/Common/AI/` (`IAiModelClient`, `AiModelContracts`, `IAiTool`, `IAiToolRegistry`, `IAiToolExecutionPolicy`, `IAiAgentOrchestrator`, `AiToolResult`, `AiAgentContext`, `IAiPromptBuilder`, `IAiDataRedactor`, `AiAgentOptions`, `AiFeatureOptions`); `IAiConversationRepository`; `AiModelException`. Serviços em `Features/AiAssistant/Services/` (`AiAgentOrchestrator` com tool-loop limitado, `AiToolRegistry`, `AiToolExecutionPolicy`, `AiPromptBuilder` versionado + hash). Tool `Features/AiAssistant/Tools/Read/GetFinancialSnapshotTool.cs` (delega a `GetMonthlyDashboardSummaryQuery`). Caso de uso `Features/AiAssistant/Commands/SendMessage/` (command + validator + handler que persiste o turno). DTO `Features/AiAssistant/DTOs/AiTurnDto.cs`. Pacote `Microsoft.Extensions.Options` adicionado.
+- **Infrastructure** — `AI/Gemini/GeminiAiModelClient.cs` (REST `generateContent` + function calling), `AI/Telemetry/AiDataRedactor.cs` (regex: e-mail, JWT, chave Google, senha de connection string, CPF/CNPJ formatado). EF configs das 5 entidades + `Persistence/AiConversationRepository.cs` + DbSets no `ApplicationDbContext` + migration `20260623000912_AddAiAssistant`. `GeminiOptions` ganhou `AgentModel`/`FastModel`/`Temperature`/`MaxOutputTokens`/`RequestTimeoutSeconds`. Bindings de `AiAgentOptions`/`AiFeatureOptions` e registro do model client/redactor na DI.
+- **Api** — `Controllers/V1/AiAssistantController.cs` (`POST /api/v1/ai/conversations` e `POST /api/v1/ai/conversations/{id}/messages`, atrás da flag → 404 quando desligado, 401 sem auth) + `Contracts/AiAssistantRequests.cs`. `appsettings.json` com `Features`, `AiAssistant` e campos do agente em `Gemini`.
+- **Config** — `src/Osiris.Web/appsettings.json` e `src/Osiris.Api/appsettings.json` com `Features` (tudo `false`) e `AiAssistant`.
+- **Testes** — unitários em `tests/Osiris.Application.UnitTests/Features/AiAssistant/` (registry, policy, orquestrador, snapshot tool; 16 testes) + redactor e fluxo de turno/isolamento de tenant/flag-off em `tests/Osiris.Api.IntegrationTests/AiAssistant/`. `FakeAiModelClient` registrado na factory de testes (sem rede real). **Suite completa verde:** 434 unit + 69 Api + 122 Web.
+
+### 0.2 Desvios conscientes em relação a este blueprint
+
+- `IAiModelClient` recebe um `AiModelPurpose` (`Agent`/`Fast`); o adapter resolve nome do modelo, temperatura e `maxOutputTokens` a partir de `GeminiOptions` (Application permanece sem saber nomes de modelo).
+- `IAiTool.ExecuteAsync` recebe também `AiAgentContext` (para a data de referência); tenant continua vindo do servidor via `ICurrentUser` nos handlers.
+- O orquestrador **não** persiste nem carrega conversa: `RunAsync(context, priorMessages, userMessage)` é puro/testável e a persistência fica no `SendAiMessageCommandHandler`.
+- `MaxToolIterations`/`MaxToolCallsPerTurn` ficam em `AiAgentOptions` (seção `AiAssistant`), não em `Gemini`.
+- Histórico re-enviado ao modelo usa apenas mensagens `User`/`Assistant`; linhas `Tool` são auditoria e não são reproduzidas.
+- **Extrator de PDF não foi migrado para SDK** (Seção 21): mantido em REST, com `GeminiOptions.Model`/`TimeoutSeconds` intactos. Paridade preservada.
+- `AiActionProposal` e `AiFeedback` existem como entidades/tabelas (fundação de schema), **sem** repositórios, tools ou lógica ainda.
+
+### 0.3 Ainda NÃO implementado (próximos passos)
+
+- **Resiliência (Seção 18):** sem Polly (retry/backoff/circuit breaker/bulkhead). Hoje há apenas timeout por request + try/catch + `AiModelException`→503.
+- **Rate limiting / quotas / orçamento por tenant (Seção 17.4):** não implementado.
+- **Telemetria/OTel spans e métricas (Seção 19):** há logs estruturados + redaction; faltam spans `ai.*` e métricas/contadores.
+- **Fase 2 (assistente somente leitura completo):** demais tools de leitura (Seção 8.1), CQRS de conversas (listar/obter/arquivar), endpoints `GET` da Seção 14, **UI Web** (`/assistant`), evaluation suite (Seção 22.4). Hoje só existe o endpoint interno de turno e a tool `get_financial_snapshot`.
+- **Fase 3 (escrita):** `AiActionProposalRepository`, tools `propose_*`, máquina de estados/TTL/idempotência, endpoints confirm/reject, cards de impacto.
+- **Fase 4 (mobile):** DTOs/repository KMP, tela de conversa, polling/SSE, deep links, flag própria.
+- **Fase 5 (hardening):** feedback (`SubmitFeedback` + endpoint), painel de custo, sugestão de categorias, RAG só de documentação, export/delete, runbooks, rotação de chave.
+- **Concorrência otimista nas proposals e `RowVersion` nas conversas:** colunas/lógica ainda não adicionadas.
+
+### 0.4 Backlog (Seção 24) — situação
+
+`AI-001`..`AI-012` ✅ feitos (fundação + read tool + endpoint). `AI-013` parcial (turno persiste conversa/histórico, mas faltam queries de listar/obter/arquivar). `AI-014` parcial (endpoints de turno com 401/404; faltam os `GET`). `AI-016`/`AI-017` pendentes (rate limit, OTel). `AI-018` pendente (evaluation suite). `AI-015`, `AI-019`..`AI-023` pendentes.
 
 ## 1. Resumo executivo
 
