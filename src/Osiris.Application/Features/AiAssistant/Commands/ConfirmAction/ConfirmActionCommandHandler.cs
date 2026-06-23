@@ -5,6 +5,12 @@ using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Features.AiAssistant.DTOs;
 using Osiris.Application.Features.AiAssistant.Proposals;
+using Osiris.Application.Features.Bills.Commands.CreateBill;
+using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
+using Osiris.Application.Features.Bills.Queries.GetBillDetails;
+using Osiris.Application.Features.CreditCardPurchases.Commands.CreateCreditCardPurchase;
+using Osiris.Application.Features.CreditCardStatementPayments.Commands.RegisterCreditCardStatementPayment;
+using Osiris.Application.Features.CreditCardStatements.Queries.GetCreditCardStatementDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
 using Osiris.Application.Features.FinancialAccounts.Queries.GetFinancialAccountDetails;
 using Osiris.Domain.Entities;
@@ -98,75 +104,204 @@ public sealed class ConfirmActionCommandHandler : IRequestHandler<ConfirmActionC
         return Result<AiActionResultDto>.Success(Map(proposal));
     }
 
-    private async Task<string?> RevalidateAsync(AiActionProposal proposal, CancellationToken cancellationToken)
-    {
-        switch (proposal.ActionType)
+    private const string StaleMessage = "O estado mudou desde a proposta. Gere uma nova.";
+    private const string UnreadableMessage = "Não foi possível reler a proposta.";
+
+    private Task<string?> RevalidateAsync(AiActionProposal proposal, CancellationToken cancellationToken) =>
+        proposal.ActionType switch
         {
-            case AiActionTypes.ManualMovement:
-                var payload = Deserialize(proposal.PayloadJson);
-                if (payload is null)
-                {
-                    return "Não foi possível reler a proposta.";
-                }
+            AiActionTypes.ManualMovement => RevalidateManualMovementAsync(proposal, cancellationToken),
+            AiActionTypes.BillCreation or AiActionTypes.CardPurchase => Task.FromResult(RevalidateCreation(proposal)),
+            AiActionTypes.BillPayment => RevalidateBillPaymentAsync(proposal, cancellationToken),
+            AiActionTypes.StatementPayment => RevalidateStatementPaymentAsync(proposal, cancellationToken),
+            _ => Task.FromResult<string?>("Tipo de ação não suportado.")
+        };
 
-                var account = await _sender.Send(new GetFinancialAccountDetailsQuery(payload.AccountId), cancellationToken);
-                if (account is null)
-                {
-                    return "A conta da proposta não está mais disponível.";
-                }
-
-                var currentHash = ProposalState.AccountHash(account.CurrentBalance, account.IsActive);
-                return currentHash == proposal.StateHash
-                    ? null
-                    : "O estado da conta mudou desde a proposta. Gere uma nova.";
-
-            default:
-                return "Tipo de ação não suportado.";
-        }
-    }
-
-    private async Task<(string? EntityType, Guid? EntityId, string? Failure)> ExecuteAsync(
+    private Task<(string? EntityType, Guid? EntityId, string? Failure)> ExecuteAsync(
         AiActionProposal proposal,
-        CancellationToken cancellationToken)
-    {
-        switch (proposal.ActionType)
+        CancellationToken cancellationToken) =>
+        proposal.ActionType switch
         {
-            case AiActionTypes.ManualMovement:
-                var payload = Deserialize(proposal.PayloadJson);
-                if (payload is null || !Enum.TryParse<FinancialAccountMovementType>(payload.Type, out var type))
-                {
-                    return (null, null, "Não foi possível reler a proposta.");
-                }
+            AiActionTypes.ManualMovement => ExecuteManualMovementAsync(proposal, cancellationToken),
+            AiActionTypes.BillCreation => ExecuteBillCreationAsync(proposal, cancellationToken),
+            AiActionTypes.CardPurchase => ExecuteCardPurchaseAsync(proposal, cancellationToken),
+            AiActionTypes.BillPayment => ExecuteBillPaymentAsync(proposal, cancellationToken),
+            AiActionTypes.StatementPayment => ExecuteStatementPaymentAsync(proposal, cancellationToken),
+            _ => Task.FromResult<(string?, Guid?, string?)>((null, null, "Tipo de ação não suportado."))
+        };
 
-                try
-                {
-                    var result = await _sender.Send(
-                        new CreateManualMovementCommand(
-                            payload.AccountId,
-                            type,
-                            payload.Amount,
-                            payload.OccurredOn,
-                            payload.Description,
-                            payload.CategoryId,
-                            payload.Notes),
-                        cancellationToken);
+    private async Task<string?> RevalidateManualMovementAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<ManualMovementPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
 
-                    return result.IsSuccess
-                        ? ("FinancialAccountMovement", result.Value, null)
-                        : (null, null, result.Errors.FirstOrDefault()?.Message ?? "Não foi possível registrar o lançamento.");
-                }
-                catch (ValidationException exception)
-                {
-                    return (null, null, exception.Errors.FirstOrDefault()?.ErrorMessage ?? "Dados do lançamento inválidos.");
-                }
+        var account = await _sender.Send(new GetFinancialAccountDetailsQuery(payload.AccountId), cancellationToken);
+        if (account is null)
+        {
+            return "A conta da proposta não está mais disponível.";
+        }
 
-            default:
-                return (null, null, "Tipo de ação não suportado.");
+        return ProposalState.AccountHash(account.CurrentBalance, account.IsActive) == proposal.StateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private static string? RevalidateCreation(AiActionProposal proposal) =>
+        ProposalState.PayloadHash(proposal.PayloadJson) == proposal.StateHash ? null : StaleMessage;
+
+    private async Task<string?> RevalidateBillPaymentAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillPaymentPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var bill = await _sender.Send(new GetBillDetailsQuery(payload.BillId), cancellationToken);
+        if (bill is null)
+        {
+            return "A conta a pagar não está mais disponível.";
+        }
+
+        return ProposalState.BillHash(bill.PaidAt, bill.Amount) == proposal.StateHash ? null : StaleMessage;
+    }
+
+    private async Task<string?> RevalidateStatementPaymentAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<StatementPaymentPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return UnreadableMessage;
+        }
+
+        var statement = await _sender.Send(new GetCreditCardStatementDetailsQuery(payload.StatementId), cancellationToken);
+        if (statement is null)
+        {
+            return "A fatura não está mais disponível.";
+        }
+
+        return ProposalState.StatementHash(statement.OpenBalance, statement.Status) == proposal.StateHash
+            ? null
+            : StaleMessage;
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteManualMovementAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<ManualMovementPayload>(proposal.PayloadJson);
+        if (payload is null || !Enum.TryParse<FinancialAccountMovementType>(payload.Type, out var type))
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(
+                new CreateManualMovementCommand(
+                    payload.AccountId, type, payload.Amount, payload.OccurredOn,
+                    payload.Description, payload.CategoryId, payload.Notes),
+                cancellationToken),
+            "FinancialAccountMovement");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteBillCreationAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillCreationPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(
+                new CreateBillCommand(
+                    payload.Description, payload.Amount, payload.DueDate,
+                    payload.CategoryId, payload.PaymentAccountId, payload.Notes),
+                cancellationToken),
+            "Bill");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteCardPurchaseAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<CardPurchasePayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(
+                new CreateCreditCardPurchaseCommand(
+                    payload.CreditCardId, payload.CategoryId, payload.Description,
+                    payload.TotalAmount, payload.PurchaseDate, payload.Installments, payload.Notes),
+                cancellationToken),
+            "CreditCardPurchase");
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteBillPaymentAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<BillPaymentPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendVoidAsync(
+            () => _sender.Send(
+                new MarkBillAsPaidCommand(payload.BillId, payload.PaidAt, payload.PaymentAccountId),
+                cancellationToken),
+            "Bill",
+            payload.BillId);
+    }
+
+    private async Task<(string?, Guid?, string?)> ExecuteStatementPaymentAsync(AiActionProposal proposal, CancellationToken cancellationToken)
+    {
+        var payload = Deserialize<StatementPaymentPayload>(proposal.PayloadJson);
+        if (payload is null)
+        {
+            return (null, null, UnreadableMessage);
+        }
+
+        return await SendAsync(
+            () => _sender.Send(
+                new RegisterCreditCardStatementPaymentCommand(
+                    payload.StatementId, payload.Amount, payload.PaidAt, payload.FinancialAccountId, payload.Notes),
+                cancellationToken),
+            "CreditCardStatementPayment");
+    }
+
+    private static async Task<(string?, Guid?, string?)> SendAsync(Func<Task<Result<Guid>>> send, string entityType)
+    {
+        try
+        {
+            var result = await send();
+            return result.IsSuccess ? (entityType, result.Value, null) : (null, null, FirstError(result));
+        }
+        catch (ValidationException exception)
+        {
+            return (null, null, exception.Errors.FirstOrDefault()?.ErrorMessage ?? "Dados inválidos.");
         }
     }
 
-    private static ManualMovementPayload? Deserialize(string payloadJson) =>
-        JsonSerializer.Deserialize<ManualMovementPayload>(payloadJson, SerializerOptions);
+    private static async Task<(string?, Guid?, string?)> SendVoidAsync(Func<Task<Result>> send, string entityType, Guid entityId)
+    {
+        try
+        {
+            var result = await send();
+            return result.IsSuccess ? (entityType, entityId, null) : (null, null, FirstError(result));
+        }
+        catch (ValidationException exception)
+        {
+            return (null, null, exception.Errors.FirstOrDefault()?.ErrorMessage ?? "Dados inválidos.");
+        }
+    }
+
+    private static string FirstError(Result result) =>
+        result.Errors.FirstOrDefault()?.Message ?? "Não foi possível concluir a operação.";
+
+    private static T? Deserialize<T>(string payloadJson) =>
+        JsonSerializer.Deserialize<T>(payloadJson, SerializerOptions);
 
     private static AiActionResultDto Map(AiActionProposal proposal) =>
         new(proposal.Id, proposal.Status.ToString(), proposal.ResultEntityType, proposal.ResultEntityId);

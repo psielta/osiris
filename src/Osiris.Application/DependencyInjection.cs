@@ -56,7 +56,12 @@ public static class DependencyInjection
 
         // Write proposal tools (Section 8.2). Offered only when the writes feature is on; they create a
         // confirmable AiActionProposal and never execute the financial command during the turn.
+        services.AddScoped<IAiActionProposalFactory, AiActionProposalFactory>();
         services.AddScoped<IAiTool, ProposeManualMovementTool>();
+        services.AddScoped<IAiTool, ProposeBillCreationTool>();
+        services.AddScoped<IAiTool, ProposeCardPurchaseTool>();
+        services.AddScoped<IAiTool, ProposeBillPaymentTool>();
+        services.AddScoped<IAiTool, ProposeStatementPaymentTool>();
 
         return services;
     }

@@ -2,6 +2,10 @@ using System.Text.Json;
 using Osiris.Application.Common.Models;
 using Osiris.Application.Features.AiAssistant.Commands.ConfirmAction;
 using Osiris.Application.Features.AiAssistant.Proposals;
+using Osiris.Application.Features.Bills.Commands.CreateBill;
+using Osiris.Application.Features.Bills.Commands.MarkBillAsPaid;
+using Osiris.Application.Features.Bills.DTOs;
+using Osiris.Application.Features.Bills.Queries.GetBillDetails;
 using Osiris.Application.Features.FinancialAccountMovements.Commands.CreateManualMovement;
 using Osiris.Application.Features.FinancialAccountMovements.DTOs;
 using Osiris.Application.Features.FinancialAccounts.DTOs;
@@ -100,6 +104,56 @@ public sealed class ConfirmActionCommandHandlerTests
         Assert.True(result.IsFailure);
         Assert.Contains(result.Errors, error => error.Code == ResultErrorCodes.Conflict);
         Assert.Equal(AiActionProposalStatus.Expired, proposal.Status);
+    }
+
+    [Fact]
+    public async Task Confirm_bill_creation_executes_create_bill_once()
+    {
+        var payload = new BillCreationPayload("Aluguel", 1200m, new DateOnly(2026, 7, 10), Guid.NewGuid(), null, null);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var proposal = new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.BillCreation, payloadJson,
+            "Criar conta", "Impacto", AiToolRisk.WriteProposal, "idem-bc",
+            ProposalState.PayloadHash(payloadJson), Now, Now.AddMinutes(15));
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var billId = Guid.NewGuid();
+        var sender = new MapSender().On<CreateBillCommand>(_ => Result<Guid>.Success(billId));
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Executed", result.Value!.Status);
+        Assert.Equal(billId, result.Value.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<CreateBillCommand>());
+    }
+
+    [Fact]
+    public async Task Confirm_bill_payment_marks_the_bill_as_paid()
+    {
+        var billId = Guid.NewGuid();
+        const decimal amount = 500m;
+        var payload = new BillPaymentPayload(billId, new DateOnly(2026, 6, 22), null);
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var proposal = new AiActionProposal(
+            _tenantId, "user-1", Guid.NewGuid(), AiActionTypes.BillPayment, payloadJson,
+            "Pagar conta", "Impacto", AiToolRisk.WriteProposal, "idem-bp",
+            ProposalState.BillHash(null, amount), Now, Now.AddMinutes(15));
+        var repo = new FakeAiActionProposalRepository(proposal);
+        var bill = new BillDetailsDto(
+            billId, "Aluguel", amount, new DateOnly(2026, 6, 10), null, BillStatus.Pending,
+            Guid.NewGuid(), null, null, null, null, null, Now, null);
+        var sender = new MapSender()
+            .On<GetBillDetailsQuery>(_ => bill)
+            .On<MarkBillAsPaidCommand>(_ => Result.Success());
+        var handler = CreateHandler(repo, sender);
+
+        var result = await handler.Handle(new ConfirmActionCommand(proposal.Id), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Executed", result.Value!.Status);
+        Assert.Equal(billId, result.Value.ResultEntityId);
+        Assert.Equal(1, sender.Invocations<MarkBillAsPaidCommand>());
     }
 
     [Fact]

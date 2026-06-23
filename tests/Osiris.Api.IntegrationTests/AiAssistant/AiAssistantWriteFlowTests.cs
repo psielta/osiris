@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Osiris.Api.IntegrationTests.Support;
 using Osiris.Application.Common.AI;
+using Osiris.Application.Features.AiAssistant.Proposals;
 using Osiris.Domain.Entities;
 using Osiris.Domain.Enums;
 using Osiris.Infrastructure.Persistence;
@@ -142,6 +144,52 @@ public sealed class AiAssistantWriteFlowTests : IAsyncLifetime
         var turn = (await response.Content.ReadFromJsonAsync<AiTurnResponse>())!;
 
         Assert.Empty(turn.Proposals);
+    }
+
+    private async Task<Guid> SeedBillCreationProposalAsync(string email)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var user = await dbContext.Users
+            .Where(account => account.Email == email)
+            .Select(account => new { account.Id, account.TenantId })
+            .SingleAsync();
+
+        var category = new FinancialCategory(user.TenantId, "Moradia IA", CategoryType.Expense);
+        dbContext.FinancialCategories.Add(category);
+        var conversation = new AiConversation(user.TenantId, user.Id, "Seed", "osiris-agent-v1.0.0");
+        dbContext.AiConversations.Add(conversation);
+        await dbContext.SaveChangesAsync();
+
+        var payload = new BillCreationPayload("Aluguel IA", 1200m, new DateOnly(2026, 7, 10), category.Id, null, null);
+        var payloadJson = JsonSerializer.Serialize(payload, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var proposal = new AiActionProposal(
+            user.TenantId, user.Id, conversation.Id, AiActionTypes.BillCreation, payloadJson,
+            "Criar conta a pagar", "Será criada uma conta a pagar.", AiToolRisk.WriteProposal,
+            Guid.NewGuid().ToString("n"), ProposalState.PayloadHash(payloadJson),
+            DateTime.UtcNow, DateTime.UtcNow.AddMinutes(15));
+        dbContext.AiActionProposals.Add(proposal);
+        await dbContext.SaveChangesAsync();
+
+        return proposal.Id;
+    }
+
+    [Fact]
+    public async Task Confirm_a_bill_creation_proposal_creates_the_bill()
+    {
+        const string email = "bill-writer@osiris.test";
+        var client = await AuthenticatedClientAsync(_factory, email);
+        var proposalId = await SeedBillCreationProposalAsync(email);
+
+        var confirm = await client.PostAsync($"/api/v1/ai/actions/{proposalId}/confirm", content: null);
+        Assert.Equal(HttpStatusCode.OK, confirm.StatusCode);
+        var actionResult = (await confirm.Content.ReadFromJsonAsync<AiActionResultResponse>())!;
+        Assert.Equal("Executed", actionResult.Status);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var tenantId = await dbContext.Users.Where(account => account.Email == email).Select(account => account.TenantId).SingleAsync();
+        Assert.True(await dbContext.Bills.AnyAsync(bill => bill.TenantId == tenantId && bill.Description == "Aluguel IA"));
     }
 
     [Fact]

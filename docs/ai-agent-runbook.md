@@ -44,6 +44,7 @@ Seção `Features` do appsettings (Web e Api). Tudo `false` por padrão.
 
 ## 5. Propostas de escrita
 
+- Tools disponíveis (com `AiAssistantWrites` ligada): `propose_manual_movement`, `propose_bill_creation`, `propose_card_purchase`, `propose_bill_payment`, `propose_statement_payment`. (`propose_category_change` ainda não existe.)
 - O modelo nunca executa um command financeiro no turno: cria uma `AiActionProposal` (Pending, TTL `AiAssistant:ProposalTtlMinutes`).
 - Confirmação (`POST /api/v1/ai/actions/{id}/confirm`) revalida TTL + hash do estado-base e executa o command existente **uma vez** (idempotente). `stale`/`expired`/já resolvida → `409`.
 - Rejeição: `POST /api/v1/ai/actions/{id}/reject`.
