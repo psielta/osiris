@@ -5,15 +5,15 @@ using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Interfaces;
 using Osiris.Application.Features.AiAssistant.Services;
 
-namespace Osiris.Web.Controllers;
+namespace Osiris.Api.Controllers.V1;
 
 /// <summary>
-/// Cookie-authenticated realtime voice endpoint. The browser opens a WebSocket to <c>/assistant/voice</c>;
-/// the shared <see cref="AiVoiceRelay"/> proxies it to a Gemini Live session (key stays server-side).
-/// Gated by AiAssistant + AiAssistantVoice (404 when off). Read-only for now (writes disabled in context).
+/// JWT-authenticated realtime voice endpoint for the mobile app. The client opens a WebSocket to
+/// <c>/api/v1/ai/voice</c> (Bearer token on the handshake) and the shared <see cref="AiVoiceRelay"/>
+/// proxies it to a Gemini Live session server-side. Gated by AiAssistant + AiAssistantVoice (404 when off).
 /// </summary>
 [Authorize]
-[Route("assistant")]
+[Route("api/v1/ai")]
 public sealed class AiVoiceController : ControllerBase
 {
     private readonly AiFeatureOptions _features;
@@ -43,7 +43,7 @@ public sealed class AiVoiceController : ControllerBase
 
         if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
-            return BadRequest("Esperado um WebSocket.");
+            return BadRequest("Expected a WebSocket request.");
         }
 
         using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();

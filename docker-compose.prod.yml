@@ -72,8 +72,10 @@ services:
       ConnectionStrings__DefaultConnection: Host=osiris-db;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB};Username=${POSTGRES_USER:?Set POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY}
       Gemini__ApiKey: ${GEMINI_API_KEY:-}
+      Gemini__LiveModel: ${GEMINI_LIVE_MODEL:-gemini-2.5-flash-native-audio-preview-12-2025}
       Features__AiAssistant: ${AI_ASSISTANT_ENABLED:-false}
       Features__AiAssistantWrites: ${AI_ASSISTANT_WRITES:-false}
+      Features__AiAssistantVoice: ${AI_ASSISTANT_VOICE:-false}
     depends_on:
       osiris-db:
         condition: service_healthy

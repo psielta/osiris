@@ -36,6 +36,14 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > compose. **Confirmado server→Gemini:** conexão, setup, function declarations aceitas, parser de áudio/transcrição.
 > Falta só o teste de **áudio no navegador** (mic) pelo usuário. **Falta na trilha:** mobile (passo D), escrita
 > por voz (Fase 2), persistência da conversa de voz e hardening (orçamento de áudio, resumption, métricas).
+>
+> **Passo D, parte 1 (servidor mobile) — 23/06/2026.** Relay extraído para `AiVoiceRelay` (serviço
+> compartilhado, transport-agnostic) e os controllers Web/API ficaram finos. Novo endpoint **`GET /api/v1/ai/voice`
+> na API (JWT)**, espelho do Web, com `UseWebSockets`; config (`Gemini:LiveModel` + `Features:AiAssistantVoice`)
+> em appsettings da API + compose (web e api). Testes de integração da API (flag-off → 404, sem auth → 401)
+> verdes; suíte 718. **Falta a parte 2 (app Android):** captura/playback de PCM via `expect/actual`
+> (`AudioRecord`/`AudioTrack`) + WebSocket do Ktor (Bearer no handshake) + ViewModel de voz + botão de microfone
+> na `AssistantScreen` — precisa de device para validar o áudio.
 
 ---
 

@@ -86,6 +86,9 @@ try
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
 
+    // Realtime voice endpoint (/api/v1/ai/voice) upgrades to a WebSocket; gated by the AiAssistantVoice flag.
+    app.UseWebSockets();
+
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
