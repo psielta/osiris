@@ -29,6 +29,11 @@ public sealed class AiMessageConfiguration : IEntityTypeConfiguration<AiMessage>
         builder.Property(message => message.Content)
             .IsRequired();
 
+        builder.Property(message => message.Channel)
+            .HasMaxLength(20)
+            .HasDefaultValue("text")
+            .IsRequired();
+
         builder.Property(message => message.Model)
             .HasMaxLength(100);
 
@@ -45,6 +50,12 @@ public sealed class AiMessageConfiguration : IEntityTypeConfiguration<AiMessage>
             .IsRequired();
 
         builder.Property(message => message.CachedTokens)
+            .IsRequired();
+
+        builder.Property(message => message.InputAudioMilliseconds)
+            .IsRequired();
+
+        builder.Property(message => message.OutputAudioMilliseconds)
             .IsRequired();
 
         builder.Property(message => message.LatencyMs)

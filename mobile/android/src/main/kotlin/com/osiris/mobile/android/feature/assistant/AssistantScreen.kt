@@ -77,10 +77,13 @@ fun AssistantScreen(
     val context = LocalContext.current
     var input by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
+    val proposals = remember(state.proposals, voice.proposals) {
+        (state.proposals + voice.proposals).distinctBy { it.id }
+    }
 
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
-            voiceViewModel.start()
+            voiceViewModel.start(state.selectedConversationId)
         } else {
             scope.launch { snackbarHostState.showSnackbar("Permissão de microfone negada.") }
         }
@@ -93,7 +96,7 @@ fun AssistantScreen(
             ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
         ) {
-            voiceViewModel.start()
+            voiceViewModel.start(state.selectedConversationId)
         } else {
             micPermission.launch(Manifest.permission.RECORD_AUDIO)
         }
@@ -111,6 +114,14 @@ fun AssistantScreen(
         voice.error?.let {
             snackbarHostState.showSnackbar(it)
             voiceViewModel.clearError()
+        }
+    }
+
+    LaunchedEffect(voice.conversationId) {
+        voice.conversationId?.let { id ->
+            if (id != state.selectedConversationId) {
+                viewModel.attachVoiceConversation(id)
+            }
         }
     }
 
@@ -187,12 +198,18 @@ fun AssistantScreen(
                     items(state.messages, key = { it.id }) { message -> MessageBubble(message) }
                 }
 
-                if (state.proposals.isNotEmpty()) {
-                    items(state.proposals, key = { it.id }) { proposal ->
+                if (proposals.isNotEmpty()) {
+                    items(proposals, key = { it.id }) { proposal ->
                         ProposalCard(
                             proposal = proposal,
-                            onConfirm = { viewModel.confirm(proposal.id) },
-                            onReject = { viewModel.reject(proposal.id) },
+                            onConfirm = {
+                                viewModel.confirm(proposal.id)
+                                voiceViewModel.removeProposal(proposal.id)
+                            },
+                            onReject = {
+                                viewModel.reject(proposal.id)
+                                voiceViewModel.removeProposal(proposal.id)
+                            },
                         )
                     }
                 }
@@ -286,6 +303,7 @@ private fun VoiceBar(
 private fun voiceStatusLabel(state: VoiceUiState): String = when {
     state.connecting -> "Conectando…"
     state.muted -> "Microfone desligado"
+    state.status == "goingaway" || state.status == "reconnecting" -> "Reconectando…"
     state.status == "speaking" -> "Falando…"
     else -> "Ouvindo…"
 }

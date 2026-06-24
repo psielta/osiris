@@ -31,7 +31,8 @@ public sealed record AiLiveSessionRequest(
     string SystemPrompt,
     IReadOnlyList<AiToolDefinition> Tools,
     AiLiveAudioConfig Audio,
-    string CorrelationId);
+    string CorrelationId,
+    string? ResumptionHandle = null);
 
 /// <summary>Voice/output configuration. Output modalities default to audio + transcription.</summary>
 public sealed record AiLiveAudioConfig(
@@ -59,3 +60,6 @@ public sealed record AiLiveInterrupted : AiLiveServerEvent;
 
 /// <summary>The server will close the connection soon; reconnect using a resumption handle.</summary>
 public sealed record AiLiveGoAway(int MillisLeft) : AiLiveServerEvent;
+
+/// <summary>Provider reported a server-side handle that can resume this session; never expose it to clients.</summary>
+public sealed record AiLiveSessionResumptionUpdate(string? Handle, bool Resumable) : AiLiveServerEvent;

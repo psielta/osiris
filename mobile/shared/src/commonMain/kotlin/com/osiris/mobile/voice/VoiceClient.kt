@@ -3,6 +3,7 @@ package com.osiris.mobile.voice
 import com.osiris.mobile.core.config.ApiConfig
 import com.osiris.mobile.data.remote.osirisJson
 import com.osiris.mobile.data.session.SessionManager
+import com.osiris.mobile.domain.model.AiProposal
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocketSession
@@ -30,20 +31,20 @@ class VoiceClient(
     private val config: ApiConfig,
     private val session: SessionManager,
 ) {
-    suspend fun connect(): VoiceConnection {
+    suspend fun connect(conversationId: String? = null): VoiceConnection {
         val token = session.currentBundle()?.accessToken
             ?: throw IllegalStateException("Sessão expirada.")
         return try {
-            open(token)
+            open(token, conversationId)
         } catch (first: Throwable) {
             val refreshed = session.refresh(null)?.accessToken ?: throw first
-            open(refreshed)
+            open(refreshed, conversationId)
         }
     }
 
-    private suspend fun open(token: String): VoiceConnection {
+    private suspend fun open(token: String, conversationId: String?): VoiceConnection {
         val ws = wsClient.webSocketSession {
-            url(voiceWsUrl(config.baseUrl))
+            url(voiceWsUrl(config.baseUrl, conversationId))
             header(HttpHeaders.Authorization, "Bearer $token")
         }
         return VoiceConnection(ws)
@@ -51,14 +52,15 @@ class VoiceClient(
 }
 
 /** Derives the `ws(s)://…/api/v1/ai/voice` endpoint from the configured `http(s)://` API base URL. */
-internal fun voiceWsUrl(baseUrl: String): String {
+internal fun voiceWsUrl(baseUrl: String, conversationId: String? = null): String {
     val trimmed = baseUrl.trimEnd('/')
     val scheme = when {
         trimmed.startsWith("https://") -> "wss://" + trimmed.removePrefix("https://")
         trimmed.startsWith("http://") -> "ws://" + trimmed.removePrefix("http://")
         else -> trimmed
     }
-    return "$scheme/api/v1/ai/voice"
+    val endpoint = "$scheme/api/v1/ai/voice"
+    return if (conversationId.isNullOrBlank()) endpoint else "$endpoint?conversationId=$conversationId"
 }
 
 /** Parses one control-JSON frame from the relay into a [VoiceEvent]; returns null for unknown/invalid frames. */
@@ -72,6 +74,22 @@ internal fun parseVoiceEvent(text: String): VoiceEvent? {
         )
 
         "status" -> VoiceEvent.Status(obj["value"]?.jsonPrimitive?.content ?: "")
+        "session" -> VoiceEvent.Session(
+            conversationId = obj["conversationId"]?.jsonPrimitive?.content ?: "",
+            writesEnabled = obj["writesEnabled"]?.jsonPrimitive?.booleanOrNull ?: false,
+        )
+        "proposal" -> obj["proposal"]?.jsonObject?.let { proposal ->
+            VoiceEvent.Proposal(
+                AiProposal(
+                    id = proposal["id"]?.jsonPrimitive?.content ?: "",
+                    actionType = proposal["actionType"]?.jsonPrimitive?.content ?: "",
+                    displaySummary = proposal["displaySummary"]?.jsonPrimitive?.content ?: "",
+                    impactSummary = proposal["impactSummary"]?.jsonPrimitive?.content ?: "",
+                    riskLevel = proposal["riskLevel"]?.jsonPrimitive?.content ?: "WriteProposal",
+                    status = proposal["status"]?.jsonPrimitive?.content ?: "Pending",
+                ),
+            )
+        }
         "error" -> VoiceEvent.Error(obj["message"]?.jsonPrimitive?.content ?: "Erro na voz.")
         "sources" -> VoiceEvent.Sources
         else -> null

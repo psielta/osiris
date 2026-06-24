@@ -260,6 +260,7 @@
                     listening: '🎙️ Ouvindo — pode falar',
                     interrupted: '🎙️ Ouvindo — pode falar',
                     goingaway: 'Reconectando…',
+                    reconnecting: 'Reconectando…',
                     error: 'Erro na voz',
                     closed: 'Voz encerrada'
                 };
@@ -275,6 +276,8 @@
                 this.voiceUser = '';
                 this.voiceAssistant = '';
                 this.voiceClient = await window.OsirisVoice.create({
+                    conversationId: this.conversationId,
+                    csrfToken: this.token(),
                     onEvent: (evt) => this.onVoiceEvent(evt),
                     onError: (msg) => {
                         this.messages.push({ role: 'assistant', content: msg });
@@ -292,6 +295,8 @@
                     if (evt.role === 'user') { this.voiceUser += evt.text; }
                     else { this.voiceAssistant += evt.text; }
                     this.scrollDown();
+                } else if (evt.type === 'session') {
+                    this.conversationId = evt.conversationId || this.conversationId;
                 } else if (evt.type === 'proposal' && evt.proposal) {
                     this.proposals.push(evt.proposal);
                 }

@@ -67,6 +67,15 @@ class AssistantViewModel(
         _state.update { it.copy(selectedConversationId = null, messages = emptyList(), proposals = emptyList()) }
     }
 
+    fun attachVoiceConversation(id: String) {
+        if (id.isBlank()) {
+            return
+        }
+
+        _state.update { it.copy(selectedConversationId = id) }
+        loadConversations()
+    }
+
     fun openConversation(id: String) {
         _state.update { it.copy(selectedConversationId = id, proposals = emptyList()) }
         viewModelScope.launch {

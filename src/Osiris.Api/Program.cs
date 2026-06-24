@@ -87,7 +87,10 @@ try
     app.UseSerilogRequestLogging();
 
     // Realtime voice endpoint (/api/v1/ai/voice) upgrades to a WebSocket; gated by the AiAssistantVoice flag.
-    app.UseWebSockets();
+    app.UseWebSockets(new WebSocketOptions
+    {
+        KeepAliveInterval = TimeSpan.FromSeconds(30)
+    });
 
     if (app.Environment.IsDevelopment())
     {

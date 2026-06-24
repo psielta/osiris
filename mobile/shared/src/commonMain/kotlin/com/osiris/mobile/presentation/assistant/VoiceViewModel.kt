@@ -2,6 +2,7 @@ package com.osiris.mobile.presentation.assistant
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.osiris.mobile.domain.model.AiProposal
 import com.osiris.mobile.voice.VoiceAudioCapture
 import com.osiris.mobile.voice.VoiceAudioPlayback
 import com.osiris.mobile.voice.VoiceClient
@@ -23,8 +24,10 @@ data class VoiceUiState(
     val connecting: Boolean = false,
     val muted: Boolean = false,
     val status: String = "idle",
+    val conversationId: String? = null,
     val userText: String = "",
     val assistantText: String = "",
+    val proposals: List<AiProposal> = emptyList(),
     val error: String? = null,
 )
 
@@ -46,17 +49,17 @@ class VoiceViewModel(
     private var sessionJob: Job? = null
     private var lastRole: String? = null
 
-    fun start() {
+    fun start(conversationId: String? = null) {
         if (sessionJob?.isActive == true) return
         lastRole = null
-        _state.value = VoiceUiState(active = true, connecting = true)
+        _state.value = VoiceUiState(active = true, connecting = true, conversationId = conversationId)
 
         sessionJob = viewModelScope.launch {
             // Drop-oldest so a slow uplink can never build latency: stale mic frames are worthless.
             val audioOut = Channel<ByteArray>(capacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
             var connection: VoiceConnection? = null
             try {
-                val conn = voiceClient.connect()
+                val conn = voiceClient.connect(conversationId)
                 connection = conn
                 playback.start()
 
@@ -100,6 +103,10 @@ class VoiceViewModel(
         _state.update { it.copy(error = null) }
     }
 
+    fun removeProposal(proposalId: String) {
+        _state.update { it.copy(proposals = it.proposals.filterNot { proposal -> proposal.id == proposalId }) }
+    }
+
     override fun onCleared() {
         stop()
         super.onCleared()
@@ -123,8 +130,17 @@ class VoiceViewModel(
                 }
 
                 "idle" -> _state.update { it.copy(status = "listening") }
+                "goingaway", "reconnecting" -> _state.update { it.copy(status = event.value) }
                 "closed" -> stop()
                 else -> {}
+            }
+
+            is VoiceEvent.Session -> _state.update {
+                it.copy(conversationId = event.conversationId.ifBlank { it.conversationId })
+            }
+
+            is VoiceEvent.Proposal -> _state.update {
+                it.copy(proposals = it.proposals + event.proposal)
             }
 
             is VoiceEvent.Error -> _state.update { it.copy(error = event.message) }

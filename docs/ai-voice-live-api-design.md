@@ -57,6 +57,17 @@ Este documento define contratos, protocolo, segurança, custo, infraestrutura, t
 > derivação da URL). **Falta:** validar áudio em **device físico** e gerar o **APK release** (a parte de pipeline de
 > áudio/echo não é verificável neste ambiente). Pendências futuras: escrita por voz (Fase 2), persistência da
 > conversa de voz, hardening (orçamento de áudio, session resumption, métricas).
+>
+> **Complemento final (Fases 2 e 4 + persistência) — 24/06/2026.** Implementado no código: voz agora cria
+> conversa persistida real antes de executar tools; `VoiceWritesEnabled` permite oferecer write tools de proposta
+> quando `AiAssistantWrites` também estiver ligado; o relay envia `proposal` para Web/mobile e a confirmação
+> segue pelos endpoints REST existentes. `AiMessage` ganhou `Channel` (`text`/`voice`) e milissegundos de áudio
+> in/out; transcrições de voz são persistidas sem áudio bruto. Hardening: uma sessão de voz por usuário,
+> orçamento diário de áudio por tenant, limite de sessão/conexão, tamanho máximo de frame, filas bounded,
+> keepalive de WebSocket, Origin allowlist + nonce antiforgery no Web, resumption handle server-side (nunca cru
+> no cliente), parse/setup de `sessionResumption`, read tools `NON_BLOCKING` e métricas `System.Diagnostics.Metrics`.
+> Verificado: build .NET, teste integrado do WS JWT criando proposta por voz, parser de resumption, testes KMP
+> do shared e compile debug do app Android. Continua exigindo validação manual de áudio em device físico.
 
 ---
 

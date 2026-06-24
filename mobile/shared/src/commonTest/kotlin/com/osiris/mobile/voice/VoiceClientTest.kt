@@ -24,6 +24,14 @@ class VoiceClientTest {
     }
 
     @Test
+    fun ws_url_adds_conversation_query_when_present() {
+        assertEquals(
+            "wss://osiris-api.mateussalgueiro.com.br/api/v1/ai/voice?conversationId=c1",
+            voiceWsUrl("https://osiris-api.mateussalgueiro.com.br/", "c1"),
+        )
+    }
+
+    @Test
     fun parses_assistant_transcript() {
         val event = parseVoiceEvent("""{"type":"transcript","role":"assistant","text":"Olá","final":false}""")
         assertEquals(VoiceEvent.Transcript("assistant", "Olá", final = false), event)
@@ -44,6 +52,22 @@ class VoiceClientTest {
     @Test
     fun maps_sources_to_singleton_event() {
         assertTrue(parseVoiceEvent("""{"type":"sources","items":[]}""") is VoiceEvent.Sources)
+    }
+
+    @Test
+    fun parses_session_and_proposal_events() {
+        assertEquals(
+            VoiceEvent.Session("conv-1", writesEnabled = true),
+            parseVoiceEvent("""{"type":"session","conversationId":"conv-1","writesEnabled":true}"""),
+        )
+
+        val proposal = parseVoiceEvent(
+            """{"type":"proposal","proposal":{"id":"p1","actionType":"propose_bill_creation","displaySummary":"Conta","impactSummary":"Cria conta","riskLevel":"WriteProposal","status":"Pending"}}""",
+        )
+
+        assertTrue(proposal is VoiceEvent.Proposal)
+        assertEquals("p1", proposal.proposal.id)
+        assertEquals("Conta", proposal.proposal.displaySummary)
     }
 
     @Test

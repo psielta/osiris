@@ -32,6 +32,11 @@ public static class GeminiLiveMessageParser
             events.Add(new AiLiveGoAway(ParseMillisLeft(goAway)));
         }
 
+        if (root.TryGetProperty("sessionResumptionUpdate", out var sessionResumptionUpdate))
+        {
+            events.Add(ParseSessionResumptionUpdate(sessionResumptionUpdate));
+        }
+
         return events;
     }
 
@@ -138,4 +143,19 @@ public static class GeminiLiveMessageParser
 
         return 0;
     }
+
+    private static AiLiveSessionResumptionUpdate ParseSessionResumptionUpdate(JsonElement update)
+    {
+        var handle = GetString(update, "newHandle") ?? GetString(update, "new_handle");
+        var resumable = GetBool(update, "resumable");
+        return new AiLiveSessionResumptionUpdate(handle, resumable);
+    }
+
+    private static string? GetString(JsonElement parent, string property) =>
+        parent.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
+
+    private static bool GetBool(JsonElement parent, string property) =>
+        parent.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.True;
 }

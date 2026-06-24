@@ -30,6 +30,9 @@ public interface IAiConversationRepository
     /// <summary>Total input+output tokens charged to the tenant since the given instant (for daily budgets).</summary>
     Task<long> SumTokensSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken);
 
+    /// <summary>Total voice input audio charged to the tenant since the given instant, in whole seconds.</summary>
+    Task<long> SumVoiceInputSecondsSinceAsync(Guid tenantId, DateTime sinceUtc, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<AiMessage>> ListMessagesAsync(
         Guid tenantId,
         Guid conversationId,

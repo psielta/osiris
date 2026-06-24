@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Osiris.Application.Common.AI;
 using Osiris.Application.Common.Exceptions;
+using Osiris.Domain.Enums;
 using Osiris.Infrastructure.Gemini;
 
 namespace Osiris.Infrastructure.AI.Gemini;
@@ -101,7 +102,8 @@ internal sealed class GeminiLiveSession : IAiLiveSession
             ["systemInstruction"] = new JsonObject
             {
                 ["parts"] = new JsonArray(new JsonObject { ["text"] = request.SystemPrompt })
-            }
+            },
+            ["sessionResumption"] = BuildSessionResumption(request.ResumptionHandle)
         };
 
         if (request.Tools.Count > 0)
@@ -109,12 +111,19 @@ internal sealed class GeminiLiveSession : IAiLiveSession
             var declarations = new JsonArray();
             foreach (var tool in request.Tools)
             {
-                declarations.Add(new JsonObject
+                var declaration = new JsonObject
                 {
                     ["name"] = tool.Name,
                     ["description"] = tool.Description,
                     ["parameters"] = JsonSerializer.SerializeToNode(tool.ParametersSchema)
-                });
+                };
+
+                if (tool.Risk == AiToolRisk.ReadOnly)
+                {
+                    declaration["behavior"] = "NON_BLOCKING";
+                }
+
+                declarations.Add(declaration);
             }
 
             setup["tools"] = new JsonArray(new JsonObject { ["functionDeclarations"] = declarations });
@@ -284,6 +293,17 @@ internal sealed class GeminiLiveSession : IAiLiveSession
         {
             return json;
         }
+    }
+
+    private static JsonObject BuildSessionResumption(string? handle)
+    {
+        var resumption = new JsonObject();
+        if (!string.IsNullOrWhiteSpace(handle))
+        {
+            resumption["handle"] = handle;
+        }
+
+        return resumption;
     }
 
     public async ValueTask DisposeAsync()

@@ -78,6 +78,21 @@ public sealed class AiConversationRepository : IAiConversationRepository
         return inputTokens + outputTokens;
     }
 
+    public async Task<long> SumVoiceInputSecondsSinceAsync(
+        Guid tenantId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken)
+    {
+        var milliseconds = await _dbContext.AiMessages
+            .Where(message => message.TenantId == tenantId
+                && message.Channel == "voice"
+                && message.Role == AiMessageRole.User
+                && message.CreatedAtUtc >= sinceUtc)
+            .SumAsync(message => (long)message.InputAudioMilliseconds, cancellationToken);
+
+        return (long)Math.Ceiling(milliseconds / 1000d);
+    }
+
     public async Task<IReadOnlyList<AiMessage>> ListMessagesAsync(
         Guid tenantId,
         Guid conversationId,

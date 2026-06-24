@@ -41,6 +41,9 @@ public static class DependencyInjection
         services.AddScoped<IAiToolCallExecutor, AiToolCallExecutor>();
         services.AddScoped<IAiLiveToolDispatcher, AiLiveToolDispatcher>();
         services.AddScoped<AiVoiceRelay>();
+        services.AddSingleton<IAiVoiceSessionLimiter, AiVoiceSessionLimiter>();
+        services.AddSingleton<IAiVoiceResumptionStore, AiVoiceResumptionStore>();
+        services.AddSingleton<AiVoiceTelemetry>();
         services.AddScoped<IAiAgentOrchestrator, AiAgentOrchestrator>();
 
         // Read tools (Section 8.1). Each is whitelisted; the registry/policy gate exposure and execution.

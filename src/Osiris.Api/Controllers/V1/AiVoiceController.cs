@@ -17,17 +17,20 @@ namespace Osiris.Api.Controllers.V1;
 public sealed class AiVoiceController : ControllerBase
 {
     private readonly AiFeatureOptions _features;
+    private readonly AiAgentOptions _agentOptions;
     private readonly AiVoiceRelay _relay;
     private readonly ICurrentUser _currentUser;
     private readonly IDateTimeProvider _clock;
 
     public AiVoiceController(
         IOptions<AiFeatureOptions> features,
+        IOptions<AiAgentOptions> agentOptions,
         AiVoiceRelay relay,
         ICurrentUser currentUser,
         IDateTimeProvider clock)
     {
         _features = features.Value;
+        _agentOptions = agentOptions.Value;
         _relay = relay;
         _currentUser = currentUser;
         _clock = clock;
@@ -47,15 +50,21 @@ public sealed class AiVoiceController : ControllerBase
         }
 
         using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        var context = new AiAgentContext(
+        var request = new AiVoiceRelayRequest(
             _currentUser.TenantId,
             _currentUser.UserId ?? string.Empty,
-            Guid.NewGuid(),
-            Guid.NewGuid().ToString("n"),
             DateOnly.FromDateTime(_clock.UtcNow),
-            WritesEnabled: false);
+            ReadConversationId(),
+            _features.AiAssistantWrites && _agentOptions.VoiceWritesEnabled,
+            Guid.NewGuid().ToString("n"));
 
-        await _relay.RunAsync(socket, context, HttpContext.RequestAborted);
+        await _relay.RunAsync(socket, request, HttpContext.RequestAborted);
         return new EmptyResult();
+    }
+
+    private Guid? ReadConversationId()
+    {
+        var raw = Request.Query["conversationId"].FirstOrDefault();
+        return Guid.TryParse(raw, out var id) ? id : null;
     }
 }

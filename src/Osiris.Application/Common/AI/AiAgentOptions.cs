@@ -25,4 +25,22 @@ public sealed class AiAgentOptions
     public int MaxConcurrentTurnsPerUser { get; set; } = 1;
 
     public int DailyTokenLimitPerTenant { get; set; } = 200_000;
+
+    public int VoiceConnectMaxMinutes { get; set; } = 10;
+
+    public int VoiceSessionMaxMinutes { get; set; } = 30;
+
+    public int VoiceDailyAudioSecondsPerTenant { get; set; } = 1_800;
+
+    public int VoiceMaxConcurrentSessionsPerUser { get; set; } = 1;
+
+    public bool VoiceWritesEnabled { get; set; }
+
+    public int VoiceMaxFrameBytes { get; set; } = 64 * 1024;
+
+    public int VoiceInboundQueueCapacity { get; set; } = 64;
+
+    public int VoiceOutboundQueueCapacity { get; set; } = 64;
+
+    public string[] VoiceAllowedOrigins { get; set; } = Array.Empty<string>();
 }

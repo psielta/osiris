@@ -88,6 +88,10 @@ public sealed class OsirisApiApplicationFactory : WebApplicationFactory<Program>
 
             services.RemoveAll<IAiModelClient>();
             services.AddSingleton<IAiModelClient, FakeAiModelClient>();
+
+            services.RemoveAll<IAiLiveSessionClient>();
+            services.AddSingleton<FakeAiLiveSessionClient>();
+            services.AddSingleton<IAiLiveSessionClient>(sp => sp.GetRequiredService<FakeAiLiveSessionClient>());
         });
     }
 

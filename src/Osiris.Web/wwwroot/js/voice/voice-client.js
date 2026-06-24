@@ -27,7 +27,11 @@
 
         try {
             const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
-            socket = new WebSocket(`${scheme}://${location.host}/assistant/voice`);
+            const params = new URLSearchParams();
+            if (options.conversationId) params.set('conversationId', options.conversationId);
+            if (options.csrfToken) params.set('voiceCsrf', options.csrfToken);
+            const query = params.toString();
+            socket = new WebSocket(`${scheme}://${location.host}/assistant/voice${query ? '?' + query : ''}`);
             socket.binaryType = 'arraybuffer';
 
             // Playback path (24 kHz). Created up front so audio plays as soon as it arrives.

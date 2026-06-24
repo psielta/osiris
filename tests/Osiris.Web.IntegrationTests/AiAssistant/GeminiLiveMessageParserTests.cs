@@ -66,6 +66,16 @@ public sealed class GeminiLiveMessageParserTests
     }
 
     [Fact]
+    public void Parses_session_resumption_update()
+    {
+        var update = Assert.IsType<AiLiveSessionResumptionUpdate>(
+            Assert.Single(Parse("""{"sessionResumptionUpdate":{"newHandle":"resume-1","resumable":true}}""")));
+
+        Assert.True(update.Resumable);
+        Assert.Equal("resume-1", update.Handle);
+    }
+
+    [Fact]
     public void Ignores_setup_complete()
     {
         Assert.Empty(Parse("""{"setupComplete":{}}"""));

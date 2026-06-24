@@ -50,6 +50,8 @@ services:
       Features__AiAssistant: ${AI_ASSISTANT_ENABLED:-false}
       Features__AiAssistantWrites: ${AI_ASSISTANT_WRITES:-false}
       Features__AiAssistantVoice: ${AI_ASSISTANT_VOICE:-false}
+      AiAssistant__VoiceWritesEnabled: ${AI_ASSISTANT_VOICE_WRITES:-false}
+      AiAssistant__VoiceAllowedOrigins__0: ${AI_ASSISTANT_VOICE_ALLOWED_ORIGIN:-}
       Gemini__LiveModel: ${GEMINI_LIVE_MODEL:-gemini-2.5-flash-native-audio-preview-12-2025}
     depends_on:
       osiris-db:
@@ -76,6 +78,7 @@ services:
       Features__AiAssistant: ${AI_ASSISTANT_ENABLED:-false}
       Features__AiAssistantWrites: ${AI_ASSISTANT_WRITES:-false}
       Features__AiAssistantVoice: ${AI_ASSISTANT_VOICE:-false}
+      AiAssistant__VoiceWritesEnabled: ${AI_ASSISTANT_VOICE_WRITES:-false}
     depends_on:
       osiris-db:
         condition: service_healthy

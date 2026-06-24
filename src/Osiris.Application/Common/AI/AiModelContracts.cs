@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Osiris.Domain.Enums;
 
 namespace Osiris.Application.Common.AI;
 
@@ -54,7 +55,11 @@ public sealed record AiModelToolCall(string Id, string Name, JsonElement Argumen
 public sealed record AiModelToolResult(string Name, string ResultJson, string? Id = null);
 
 /// <summary>The JSON-schema description of a tool the model is allowed to call this turn.</summary>
-public sealed record AiToolDefinition(string Name, string Description, object ParametersSchema);
+public sealed record AiToolDefinition(
+    string Name,
+    string Description,
+    object ParametersSchema,
+    AiToolRisk Risk = AiToolRisk.ReadOnly);
 
 /// <summary>One neutral conversation message (user text, model text/tool-calls, or tool results).</summary>
 public sealed record AiModelMessage
